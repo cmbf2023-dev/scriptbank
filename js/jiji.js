@@ -33,9 +33,12 @@ const bidInterval = setInterval(()=>{
 	
 	if( ! bidButton ) return;
 	
+	const bidButton2 = document.querySelector("#__nuxt > div > div.b-body-wrapper.js-body-wrapper > div > div > div.b-content-wrapper > div > div > div.b-advert-seller-info-wrapper > div.b-advert-item-wrapper > div.h-mh--10.b-advert-card-wrapper > div.qa-advert-item.b-advert-card > div.b-advert-card-wrapper__bottom.h-dflex.h-flex-cross-center.h-pv-10.h-ph-15 > div.h-flex-1-0.h-ml-10 > a > span > div > div");
+	
 	clearInterval(bidInterval);
 	const bidName = document.querySelector("#__nuxt > div > div.b-body-wrapper.js-body-wrapper > div > div > div.b-content-wrapper > div > div > div.b-advert-seller-info-wrapper > div.b-advert-item-wrapper > div.h-mh--10.b-advert-card-wrapper > div.qa-advert-item.b-advert-card > div.b-advert-card__head > div.b-advert-title-outer > div.b-advert-title-outer__inner > h1 > div")
 	const bidPrice = document.querySelector("#__nuxt > div > div.b-body-wrapper.js-body-wrapper > div > div > div.b-content-wrapper > div > div > div.b-advert-seller-info-wrapper > div.b-advert-item-wrapper > div.h-mh--10.b-advert-card-wrapper > div.qa-advert-item.b-advert-card > div.b-advert-card__head > div.b-advert-title-outer > div.b-advert-card__head-price.h-dflex.h-flex-cross-center > div.qa-advert-price-view.h-flex-1-0.qa-advert-mobile-price.b-advert-mobile-price > div > span.qa-advert-price-view-value");
+	const bidDesc = document.querySelector("#__nuxt > div > div.b-body-wrapper.js-body-wrapper > div > div > div.b-content-wrapper > div > div > div.b-advert-seller-info-wrapper > div.b-advert-item-wrapper > div.h-mh--10.b-advert-card-wrapper > div.qa-advert-item.b-advert-card > div.b-advert__description-wrapper > div > div.b-advert-item-details-collapser__rest.b-advert-item-details-collapser__rest--has-min-height > div > div > span");
 	const similarTitle = document.querySelector("#__nuxt > div > div.b-body-wrapper.js-body-wrapper > div > div > div.b-content-wrapper > div > div > div.h-dflex.h-pb-20.h-flex-dir-column > div > div.h-flex-center-between");
 	const similarProducts = document.querySelector("#__nuxt > div > div.b-body-wrapper.js-body-wrapper > div > div > div.b-content-wrapper > div > div > div.h-dflex.h-pb-20.h-flex-dir-column > div > div.b-similar-listing-outer");
 	const postAds = document.querySelector("#__nuxt > div > div.b-body-wrapper.js-body-wrapper > div > div > div.b-content-wrapper > div > div > div.b-advert-seller-info-wrapper > div.b-seller-info-wrapper > div:nth-child(2) > div:nth-child(3)");
@@ -48,12 +51,17 @@ const bidInterval = setInterval(()=>{
 	shopName.innerText = businessName;
 	let productprice = bidPrice.getAttribute("content");
 	let productname = bidname.innerText;
+	let productDesc = bidDesc.innerText;
 
 	const bidText = bidButton.querySelector(".b-button__text");
 	bidText.innerText = "Bid Now";
 	
 	bidButton.addEventListener("click", function(){
-		showBidPopup(productPrice, productName);
+		showBidPopup( productName, productDesc, productPrice, 1, Math.floor( Math.random() * 10000 ));
+	});
+	
+	bidButton2.addEventListener("click", function(){
+		showBidPopup( productName, productDesc, productPrice, 1, Math.floor( Math.random() * 10000 ));
 	});
 }, 1000);
 
@@ -62,7 +70,7 @@ function showLoginPopup(){
 	
 }
 
-function showBidPopup(name ="Premium Wireless Headphones", description="Noise cancelling, 30hr battery life", price="249.99", stock="5", current="12"){
+function showBidPopup(name ="Premium Wireless Headphones", description="Noise cancelling, 30hr battery life", price="249.99", stock="5", current="12", time = "02:15:30"){
 	const popup = document.getElementById("bid-popup");
 	
 	if(!popup){
@@ -136,7 +144,7 @@ function showBidPopup(name ="Premium Wireless Headphones", description="Noise ca
             
             <div class="bid-timer">
                 <h3>Bidding Ends In</h3>
-                <div class="timer">02:15:30</div>
+                <div class="timer">${time}</div>
             </div>
             
             <div class="bid-form">
