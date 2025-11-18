@@ -6433,7 +6433,7 @@
 				console.error(e);
 			}
 			
-			if( chrome && chrome.runtime ){
+			if( chrome && chrome.runtime && Object.hasOwn("onMessage")){
 				chrome.runtime.sendMessage({setCurrentNote: currentNote});
 			}
 			//////console.log( "CURRENT NOTE SET: " + JSON.stringify( currentNote ), "TYPEOF: " + typeof currentNote );
@@ -6645,7 +6645,7 @@
 			obj.note 		= JSON.stringify( this.#note );
 			let data 		= false;
 			
-			if( chrome && chrome.runtime ){
+			if( chrome && chrome.runtime && Object.hasOwn("onMessage")){
 				chrome.runtime.sendMessage(obj);
 				chrome.runtime.onMessage.addListener( async (data, sender, sendResponse) => {
 					//////console.log("message response", data);
@@ -8262,7 +8262,7 @@ static Base64 = {
 			obj.noteServer 				= server;
 			obj.defaultServer 			= this.#default_scriptbill_server;
 			this.s.processingData = true;
-			if( chrome && chrome.runtime ){
+			if( chrome && chrome.runtime && Object.hasOwn("onMessage") ){
 				chrome.runtime.sendMessage(obj);
 				
 				if( ! server.includes( this.#default_scriptbill_server ) && this.#note ){
@@ -8444,7 +8444,7 @@ static Base64 = {
 			obj.noteServer 			= this.#note.noteServer;		
 			obj.defaultServer 		= this.#default_scriptbill_server;		
 			let response 			= null;
-			if( chrome && chrome.runtime ){
+			if( chrome && chrome.runtime && Object.hasOwn("onMessage")){
 				////console.log( "Sending Message", obj );
 				chrome.runtime.sendMessage(obj);
 				chrome.runtime.onMessage.addListener( async (message, sender, sendResponse) => {
@@ -9164,7 +9164,9 @@ static Base64 = {
 		}
 		
 		if( this.shareDataRunning && limit ) return;
-			
+		
+		if( chrome && chrome.runtime && Object.hasOwn( chrome.runtime, "onMessage" )){
+		
 		chrome.runtime.onMessage.addListener( async (message, sender, sendResponse )=>{
 			if( message.runBlock ){
 				let lastRunBlock = Scriptbill.l.lastRunBlock;
@@ -9218,6 +9220,7 @@ static Base64 = {
 			}
 		});
 		
+		}
 		//this.getData( "shareScriptbillData", this.Base64.encode( JSON.stringify( this.#default_scriptbill_servers ) ), this.#default_scriptbill_server );
 		
 		let shareData = async ( blocks, countShares, blockIDs )=>{
@@ -12178,7 +12181,7 @@ static Base64 = {
 						exRates 	= JSON.parse( this.l[ "USDEX" ] );	
 					} else {
 						let urle;
-						if( chrome.runtime ){
+						if( chrome && chrome.runtime && Object.hasOwn( chrome.runtime, "getURL" ) ){
 							urle = chrome.runtime.getURL("exRate.json");
 						} else {
 							urle = "/exRate.json";
@@ -12354,7 +12357,7 @@ static Base64 = {
 		
 		let url;
 		try {
-			if( chrome.runtime ){
+			if( chrome && chrome.runtime && Object.hasOwn( chrome.runtime, "getURL" ) ){
 				url 	= chrome.runtime.getURL("hashBlock.json");
 			} else {
 				url 	= location.origin + "/hashBlock.json";
