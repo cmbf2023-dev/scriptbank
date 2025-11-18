@@ -4,37 +4,37 @@
 const exchangeFee 	= 0.03;
 const EXCHANGEKEY   = "niBWZ4PXNw1-GqQN8xu-AXI8e1JHeYeLk5M9HsYU__djtWOU9Ck20fjApW5aOU4-5ms6jjpttK4nHfYqzirQ39Aj0SjkpEwoJ5stWq3T9eQWXGeSOIq4NeB428fVJBXov1lFYU56ogLaoj41zqOcBHl3GkEtKfHxshOfDxQ0SP0";
 const SERVER 		= Scriptbill.getDefaultServer();
-let loginUrl 		= window.location.origin + '/HTML/login.html';
-let qrcodeUrl 		= window.location.origin + '/HTML/scan-qrcode.html';
-let signupUrl 		= window.location.origin + '/HTML/signup.html';
-let dashboardUrl 	= window.location.origin + '/HTML/dashboard.html';
-let profileUrl 		= window.location.origin + '/HTML/profile.html';
-let bankUrl 		= window.location.origin + '/HTML/profile-cards-and-bank-accounts.html';
-let depositUrl 		= window.location.origin + '/HTML/deposit-money.html';
-let depositConfirm	= window.location.origin + '/HTML/deposit-money-confirm.html';
-let depositSuccess	= window.location.origin + '/HTML/deposit-money-success.html';
-let loanUrl 			= window.location.origin + '/HTML/loan.html';
-let loanConfirm		= window.location.origin + '/HTML/loan-confirm.html';
-let loanSuccess		= window.location.origin + '/HTML/loan-success.html';
-let withdrawUrl 	= window.location.origin + '/HTML/withdraw-money.html';
-let sendUrl 		= window.location.origin + '/HTML/send-money.html';
-let requestUrl 		= window.location.origin + '/HTML/request-money.html';
-let transUrl 		= window.location.origin + '/HTML/transactions.html';
-let sendConfirm		= window.location.origin + '/HTML/send-money-confirm.html';
-let requestConfirm		= window.location.origin + '/HTML/request-money-confirm.html';
-let sendSuccess		= window.location.origin + '/HTML/send-money-success.html';
-let requestSuccess		= window.location.origin + '/HTML/request-money-success.html';
-let withdrawConfirm	= window.location.origin + '/HTML/withdraw-money-confirm.html';
-let withdrawSuccess	= window.location.origin + '/HTML/withdraw-money-success.html';
-let notificationUrl	= window.location.origin + '/HTML/profile-notifications.html';
-let buyProduct		= window.location.origin + '/HTML/buyProduct.html';
-let buyWebsite		= window.location.origin + '/HTML/buyWebsite.html';
-let buyStocks		= window.location.origin + '/HTML/buyStocks.html';
-let sellWebsite		= window.location.origin + '/HTML/sellWebsite.html';
-let sellStocks		= window.location.origin + '/HTML/sellStocks.html';
-let createAds		= window.location.origin + '/HTML/create-advert.html';
-let createItem		= window.location.origin + '/HTML/create-item.html';
-let sellProduct		= window.location.origin + '/HTML/sell-product.html';
+let loginUrl 		= window.location.origin + '/login.html';
+let qrcodeUrl 		= window.location.origin + '/scan-qrcode.html';
+let signupUrl 		= window.location.origin + '/signup.html';
+let dashboardUrl 	= window.location.origin + '/dashboard.html';
+let profileUrl 		= window.location.origin + '/profile.html';
+let bankUrl 		= window.location.origin + '/profile-cards-and-bank-accounts.html';
+let depositUrl 		= window.location.origin + '/deposit-money.html';
+let depositConfirm	= window.location.origin + '/deposit-money-confirm.html';
+let depositSuccess	= window.location.origin + '/deposit-money-success.html';
+let loanUrl 			= window.location.origin + '/loan.html';
+let loanConfirm		= window.location.origin + '/loan-confirm.html';
+let loanSuccess		= window.location.origin + '/loan-success.html';
+let withdrawUrl 	= window.location.origin + '/withdraw-money.html';
+let sendUrl 		= window.location.origin + '/send-money.html';
+let requestUrl 		= window.location.origin + '/request-money.html';
+let transUrl 		= window.location.origin + '/transactions.html';
+let sendConfirm		= window.location.origin + '/send-money-confirm.html';
+let requestConfirm		= window.location.origin + '/request-money-confirm.html';
+let sendSuccess		= window.location.origin + '/send-money-success.html';
+let requestSuccess		= window.location.origin + '/request-money-success.html';
+let withdrawConfirm	= window.location.origin + '/withdraw-money-confirm.html';
+let withdrawSuccess	= window.location.origin + '/withdraw-money-success.html';
+let notificationUrl	= window.location.origin + '/profile-notifications.html';
+let buyProduct		= window.location.origin + '/buyProduct.html';
+let buyWebsite		= window.location.origin + '/buyWebsite.html';
+let buyStocks		= window.location.origin + '/buyStocks.html';
+let sellWebsite		= window.location.origin + '/sellWebsite.html';
+let sellStocks		= window.location.origin + '/sellStocks.html';
+let createAds		= window.location.origin + '/create-advert.html';
+let createItem		= window.location.origin + '/create-item.html';
+let sellProduct		= window.location.origin + '/sell-product.html';
 let conUrl   		= new URL( window.location.href );
 let spaceID 		= document.querySelector("#spaceID");
 var socialShareHTML = `<div class="share-button">
@@ -193,7 +193,7 @@ if( spaceID ){
 
 
 
-Scriptbill.motherKeysURL = chrome.runtime.getURL('motherKeys.json');
+Scriptbill.motherKeysURL = window.location.origin + '/motherKeys.json';
 function chunk_data( data, limit = 50 ){
 	
 	let remaining = data;
@@ -447,24 +447,16 @@ else if( ( Scriptbill.s.uploadedNote || Scriptbill.l.uploadedNote ) && Scriptbil
 else if( ! location.href.includes( loginUrl ) && ! location.href.includes( signupUrl ) &&  ! Scriptbill.s.currentNote && ! Scriptbill.l.currentNote ) {
 	
 		setTimeout(async function(){
-			//await Scriptbill.createAlert( "Scriptbill.s.currentNote" );
-			let currentNote = await chrome.storage.session.get("currentNote");
+			let conf 	= await Scriptbill.createConfirm("You've Not Uploaded Any Scriptbill Note To This Scriptbill Dashboard! To Make Best Use Of This App You'll Need A Scriptbill Note Active Even Though It Is On A Zero Balance.  Click Ok To Create A New Scriptbill Note or Cancel To Log Out Now!");
+				
+				
+			delete Scriptbill.l.uploadedNote;
+			delete Scriptbill.s.uploadedNote;
 			
-			if( currentNote.currentNote && Scriptbill.isJsonable( currentNote.currentNote ) ){
-				Scriptbill.s.currentNote = currentNote.currentNote;
-				Scriptbill.l.currentNote = currentNote.currentNote;
+			if( ! conf ) {		
+				window.location.href = loginUrl;
 			} else {
-				let conf 	= await Scriptbill.createConfirm("You've Not Uploaded Any Scriptbill Note To This Scriptbill Dashboard! To Make Best Use Of This App You'll Need A Scriptbill Note Active Even Though It Is On A Zero Balance.  Click Ok To Create A New Scriptbill Note or Cancel To Log Out Now!");
-				
-				
-				delete Scriptbill.l.uploadedNote;
-				delete Scriptbill.s.uploadedNote;
-				
-				if( ! conf ) {		
-					window.location.href = loginUrl;
-				} else {
-					location.href = signupUrl;						
-				}
+				location.href = signupUrl;						
 			}
 		}, 500);
 		
@@ -566,7 +558,7 @@ if( Scriptbill.s.currentNote && Scriptbill.isJsonable( Scriptbill.s.currentNote 
 					
 					delete Scriptbill.l.currentNote;			
 					delete Scriptbill.l.uploadedNote;
-					chrome.storage.session.remove("currentNote");
+					//chrome.storage.session.remove("currentNote");
 				}
 				else {
 					welcome.innerHTML 	= "Error Downloading Note...";
@@ -2425,11 +2417,11 @@ if( location.href.includes( qrcodeUrl ) ){
 									let data = JSON.parse( JSON.stringify( lastResult ));
 									data.referer = note.noteAddress;
 									await Scriptbill.createAlert( "QR Code Generating, Please Download QR Codes as soon as it is generated" );
-									let qrurl 	= chrome.runtime.getURL("qrcode.min.js");
+									let qrurl 	= window.location.origin + "/js/qrcode.min.js";
 									let script = document.createElement('script');
 									script.src = qrurl;
 									document.head.appendChild( script );
-									let cssurl 	= chrome.runtime.getURL("scriptbill/css/css.css");
+									let cssurl 	= window.location.origin + "/vss/css.css";
 									let css = document.createElement('link');
 									css.setAttribute('href', cssurl );
 									css.setAttribute('type', "text/css" );
@@ -8435,7 +8427,7 @@ if( location.href.includes( sendConfirm ) ){
 												if( prodConfig.referer ){
 													url.searchParams.set( 'referer', prodConfig.referer );
 												}
-												let win = await chrome.windows.create({url: url.href, focused: true, state: "normal", type: "popup" });
+												let win = window.open(url, "_blank");
 											}
 										} catch(e){
 											await Scriptbill.createAlert( "Couldn't Visit Store Url");
@@ -10468,7 +10460,7 @@ async function saveNotesCard(){
 				url.searchParams.set("PIN", saveCard.cardPIN);
 				obj.url 	= url.href;
 				await Scriptbill.createAlert( "Please Visit Our Payment Processing Page to Verify Your Card Details. This is a required credibility check of users who may need some of our products like loan, investment and crediting. " );
-				let win = await chrome.windows.create({url: url.href, focused: true, state: "normal", type: "popup" });
+				let win = window.open(url, "_blank");
 				let ref 			= payment.data.transaction_ref;
 				let refInterval = setInterval( async ()=>{
 					
@@ -10488,7 +10480,6 @@ async function saveNotesCard(){
 						
 						if( refed ){
 							clearInterval( refInterval );
-							chrome.windows.remove( win.id );
 							accountData[accID].savedCards 	= JSON.stringify( saveCards );
 							await Scriptbill.setAccountData( accountData );	
 							
@@ -10504,7 +10495,7 @@ async function saveNotesCard(){
 								let time = await Scriptbill.createConfirm("We are about to end this transaction, Should We give you more time? ");
 								if( ! time ){
 									clearInterval( refInterval );
-									chrome.windows.remove( win.id );
+									
 								} else {
 									this.seconds = 1;
 								}
@@ -10517,7 +10508,7 @@ async function saveNotesCard(){
 							let time = await Scriptbill.createConfirm("We are about to end this transaction, Should We give you more time? ");
 							if( ! time ){
 								clearInterval( refInterval );
-								chrome.windows.remove( win.id );
+								//window.close();
 							} else {
 								this.seconds = 1;
 							}
@@ -10892,7 +10883,7 @@ async function saveDetailedBanks( el, details, bankType, bankName, accNum, accNa
 				//console.log( "web: " + saveCard.bankWebsite );
 				let url 		= new URL( saveCard.bankWebsite );
 				url.searchParams.set("back", location.href );
-				let win = await chrome.windows.create({url: url.href, focused: true, state: "normal", type: "popup" });				
+				let win =window.open(url, "_blank");		
 			} else {
 				await Scriptbill.createAlert("account saved" );
 				location.reload();
@@ -10992,6 +10983,8 @@ const profitInter = setInterval( async ()=>{
 	}
 }, 10000 );
 
+/*
+
 chrome.runtime.onMessage.addListener( async (message, sender, sendResponse) => {
 	if( typeof message == "object" && Scriptbill.s.currentNote && Scriptbill.isJsonable( Scriptbill.s.currentNote ) ){
 		let note 		= JSON.parse( Scriptbill.s.currentNote );
@@ -11004,7 +10997,7 @@ chrome.runtime.onMessage.addListener( async (message, sender, sendResponse) => {
 		} 
 		else if( message.notLoggedIn && message.url ){
 			try {
-				let win = await chrome.windows.create({url: message.url, focused: true, state: "normal", type: "popup" });
+				let win = window.open(url, "_blank");
 				let url 	= new URL( message.url );
 				let obj = {
 					url : message.url,
@@ -11033,7 +11026,7 @@ chrome.runtime.onMessage.addListener( async (message, sender, sendResponse) => {
 				if( notLoggedIn ){
 					notLoggedIn 	= JSON.parse( notLoggedIn );
 					if( notLoggedIn[ url.origin ] ){
-						chrome.windows.remove( notLoggedIn[ url.origin ].window );
+						//chrome.windows.remove( notLoggedIn[ url.origin ].window );
 					}
 				}
 				
@@ -11070,7 +11063,7 @@ chrome.runtime.onMessage.addListener( async (message, sender, sendResponse) => {
 	}
 });
 
-
+*/
 let update = document.getElementById("update-el");
 
 if( update ){
