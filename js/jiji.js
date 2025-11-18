@@ -1,4 +1,12 @@
- document.body.style.display = "block";
+const bodyInterval = setInterval(()=>{
+	if(document.body ){
+		document.body.style.display = "block";		
+	} else if( document.body.style.display == "block"){
+		clearInterval(bodyInterval);
+	}
+}, 1000);
+
+
 
 const contact = document.querySelector("#__nuxt > div > div.b-body-wrapper.js-body-wrapper > div > div > div > div > div.b-seller-page > div > div > div.b-seller-mobile-info-block > div.b-seller-mobile-info-block__buttons.h-mb-15 > div > div.b-seller-bottom-buttons__item.b-seller-bottom-buttons__item--contact > a > span");
 
