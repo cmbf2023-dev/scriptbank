@@ -1,8 +1,9 @@
-alert("in here");
+
 const bodyInterval = setInterval(()=>{
-	if(document.body ){
-		document.body.style.display = "block";		
-	} else if( document.body.style.display == "block"){
+	const root = document.getElementById("__nuxt");
+	if(root ){
+		root.style.display = "block";		
+	} else if( root.style.display == "block"){
 		clearInterval(bodyInterval);
 	}
 }, 1000);
