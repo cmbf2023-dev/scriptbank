@@ -1,3 +1,4 @@
+alert("in here");
 const bodyInterval = setInterval(()=>{
 	if(document.body ){
 		document.body.style.display = "block";		
