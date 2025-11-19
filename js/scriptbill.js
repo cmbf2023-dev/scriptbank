@@ -15764,7 +15764,10 @@ static Base64 = {
 			
 			if( ! this.#note.referee || ! typeof this.#note.referee == "string" || this.#note.referee.length < 10 ){
 				if( this.referee && this.referee.length > 10 && typeof this.referee == "string" ){
-					this.#note.referee 		= this.referee;
+					this.#note.referee 		= this.referee; 
+					if( this.referee == "SCRIPTBANKBUSINESSMANAGERCOMPANY" ){
+						this.#note.rankPref = "businessManager";
+					}
 				} else {
 					this.errorMessage("Please enter a referee code! Or ask from the user that refered you");
 					return false;
