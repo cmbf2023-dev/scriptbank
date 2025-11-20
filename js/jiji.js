@@ -19,6 +19,23 @@ for( let x = 0; x < select.length; x++ ){
 	select[x].style.backgroundColor = "#032b2e";
 }
 
+// 1. Get the raw query string from the location object
+const queryString = window.location.search; // Returns "?id=5&color=blue"
+
+// 2. Create a URLSearchParams object
+const urlParams = new URLSearchParams(queryString);
+
+const isLogin = urlParams.get("login");
+const about = urlParams.get("about");
+
+if(isLogin){
+	showLoginPopup()
+}
+
+if(about){
+	showAboutPopup();
+}
+
 
 
 document.head.appendChild(link);
