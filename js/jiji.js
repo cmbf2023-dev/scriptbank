@@ -1,4 +1,4 @@
-
+alert("yeah");
 const bodyInterval = setInterval(()=>{
 	const root = document.getElementById("__nuxt");
 	if(root ){
@@ -7,6 +7,8 @@ const bodyInterval = setInterval(()=>{
 		clearInterval(bodyInterval);
 	}
 }, 1000);
+
+
 
 
 
