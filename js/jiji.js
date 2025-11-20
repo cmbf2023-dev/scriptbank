@@ -190,7 +190,7 @@ function showBiddingPopup(name ="Go to Shop", description=" and Select your Item
                 
                 // Show corresponding payment details
                 const optionType = option.getAttribute('data-option');
-                document.getElementById(`${optionType}-details`).classList.add('active');
+                document.getElementById("${optionType} details").classList.add('active');
             });
         });
         
@@ -203,7 +203,7 @@ function showBiddingPopup(name ="Go to Shop", description=" and Select your Item
             const seconds = timeLeft % 60;
             
             const formattedTime = 
-                `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                "${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}";
             
             document.querySelector('.timer').textContent = formattedTime;
             document.querySelector('.stock-item:last-child .stock-value').textContent = formattedTime;
