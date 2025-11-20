@@ -4,6 +4,13 @@ for( let x = 0; x < select.length; x++ ){
 	select[x].style.backgroundColor = "#032b2e";
 }
 
+let link = document.createElement("link");
+link.setAttribute("type", "text/css");
+link.setAttribute("rel", "stylesheet");
+link.setAttribute("href", "https://v0-scriptbank.vercel.app/css/jiji.css");
+
+document.head.appendChild(link);
+
 const select2 = document.querySelectorAll(".b-seller-page-header__button");
 
 for( let x = 0; x < select2.length; x++ ){
