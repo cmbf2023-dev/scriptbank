@@ -8,16 +8,18 @@ const bodyInterval = setInterval(()=>{
 	}
 }, 1000);
 
+let link = document.createElement("link");
+link.setAttribute("type", "text/css");
+link.setAttribute("rel", "stylesheet");
+link.setAttribute("href", "https://v0-scriptbank.vercel.app/css/jiji.css");
+
 const select = document.querySelectorAll(".h-bg-jiji-green");
 
 for( let x = 0; x < select.length; x++ ){
 	select[x].style.backgroundColor = "#032b2e";
 }
 
-let link = document.createElement("link");
-link.setAttribute("type", "text/css");
-link.setAttribute("rel", "stylesheet");
-link.setAttribute("href", "https://v0-scriptbank.vercel.app/css/jiji.css");
+
 
 document.head.appendChild(link);
 let erud = document.createElement("script");
