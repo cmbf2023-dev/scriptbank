@@ -10,12 +10,12 @@ link.setAttribute("rel", "stylesheet");
 link.setAttribute("href", "https://v0-scriptbank.vercel.app/css/jiji.css");
 
 document.head.appendChild(link);
-let eruda = document.createElement("script");
-eruda.setAttribute("src","https://cdn.jsdelivr.net/npm/eruda");
-document.head.appendChid(eruda);
-let rudy = eroda.cloneNode();
-rudy.innerText = ``;
-document.head.appendhild()
+let erud = document.createElement("script");
+erud.setAttribute("src","https://cdn.jsdelivr.net/npm/eruda");
+document.head.appendChid(erud);
+let rudy = erud.cloneNode();
+rudy.innerText = `eruda.init();`;
+document.head.appendhild(rudy)
 
 document.head.appendChild(link);
 const select2 = document.querySelectorAll(".b-seller-page-header__button");
