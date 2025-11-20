@@ -21,11 +21,28 @@ for( let x = 0; x < select4.length; x++ ){
 	select4[x].style.backgroundColor = "#032b2e";
 }
 const heInterval = setInterval(()=>{
-	let he = document.querySelector(".fw-button__slot-wrapper.fw-button__text--has-icon");
+let he = document.querySelector(".fw-button__slot-wrapper.fw-button__text--has-icon");
 
-	if(he && he.innerText=="Show Contact"){
-		he.innerText = "Bid Now";
+if(he) {
+    // Clone the element (true = deep clone including child elements)
+	let isCloned = he.getAttribute("data-cloned");
+
+	if(isCloned ){
+		clearInterval(heInterval);
 	}
+    let clonedElement = he.cloneNode(true);
+    
+    // Modify the text content
+    clonedElement.innerText = "Bid Now";
+	clonedElement.addEventListener("click", function(){
+		showBiddingPopup();
+	});
+
+	clonedElement.setAttribute("data-cloned", "true");
+    
+    // Replace the original element with the cloned one
+    he.parentNode.replaceChild(clonedElement, he);
+}
 }, 1500);
 
 const bodyInterval = setInterval(()=>{
