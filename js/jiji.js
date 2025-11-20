@@ -42,6 +42,796 @@ for( let x = 0; x < select3.length; x++ ){
 }
 
 
+
+function showLoginPopup(){
+	const style = document.createElement('style');
+	style.innerHTML = `  * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+        
+        body {
+            background-color: #f8f9fa;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 450px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .login-container {
+            padding: 40px 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .dashboard-container {
+            padding: 30px;
+            display: none;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        
+        .logo i {
+            font-size: 32px;
+            margin-right: 12px;
+            color: #2563eb;
+        }
+        
+        .logo h1 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1e293b;
+        }
+        
+        .input-group {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        
+        .input-group label {
+            display: block;
+            color: #475569;
+            margin-bottom: 8px;
+            font-weight: 500;
+            font-size: 14px;
+        }
+        
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            width: 100%;
+        }
+        
+        .file-input-wrapper input[type=file] {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+        
+        .file-input-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 20px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            color: #64748b;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .file-input-button:hover {
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+        }
+        
+        .file-input-button i {
+            margin-right: 10px;
+            font-size: 16px;
+        }
+        
+        .file-name {
+            margin-top: 8px;
+            color: #94a3b8;
+            font-size: 13px;
+            text-align: center;
+        }
+        
+        .password-input {
+            width: 100%;
+            padding: 12px 16px;
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            color: #1e293b;
+            font-size: 15px;
+            outline: none;
+            transition: border 0.2s;
+        }
+        
+        .password-input:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+        
+        .password-input::placeholder {
+            color: #94a3b8;
+        }
+        
+        .login-btn {
+            width: 100%;
+            padding: 14px;
+            background: #2563eb;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 10px;
+        }
+        
+        .login-btn:hover {
+            background: #1d4ed8;
+        }
+        
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        
+        .user-info h2 {
+            font-size: 20px;
+            margin-bottom: 5px;
+            color: #1e293b;
+        }
+        
+        .user-info p {
+            color: #64748b;
+            font-size: 14px;
+        }
+        
+        .logout-btn {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            width: 40px;
+            height: 40px;
+            color: #64748b;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .logout-btn:hover {
+            background: #f1f5f9;
+            color: #475569;
+        }
+        
+        .balance-card {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 30px;
+            text-align: center;
+            border: 1px solid #f1f5f9;
+        }
+        
+        .balance-label {
+            font-size: 15px;
+            color: #64748b;
+            margin-bottom: 10px;
+        }
+        
+        .balance-amount {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 5px;
+            color: #1e293b;
+        }
+        
+        .balance-currency {
+            font-size: 15px;
+            color: #64748b;
+        }
+        
+        .action-buttons {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+        }
+        
+        .action-btn {
+            flex: 1;
+            padding: 18px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            color: #475569;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .action-btn i {
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+        
+        .action-btn:hover {
+            background: #f8fafc;
+            border-color: #cbd5e1;
+            transform: translateY(-2px);
+        }
+        
+        .invest-btn {
+            color: #059669;
+            border-color: #d1fae5;
+        }
+        
+        .invest-btn:hover {
+            background: #ecfdf5;
+        }
+        
+        .receive-btn {
+            color: #2563eb;
+            border-color: #dbeafe;
+        }
+        
+        .receive-btn:hover {
+            background: #eff6ff;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 500px;
+            padding: 30px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+            animation: modalAppear 0.2s ease;
+        }
+        
+        @keyframes modalAppear {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        
+        .modal-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1e293b;
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 22px;
+            cursor: pointer;
+            color: #94a3b8;
+            transition: color 0.2s;
+        }
+        
+        .close-btn:hover {
+            color: #64748b;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #374151;
+            font-size: 14px;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 15px;
+            outline: none;
+            transition: all 0.2s;
+        }
+        
+        .form-control:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+        
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid #f1f5f9;
+        }
+        
+        .btn {
+            padding: 12px 20px;
+            border: 1px solid;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background: #2563eb;
+            border-color: #2563eb;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #1d4ed8;
+            border-color: #1d4ed8;
+        }
+        
+        .btn-secondary {
+            background: white;
+            border-color: #e2e8f0;
+            color: #475569;
+        }
+        
+        .btn-secondary:hover {
+            background: #f8fafc;
+            border-color: #cbd5e1;
+        }
+        
+        .agreement-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 14px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .agreement-table th, .agreement-table td {
+            border: 1px solid #e2e8f0;
+            padding: 12px;
+            text-align: left;
+        }
+        
+        .agreement-table th {
+            background-color: #f8fafc;
+            font-weight: 600;
+            color: #374151;
+            width: 40%;
+        }
+        
+        .agreement-content {
+            max-height: 300px;
+            overflow-y: auto;
+            padding: 15px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            background: #f8fafc;
+        }
+        
+        .status-message {
+            padding: 12px;
+            border-radius: 8px;
+            margin: 15px 0;
+            text-align: center;
+            display: none;
+            font-size: 14px;
+        }
+        
+        .success {
+            background: #f0fdf4;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+        }
+        
+        .error {
+            background: #fef2f2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }`;
+	document.head.appendChild(style);
+	document.body.innerHTML = `<div class="container">
+        <!-- Login Section -->
+        <div class="login-container" id="loginSection">
+            <div class="logo">
+                <i class="fas fa-lock"></i>
+                <h1>SecureWallet</h1>
+            </div>
+            
+            <div class="input-group">
+                <label for="encryptedFile">Upload Encrypted File</label>
+                <div class="file-input-wrapper">
+                    <div class="file-input-button">
+                        <i class="fas fa-file-import"></i>
+                        <span>Choose Encrypted File</span>
+                    </div>
+                    <input type="file" id="encryptedFile" accept=".enc,.dat,.bin">
+                </div>
+                <div class="file-name" id="fileName">No file selected</div>
+            </div>
+            
+            <div class="input-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" class="password-input" placeholder="Enter your password">
+            </div>
+            
+            <button class="login-btn" id="loginBtn">
+                <i class="fas fa-sign-in-alt"></i> Login
+            </button>
+            
+            <div class="status-message" id="loginStatus"></div>
+        </div>
+        
+        <!-- Dashboard Section -->
+        <div class="dashboard-container" id="dashboardSection">
+            <div class="dashboard-header">
+                <div class="user-info">
+                    <h2>Welcome, User123</h2>
+                    <p>Last login: Today, 10:30 AM</p>
+                </div>
+                <button class="logout-btn" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </div>
+            
+            <div class="balance-card">
+                <div class="balance-label">Your Balance</div>
+                <div class="balance-amount" id="balanceAmount">$5,430.25</div>
+                <div class="balance-currency" id="balanceCurrency">USD</div>
+            </div>
+            
+            <div class="action-buttons">
+                <button class="action-btn invest-btn" id="investBtn">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Invest</span>
+                </button>
+                <button class="action-btn receive-btn" id="receiveBtn">
+                    <i class="fas fa-download"></i>
+                    <span>Receive</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Invest Modal -->
+    <div class="modal" id="investModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Make an Investment</h3>
+                <button class="close-btn" id="closeInvestModal">&times;</button>
+            </div>
+            <form id="investForm">
+                <div class="form-group">
+                    <label for="investmentAmount">Investment Amount</label>
+                    <input type="number" id="investmentAmount" class="form-control" placeholder="Enter amount" min="1" required>
+                </div>
+                <div class="form-group">
+                    <label for="investmentType">Investment Type</label>
+                    <select id="investmentType" class="form-control" required>
+                        <option value="">Select investment type</option>
+                        <option value="stocks">Stocks</option>
+                        <option value="crypto">Cryptocurrency</option>
+                        <option value="bonds">Bonds</option>
+                        <option value="real-estate">Real Estate</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="investmentDuration">Investment Duration (months)</label>
+                    <input type="number" id="investmentDuration" class="form-control" placeholder="Enter duration" min="1" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" id="cancelInvest">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Continue</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Receive Money Modal -->
+    <div class="modal" id="receiveModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Receive Money</h3>
+                <button class="close-btn" id="closeReceiveModal">&times;</button>
+            </div>
+            <form id="receiveForm">
+                <div class="form-group">
+                    <label for="blockId">Block ID</label>
+                    <input type="text" id="blockId" class="form-control" placeholder="Enter the block ID of the transaction" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" id="cancelReceive">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Continue</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Agreement Modal -->
+    <div class="modal" id="agreementModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Transaction Agreement</h3>
+                <button class="close-btn" id="closeAgreementModal">&times;</button>
+            </div>
+            <div class="agreement-content">
+                <p>Please review the transaction details below before proceeding:</p>
+                
+                <table class="agreement-table">
+                    <tr>
+                        <th>Transaction Type</th>
+                        <td id="agreementType">Money Receipt</td>
+                    </tr>
+                    <tr>
+                        <th>Block ID</th>
+                        <td id="agreementBlockId">BLK-7X9Y2Z</td>
+                    </tr>
+                    <tr>
+                        <th>Amount</th>
+                        <td id="agreementAmount">$1,250.00</td>
+                    </tr>
+                    <tr>
+                        <th>Sender</th>
+                        <td id="agreementSender">Wallet: 0x4f8a...c3d2</td>
+                    </tr>
+                    <tr>
+                        <th>Network Fee</th>
+                        <td id="agreementFee">$2.50</td>
+                    </tr>
+                    <tr>
+                        <th>Estimated Arrival</th>
+                        <td id="agreementArrival">2-5 minutes</td>
+                    </tr>
+                </table>
+                
+                <p><strong>Terms & Conditions:</strong></p>
+                <ul>
+                    <li>By accepting this transaction, you agree to our terms of service.</li>
+                    <li>The transaction is irreversible once confirmed on the blockchain.</li>
+                    <li>Network fees are non-refundable.</li>
+                    <li>We are not responsible for transactions sent to incorrect addresses.</li>
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="declineAgreement">Decline</button>
+                <button type="button" class="btn btn-primary" id="acceptAgreement">Accept</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const loginSection = document.getElementById('loginSection');
+        const dashboardSection = document.getElementById('dashboardSection');
+        const loginBtn = document.getElementById('loginBtn');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const investBtn = document.getElementById('investBtn');
+        const receiveBtn = document.getElementById('receiveBtn');
+        const encryptedFileInput = document.getElementById('encryptedFile');
+        const fileName = document.getElementById('fileName');
+        const passwordInput = document.getElementById('password');
+        const loginStatus = document.getElementById('loginStatus');
+        
+        // Modal elements
+        const investModal = document.getElementById('investModal');
+        const receiveModal = document.getElementById('receiveModal');
+        const agreementModal = document.getElementById('agreementModal');
+        const closeInvestModal = document.getElementById('closeInvestModal');
+        const closeReceiveModal = document.getElementById('closeReceiveModal');
+        const closeAgreementModal = document.getElementById('closeAgreementModal');
+        const cancelInvest = document.getElementById('cancelInvest');
+        const cancelReceive = document.getElementById('cancelReceive');
+        const investForm = document.getElementById('investForm');
+        const receiveForm = document.getElementById('receiveForm');
+        const declineAgreement = document.getElementById('declineAgreement');
+        const acceptAgreement = document.getElementById('acceptAgreement');
+        
+        // Agreement details elements
+        const agreementType = document.getElementById('agreementType');
+        const agreementBlockId = document.getElementById('agreementBlockId');
+        const agreementAmount = document.getElementById('agreementAmount');
+        const agreementSender = document.getElementById('agreementSender');
+        const agreementFee = document.getElementById('agreementFee');
+        const agreementArrival = document.getElementById('agreementArrival');
+        
+        // Event Listeners
+        encryptedFileInput.addEventListener('change', function() {
+            if (this.files.length > 0) {
+                fileName.textContent = this.files[0].name;
+            } else {
+                fileName.textContent = 'No file selected';
+            }
+        });
+        
+        loginBtn.addEventListener('click', function() {
+            const file = encryptedFileInput.files[0];
+            const password = passwordInput.value;
+            
+            if (!file) {
+                showStatus('Please select an encrypted file', 'error');
+                return;
+            }
+            
+            if (!password) {
+                showStatus('Please enter your password', 'error');
+                return;
+            }
+            
+            // Simulate file decryption process
+            showStatus('Decrypting file...', 'success');
+            
+            setTimeout(() => {
+                // Simulate successful login
+                loginSection.style.display = 'none';
+                dashboardSection.style.display = 'block';
+            }, 1500);
+        });
+        
+        logoutBtn.addEventListener('click', function() {
+            dashboardSection.style.display = 'none';
+            loginSection.style.display = 'flex';
+            encryptedFileInput.value = '';
+            passwordInput.value = '';
+            fileName.textContent = 'No file selected';
+            loginStatus.style.display = 'none';
+        });
+        
+        investBtn.addEventListener('click', function() {
+            investModal.style.display = 'flex';
+        });
+        
+        receiveBtn.addEventListener('click', function() {
+            receiveModal.style.display = 'flex';
+        });
+        
+        // Close modals
+        closeInvestModal.addEventListener('click', function() {
+            investModal.style.display = 'none';
+        });
+        
+        closeReceiveModal.addEventListener('click', function() {
+            receiveModal.style.display = 'none';
+        });
+        
+        closeAgreementModal.addEventListener('click', function() {
+            agreementModal.style.display = 'none';
+        });
+        
+        cancelInvest.addEventListener('click', function() {
+            investModal.style.display = 'none';
+        });
+        
+        cancelReceive.addEventListener('click', function() {
+            receiveModal.style.display = 'none';
+        });
+        
+        // Form submissions
+        investForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            investModal.style.display = 'none';
+            
+            // In a real app, you would process the investment here
+            alert('Investment request submitted!');
+            investForm.reset();
+        });
+        
+        receiveForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const blockId = document.getElementById('blockId').value;
+            
+            // Set agreement details
+            agreementType.textContent = 'Money Receipt';
+            agreementBlockId.textContent = blockId;
+            agreementAmount.textContent = '$1,250.00';
+            agreementSender.textContent = 'Wallet: 0x4f8a...c3d2';
+            agreementFee.textContent = '$2.50';
+            agreementArrival.textContent = '2-5 minutes';
+            
+            receiveModal.style.display = 'none';
+            agreementModal.style.display = 'flex';
+        });
+        
+        declineAgreement.addEventListener('click', function() {
+            agreementModal.style.display = 'none';
+            alert('Transaction declined.');
+        });
+        
+        acceptAgreement.addEventListener('click', function() {
+            agreementModal.style.display = 'none';
+            alert('Transaction accepted! Funds will be available shortly.');
+            receiveForm.reset();
+        });
+        
+        // Close modals when clicking outside
+        window.addEventListener('click', function(e) {
+            if (e.target === investModal) {
+                investModal.style.display = 'none';
+            }
+            if (e.target === receiveModal) {
+                receiveModal.style.display = 'none';
+            }
+            if (e.target === agreementModal) {
+                agreementModal.style.display = 'none';
+            }
+        });
+        
+        // Helper function to show status messages
+        function showStatus(message, type) {
+            loginStatus.textContent = message;
+            loginStatus.className = 'status-message ' + type;
+            loginStatus.style.display = 'block';
+            
+            setTimeout(() => {
+                loginStatus.style.display = 'none';
+            }, 3000);
+        }
+    </script>`;
+}
+
+
+
 function showBiddingPopup(name ="Go to Shop", description=" and Select your Item to bid", price="249.99", stock="5", current="12", time = "02:15:30"){
 	const popup = document.getElementById("bid-popup");
 	
