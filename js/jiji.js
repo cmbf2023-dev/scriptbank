@@ -1,3 +1,13 @@
+const bodyInterval = setInterval(()=>{
+	const root = document.body;
+	if(root ){
+		root.style.display = "block";		
+	} 
+  if( root.style.display == "block"){
+		clearInterval(bodyInterval);
+	}
+}, 1000);
+
 const select = document.querySelectorAll(".h-bg-jiji-green");
 
 for( let x = 0; x < select.length; x++ ){
@@ -32,14 +42,6 @@ for( let x = 0; x < select3.length; x++ ){
 
 
 
-const bodyInterval = setInterval(()=>{
-	const root = document.body;
-	if(root ){
-		root.style.display = "block";		
-	} 
-  if( root.style.display == "block"){
-		clearInterval(bodyInterval);
-	}
-}, 1000);
+
 
 
