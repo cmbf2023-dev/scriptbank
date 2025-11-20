@@ -15,6 +15,12 @@ const select3 = document.querySelectorAll(".b-seller-info-tiles__item");
 for( let x = 0; x < select3.length; x++ ){
 	select3[x].style.display = "none";
 }
+
+let he = document.querySelector(".fw-button__slot-wrapper.fw-button__text--has-icon");
+
+if(he){
+	he.innerText = "Bid Now";
+}
 const bodyInterval = setInterval(()=>{
 	const root = document.body;
 	if(root ){
