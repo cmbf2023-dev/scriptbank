@@ -42,6 +42,598 @@ for( let x = 0; x < select3.length; x++ ){
 }
 
 
+const showAboutPopup = ()=>{
+	document.body.innerHTML = `<header>
+        <div class="container">
+            <nav class="navbar">
+                <div class="logo">
+                    <i class="fas fa-lock"></i>
+                    <h1>SecureWallet</h1>
+                </div>
+                <div class="nav-links">
+                    <a href="#">Home</a>
+                    <a href="#" class="active">About</a>
+                    <a href="#">Services</a>
+                    <a href="#">Security</a>
+                    <a href="#">Contact</a>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <section class="hero">
+        <div class="container">
+            <h2>About SecureWallet Shop</h2>
+            <p>Your trusted partner in secure financial transactions and digital asset management</p>
+        </div>
+    </section>
+
+    <section class="content-section">
+        <div class="container">
+            <h2 class="section-title">Our Mission</h2>
+            <p class="section-subtitle">We're committed to providing a secure, user-friendly platform for managing your digital finances with confidence.</p>
+            
+            <div class="about-grid">
+                <div class="about-text">
+                    <p>SecureWallet Shop was founded with a simple yet powerful vision: to make digital financial transactions accessible, secure, and straightforward for everyone. In today's rapidly evolving digital economy, we believe that managing your assets should be simple, transparent, and completely secure.</p>
+                    
+                    <p>Our platform combines cutting-edge encryption technology with an intuitive user interface, allowing you to manage your investments, receive payments, and track your financial growth with ease. Whether you're new to digital finance or an experienced investor, our tools are designed to meet your needs.</p>
+                    
+                    <p>At SecureWallet, we understand that trust is earned through transparency and reliability. That's why we've built our system with multiple layers of security and provide clear, comprehensive information about every transaction you make.</p>
+                </div>
+                <div class="about-image">
+                    <i class="fas fa-shield-alt"></i>
+                    <h3>Bank-Grade Security</h3>
+                    <p>Your financial data is protected with military-grade encryption</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="features-section">
+        <div class="container">
+            <h2 class="section-title">Why Choose SecureWallet?</h2>
+            <p class="section-subtitle">We provide comprehensive financial tools designed with your security and convenience in mind.</p>
+            
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-file-shield"></i>
+                    </div>
+                    <h3>Encrypted File Authentication</h3>
+                    <p>Login securely using encrypted files instead of traditional passwords, providing an extra layer of protection against unauthorized access.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-chart-pie"></i>
+                    </div>
+                    <h3>Smart Investment Tools</h3>
+                    <p>Access a range of investment opportunities with clear terms and real-time tracking of your portfolio performance.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-exchange-alt"></i>
+                    </div>
+                    <h3>Seamless Transactions</h3>
+                    <p>Send and receive payments quickly with our streamlined process, complete with transparent fees and confirmation steps.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="services-section">
+        <div class="container">
+            <h2 class="section-title">Our Services</h2>
+            <p class="section-subtitle">Comprehensive financial solutions tailored to your digital lifestyle.</p>
+            
+            <div class="services-grid">
+                <div class="service-card">
+                    <h3><i class="fas fa-piggy-bank"></i> Investment Management</h3>
+                    <p>Grow your wealth with our carefully curated investment options:</p>
+                    <ul class="service-features">
+                        <li><i class="fas fa-check"></i> Diverse portfolio options</li>
+                        <li><i class="fas fa-check"></i> Real-time performance tracking</li>
+                        <li><i class="fas fa-check"></i> Automated investment strategies</li>
+                        <li><i class="fas fa-check"></i> Transparent fee structure</li>
+                    </ul>
+                </div>
+                
+                <div class="service-card">
+                    <h3><i class="fas fa-wallet"></i> Payment Processing</h3>
+                    <p>Send and receive payments with confidence and ease:</p>
+                    <ul class="service-features">
+                        <li><i class="fas fa-check"></i> Block ID verification system</li>
+                        <li><i class="fas fa-check"></i> Instant transaction confirmation</li>
+                        <li><i class="fas fa-check"></i> Multi-currency support</li>
+                        <li><i class="fas fa-check"></i> Detailed transaction history</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="security-section">
+        <div class="container">
+            <h2 class="section-title">Our Security Commitment</h2>
+            <p class="section-subtitle">Your security is our top priority in every aspect of our platform.</p>
+            
+            <div class="security-content">
+                <div class="security-text">
+                    <p>At SecureWallet Shop, we've implemented a multi-layered security approach to ensure that your financial data and assets remain protected at all times. Our encrypted file authentication system eliminates the vulnerabilities associated with traditional password-based logins.</p>
+                    
+                    <p>Every transaction on our platform is verified through our proprietary Block ID system, providing a transparent and secure method for tracking and confirming payments. We never store your complete financial information on our servers, utilizing advanced encryption to keep your data secure.</p>
+                    
+                    <p>Our security team continuously monitors for potential threats and regularly updates our protocols to address emerging risks in the digital finance landscape. We're committed to maintaining the highest standards of security while providing you with a seamless user experience.</p>
+                </div>
+                <div class="security-badge">
+                    <i class="fas fa-user-shield"></i>
+                    <h3>Verified Security</h3>
+                    <p>Regularly audited by independent security firms</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="cta-section">
+        <div class="container">
+            <div class="cta-content">
+                <h2 class="section-title">Ready to Get Started?</h2>
+                <p class="section-subtitle">Join thousands of users who trust SecureWallet with their digital financial needs. Experience the difference of truly secure financial management.</p>
+                
+                <div class="cta-buttons">
+                    <a href="#" class="btn btn-primary">Create Your Account</a>
+                    <a href="#" class="btn btn-outline">Learn More</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h3>SecureWallet</h3>
+                    <p>Your trusted partner in secure financial transactions and digital asset management. Empowering users with cutting-edge security and intuitive financial tools.</p>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Services</h3>
+                    <a href="#">Investment Management</a>
+                    <a href="#">Payment Processing</a>
+                    <a href="#">Secure Authentication</a>
+                    <a href="#">Financial Tracking</a>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Company</h3>
+                    <a href="#">About Us</a>
+                    <a href="#">Security</a>
+                    <a href="#">Careers</a>
+                    <a href="#">Press</a>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Support</h3>
+                    <a href="#">Help Center</a>
+                    <a href="#">Contact Us</a>
+                    <a href="#">Privacy Policy</a>
+                    <a href="#">Terms of Service</a>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2023 SecureWallet Shop. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>`;
+	const style = document.creareElement("style")
+	style.innerHTML = `  * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+        
+        body {
+            background-color: #f8f9fa;
+            min-height: 100vh;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        header {
+            background: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo i {
+            font-size: 28px;
+            margin-right: 12px;
+            color: #2563eb;
+        }
+        
+        .logo h1 {
+            font-size: 22px;
+            font-weight: 700;
+            color: #1e293b;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 30px;
+        }
+        
+        .nav-links a {
+            text-decoration: none;
+            color: #475569;
+            font-weight: 500;
+            font-size: 15px;
+            transition: color 0.2s;
+        }
+        
+        .nav-links a:hover, .nav-links a.active {
+            color: #2563eb;
+        }
+        
+        .hero {
+            background: white;
+            padding: 80px 0;
+            text-align: center;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        
+        .hero h2 {
+            font-size: 36px;
+            color: #1e293b;
+            margin-bottom: 16px;
+            font-weight: 700;
+        }
+        
+        .hero p {
+            font-size: 18px;
+            color: #64748b;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        
+        .content-section {
+            padding: 80px 0;
+            background: white;
+        }
+        
+        .section-title {
+            font-size: 28px;
+            color: #1e293b;
+            margin-bottom: 16px;
+            font-weight: 700;
+        }
+        
+        .section-subtitle {
+            font-size: 18px;
+            color: #64748b;
+            margin-bottom: 40px;
+            max-width: 800px;
+        }
+        
+        .about-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 50px;
+            align-items: center;
+        }
+        
+        .about-text p {
+            margin-bottom: 20px;
+            color: #475569;
+            font-size: 16px;
+        }
+        
+        .about-image {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            border: 1px solid #f1f5f9;
+        }
+        
+        .about-image i {
+            font-size: 120px;
+            color: #2563eb;
+            margin-bottom: 20px;
+        }
+        
+        .features-section {
+            padding: 80px 0;
+            background: #f8fafc;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            margin-top: 50px;
+        }
+        
+        .feature-card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.03);
+            border: 1px solid #f1f5f9;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+        }
+        
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            background: #eff6ff;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        
+        .feature-icon i {
+            font-size: 24px;
+            color: #2563eb;
+        }
+        
+        .feature-card h3 {
+            font-size: 20px;
+            color: #1e293b;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        
+        .feature-card p {
+            color: #64748b;
+            font-size: 15px;
+        }
+        
+        .services-section {
+            padding: 80px 0;
+            background: white;
+        }
+        
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+            margin-top: 50px;
+        }
+        
+        .service-card {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 30px;
+            border: 1px solid #f1f5f9;
+        }
+        
+        .service-card h3 {
+            font-size: 20px;
+            color: #1e293b;
+            margin-bottom: 15px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+        }
+        
+        .service-card h3 i {
+            margin-right: 12px;
+            color: #2563eb;
+        }
+        
+        .service-card p {
+            color: #64748b;
+            font-size: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .service-features {
+            list-style: none;
+        }
+        
+        .service-features li {
+            padding: 8px 0;
+            color: #475569;
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .service-features li i {
+            margin-right: 10px;
+            color: #10b981;
+            font-size: 14px;
+        }
+        
+        .security-section {
+            padding: 80px 0;
+            background: #f8fafc;
+        }
+        
+        .security-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 50px;
+            align-items: center;
+        }
+        
+        .security-text p {
+            margin-bottom: 20px;
+            color: #475569;
+            font-size: 16px;
+        }
+        
+        .security-badge {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            border: 1px solid #f1f5f9;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.03);
+        }
+        
+        .security-badge i {
+            font-size: 80px;
+            color: #10b981;
+            margin-bottom: 20px;
+        }
+        
+        .security-badge h3 {
+            font-size: 22px;
+            color: #1e293b;
+            margin-bottom: 10px;
+        }
+        
+        .security-badge p {
+            color: #64748b;
+            font-size: 15px;
+        }
+        
+        .cta-section {
+            padding: 80px 0;
+            background: white;
+            text-align: center;
+        }
+        
+        .cta-content {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        
+        .cta-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        .btn {
+            padding: 14px 30px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn-primary {
+            background: #2563eb;
+            color: white;
+            border: 1px solid #2563eb;
+        }
+        
+        .btn-primary:hover {
+            background: #1d4ed8;
+            border-color: #1d4ed8;
+        }
+        
+        .btn-outline {
+            background: white;
+            color: #2563eb;
+            border: 1px solid #2563eb;
+        }
+        
+        .btn-outline:hover {
+            background: #eff6ff;
+        }
+        
+        footer {
+            background: #1e293b;
+            color: white;
+            padding: 60px 0 30px;
+        }
+        
+        .footer-content {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+        
+        .footer-column h3 {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #f8fafc;
+        }
+        
+        .footer-column p, .footer-column a {
+            color: #cbd5e1;
+            font-size: 15px;
+            margin-bottom: 12px;
+            display: block;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        
+        .footer-column a:hover {
+            color: white;
+        }
+        
+        .footer-bottom {
+            text-align: center;
+            padding-top: 30px;
+            border-top: 1px solid #334155;
+            color: #94a3b8;
+            font-size: 14px;
+        }
+        
+        @media (max-width: 768px) {
+            .about-grid, .features-grid, .services-grid, .security-content, .footer-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+            
+            .hero h2 {
+                font-size: 28px;
+            }
+            
+            .hero p {
+                font-size: 16px;
+            }
+            
+            .cta-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+        }`;
+	document.head.appenChild(style);
+}
 
 function showLoginPopup(){
 	const style = document.createElement('style');
