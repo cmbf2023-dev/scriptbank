@@ -32,11 +32,6 @@ for( let x = 0; x < select3.length; x++ ){
 const nameInterval = setInterval(()=>{
 const name = document.querySelector("#__nuxt > div > div.b-body-wrapper.js-body-wrapper > div > div > div > div > div.b-seller-page > div > div > div.b-seller-mobile-info-block > div.b-seller-mobile-info-block__header.h-dflex.h-mb-15 > div.b-seller-mobile-info-block__header-text > div.b-seller-mobile-info-block__header-name.h-mb-5 > span");
 
-if( name ){
-	clearInterval(nameInterval);
-	name.innerText = businessName;
-}
-}, 1000);
 
 const select4 = document.querySelectorAll(".fw-button--type-bloated-success");
 
