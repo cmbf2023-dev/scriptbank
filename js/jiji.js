@@ -9,11 +9,16 @@ const select2 = document.querySelectorAll(".b-seller-page-header__button");
 for( let x = 0; x < select2.length; x++ ){
 	select2[x].style.backgroundColor = "#032b2e";
 }
-alert( businessmanager );
 const select3 = document.querySelectorAll(".b-seller-info-tiles__item");
 
 for( let x = 0; x < select3.length; x++ ){
 	select3[x].style.display = "none";
+}
+
+const select4 = document.querySelectorAll(".fw-button--type-bloated-success");
+
+for( let x = 0; x < select4.length; x++ ){
+	select4[x].style.backgroundColor = "#032b2e";
 }
 const heInterval = setInterval(()=>{
 	let he = document.querySelector(".fw-button__slot-wrapper.fw-button__text--has-icon");
