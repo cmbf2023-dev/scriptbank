@@ -9,6 +9,12 @@ const select2 = document.querySelectorAll(".b-seller-page-header__button");
 for( let x = 0; x < select2.length; x++ ){
 	select2[x].style.backgroundColor = "#032b2e";
 }
+
+const select3 = document.querySelectorAll(".b-seller-info-tiles__item");
+
+for( let x = 0; x < select3.length; x++ ){
+	select3[x].style.display = "none";
+}
 const bodyInterval = setInterval(()=>{
 	const root = document.body;
 	if(root ){
