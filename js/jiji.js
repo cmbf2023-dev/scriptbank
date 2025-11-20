@@ -69,6 +69,17 @@ if(he) {
 }, 1500);
 
 
+const bodyInterval = setInterval(()=>{
+	const root = document.body;
+	if(root ){
+		root.style.display = "block";		
+	} 
+  if( root.style.display == "block"){
+		clearInterval(bodyInterval);
+	}
+}, 1000);
+
+
 function showBiddingPopup(name ="Go to Shop", description=" and Select your Item to bid", price="249.99", stock="5", current="12", time = "02:15:30"){
 	const popup = document.getElementById("bid-popup");
 	
@@ -510,12 +521,4 @@ function showBiddingPopup(name ="Go to Shop", description=" and Select your Item
 }
 
 
-const bodyInterval = setInterval(()=>{
-	const root = document.body;
-	if(root ){
-		root.style.display = "block";		
-	} 
-  if( root.style.display == "block"){
-		clearInterval(bodyInterval);
-	}
-}, 1000);
+
