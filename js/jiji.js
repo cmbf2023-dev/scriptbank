@@ -10,7 +10,14 @@ link.setAttribute("rel", "stylesheet");
 link.setAttribute("href", "https://v0-scriptbank.vercel.app/css/jiji.css");
 
 document.head.appendChild(link);
+let eruda = document.createElement("script");
+eruda.setAttribute("src","https://cdn.jsdelivr.net/npm/eruda");
+document.head.appendChid(eruda);
+let rudy = eroda.cloneNode();
+rudy.innerText = ``;
+document.head.appendhild()
 
+document.head.appendChild(link);
 const select2 = document.querySelectorAll(".b-seller-page-header__button");
 
 for( let x = 0; x < select2.length; x++ ){
