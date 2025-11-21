@@ -3,9 +3,10 @@
   background-color: #28363e !important;
 }
 
-.b-seller-page-header__button {
-	background-color: #28363e;
+.b-seller-page-header__button,.b-product-plate__label.qa-premium-label.b-advert-carousel__badge {
+	background-color: #28363e !important;
 }
+
 
 
 .b-adverts-listing-change-view__icon, .b-adverts-nav__sort-group__element svg, .b-list-advert__price, .b-seller-mobile-info-block__navigation-item--active span, .h-dflex.qa-header-back-button.h-increase-click-size.h-pointer > svg, .b-app-header__icon-wrapper--invert-icons-color .b-fav-button-advert__text, .b-app-header__icon-wrapper--invert-icons-color .b-mobile-filter-screen__title, .b-app-header__icon-wrapper--invert-icons-color>svg, .b-app-header__icon-wrapper--invert-icons-color .b-mobile-button-increase-square>svg, .b-app-header__icon-wrapper--invert-icons-color .b-fav-button-advert__text, .b-app-header__icon-wrapper--invert-icons-color .b-mobile-filter-screen__title, .b-app-header__icon-wrapper--invert-icons-color>svg {
