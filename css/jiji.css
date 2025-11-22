@@ -24,7 +24,7 @@ a.b-list-advert-base.b-list-advert-base--vip.b-list-advert-base--gallery {
 	border: 1px solid #28363e !important;
 }
 
-.b-seller-info-tiles, .b-seller-mobile-info-block__header-photo .b-static-image, .b-seller-advert-info__image, .b-advert-seller-block,.h-dflex.h-pb-20.h-flex-dir-column, div.qa-show-adsense.h-max-width-100p.h-mv-10, .active b-mobile-bar.b-mobile-bar-new.js-mobile-bar-new {
+.b-seller-info-tiles, .b-seller-mobile-info-block__header-photo .b-static-image, .b-seller-advert-info__image, .b-advert-seller-block,.h-dflex.h-pb-20.h-flex-dir-column, div.qa-show-adsense.h-max-width-100p.h-mv-10, .active.b-mobile-bar.b-mobile-bar-new.js-mobile-bar-new {
 	display:none;
 }
 
