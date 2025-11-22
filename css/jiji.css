@@ -3,6 +3,10 @@
   background-color: #28363e !important;
 }
 
+.b-app-header.b-app-header--invert-color.b-app-header--active {
+	background-color: #fff !important;
+}
+
 a.b-list-advert-base.b-list-advert-base--vip.b-list-advert-base--gallery {
 	border: 2px solid #28363e !important;
 }
