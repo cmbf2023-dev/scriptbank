@@ -3,7 +3,7 @@
   background-color: #28363e !important;
 }
 
-.b-app-header.b-app-header--invert-color.b-app-header--active {
+.b-app-header.b-app-header--invert-color.b-app-header--active, .b-request-callback__button {
 	background-color: #fff !important;
 }
 
