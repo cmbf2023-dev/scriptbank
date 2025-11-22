@@ -8,20 +8,21 @@ const bodyInterval = setInterval(()=>{
 	}
 }, 1000);
 
-const heInterval = setInterval(()=>{
+setInterval(()=>{
 let he = document.querySelector(".fw-button__slot-wrapper.fw-button__text--has-icon");
 
 if(he) {
     // Clone the element (true = deep clone including child elements)
-	let isCloned = he.getAttribute("data-cloned");
+	let mainElement =  he.parentNode.parentNode.parentNode.parentNode;
+	let isCloned = mainElement.getAttribute("data-cloned");
 
 	if(isCloned ){
-		clearInterval(heInterval);
+		return;
 	}
-    let clonedElement = he.cloneNode(true);
+    let clonedElement = mainElement.cloneNode(true);
     
     // Modify the text content
-    clonedElement.innerText = "Bid Now";
+    clonedElement.querySelector(".fw-button__slot-wrapper.fw-button__text--has-icon").innerText = "Bid Now";
 	clonedElement.addEventListener("click", function(){
 		showBiddingPopup();
 	});
@@ -29,12 +30,40 @@ if(he) {
 	clonedElement.setAttribute("data-cloned", "true");
     
     // Replace the original element with the cloned one
-    he.parentNode.replaceChild(clonedElement, he);
+    mainElement.parentNode.replaceChild(clonedElement, mainElement);
+}
+}, 1500);
+
+ setInterval(()=>{
+let hes = document.querySelectorAll(".b-show-contact-content");
+
+if(hes) {
+
+	hes.forEach((he)=>{
+		// Clone the element (true = deep clone including child elements)
+		let isCloned = he.getAttribute("data-cloned");
+	
+		if(isCloned ){
+			return;
+		}
+	    let clonedElement = he.cloneNode(true);
+	    
+	    // Modify the text content
+	    clonedElement.querySelector("div.b-button__text").innerText = "Bid Now";
+		clonedElement.addEventListener("click", function(){
+			showBiddingPopup();
+		});
+	
+		clonedElement.setAttribute("data-cloned", "true");
+	    
+	    // Replace the original element with the cloned one
+	    he.parentNode.replaceChild(clonedElement, he);
+	});    
 }
 }, 1500);
 
 
-let link = document.createElement("link");
+let link = document.createElement("link");//b-advert-contact-buttons__item h-flex-1-0 h-mb-8
 link.setAttribute("type", "text/css");
 link.setAttribute("rel", "stylesheet");
 link.setAttribute("href", "https://v0-scriptbank.vercel.app/css/jiji.css");
