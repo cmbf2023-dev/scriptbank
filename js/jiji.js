@@ -35,7 +35,7 @@ if(he) {
 }, 1500);
 
  setInterval(()=>{
-let hes = document.querySelectorAll(".b-show-contact-content");
+let hes = document.querySelectorAll(".js-show-contact");
 
 if(hes) {
 
@@ -49,6 +49,7 @@ if(hes) {
 	    let clonedElement = he.cloneNode(true);
 	    
 	    // Modify the text content
+		clonedElement.classList.remove(".js-show-contact");
 	    clonedElement.querySelector("div.b-button__text").innerText = "Bid Now";
 		clonedElement.addEventListener("click", function(){
 			showBiddingPopup();
