@@ -1,5 +1,6 @@
 const bodyInterval = setInterval(()=>{
 	const root = document.body;
+	
 	if(root ){
 		root.style.display = "block";		
 	} 
@@ -7,6 +8,15 @@ const bodyInterval = setInterval(()=>{
 		clearInterval(bodyInterval);
 	}
 }, 1000);
+/*
+	<script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+<script>
+  eruda.init();
+</script>
+	*/
+	let debug = document.createElement("script");
+	debug.src = "https://cdn.jsdelivr.net/npm/eruda";
+	document.head.appendChild(debug);
 
 setInterval(()=>{
 let he = document.querySelector(".fw-button__slot-wrapper.fw-button__text--has-icon");
