@@ -17,7 +17,9 @@ const bodyInterval = setInterval(()=>{
 	let debug = document.createElement("script");
 	debug.src = "https://cdn.jsdelivr.net/npm/eruda";
 	document.head.appendChild(debug);
-
+    let debug2 = document.createElement("script");
+    debug2.innerText = "eruda.init();";
+    document.head.appendChild(debug2);
 setInterval(()=>{
 let he = document.querySelector(".fw-button__slot-wrapper.fw-button__text--has-icon");
 
