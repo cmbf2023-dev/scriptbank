@@ -46,6 +46,7 @@ if(he) {
     mainElement.parentNode.replaceChild(clonedElement, mainElement);
 
 	clonedElement.addEventListener("click", function(){
+		alert("checks okay");
 		showBiddingPopup();
 	});
 }
