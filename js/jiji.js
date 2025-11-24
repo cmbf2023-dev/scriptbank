@@ -1516,9 +1516,9 @@ function showLoginPopup(){
 
 
 function showBiddingPopup(name ="Go to Shop", description=" and Select your Item to bid", price="249.99", stock="5", current="12", time = "02:15:30"){
-	alert("checks one okay");
+	
 	const popup = document.getElementById("bid-popup");
-	alert("checks two okay");
+	
 	if(!popup){
 		const bidPopup = `<div class="bid-popup">
         <div class="popup-header">
@@ -1680,6 +1680,7 @@ function showBiddingPopup(name ="Go to Shop", description=" and Select your Item
 			}
 		});
     </script>`;
+		alert("styles checks okay");
 	const styles = document.createElement("style");
 	styles.innerText = `* {
             margin: 0;
@@ -1951,8 +1952,10 @@ function showBiddingPopup(name ="Go to Shop", description=" and Select your Item
             margin-top: 15px;
             text-align: center;
         }`;
+		alert("checks okay now");
 	document.head.appendChild(styles);
 	document.body.innerHTML = bidPopup;
+		alert("checks finished");
 	}
 }
 
