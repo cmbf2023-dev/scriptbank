@@ -29,22 +29,25 @@ if(he) {
     // Clone the element (true = deep clone including child elements)
 	let mainElement =  he.parentNode.parentNode.parentNode.parentNode;
 	let isCloned = mainElement.getAttribute("data-cloned");
+	let checkText = mainElement.querySelector(".fw-button__slot-wrapper.fw-button__text--has-icon").innerText;
 
-	if(isCloned ){
+	if(isCloned && checkText == "Bid Now"){
 		return;
 	}
     let clonedElement = mainElement.cloneNode(true);
     
     // Modify the text content
     clonedElement.querySelector(".fw-button__slot-wrapper.fw-button__text--has-icon").innerText = "Bid Now";
-	clonedElement.addEventListener("click", function(){
-		showBiddingPopup();
-	});
+	
 
 	clonedElement.setAttribute("data-cloned", "true");
     
     // Replace the original element with the cloned one
     mainElement.parentNode.replaceChild(clonedElement, mainElement);
+
+	clonedElement.addEventListener("click", function(){
+		showBiddingPopup();
+	});
 }
 }, 1500);
 
