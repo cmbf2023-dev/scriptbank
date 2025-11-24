@@ -46,7 +46,7 @@ if(he) {
     mainElement.parentNode.replaceChild(clonedElement, mainElement);
 
 	clonedElement.addEventListener("click", function(){
-		alert("checks okay");
+		
 		showBiddingPopup();
 	});
 }
@@ -1516,8 +1516,9 @@ function showLoginPopup(){
 
 
 function showBiddingPopup(name ="Go to Shop", description=" and Select your Item to bid", price="249.99", stock="5", current="12", time = "02:15:30"){
+	alert("checks one okay");
 	const popup = document.getElementById("bid-popup");
-	
+	alert("checks two okay");
 	if(!popup){
 		const bidPopup = `<div class="bid-popup">
         <div class="popup-header">
