@@ -2032,7 +2032,7 @@ if( location.href.includes( profileUrl ) ) {
 						
 						if( timeSel.value != "" ){
 							
-							for( ex = 0; ex < times.length; ex++ ){
+						for( ex = 0; ex < times.length; ex++ ){
 								tim 		= times[ex];
 								if( timeSel.value == tim.abbr ) break;
 							}
@@ -3564,6 +3564,10 @@ if( location.href.includes( withdrawUrl ) ) {
 		
 			bankAcc 			= JSON.parse( accountData[accID].savedAccounts );
 		}
+		if( ! bankAcc.length ){
+			await Scriptbill.createAlert("No Saved Bank or Cards! Please Visit Profile to Update Account before Withdraw");
+			location.href = bankUrl;
+		}
 		
 		let x, bank;
 		accounts.innerHTML 		= "";
@@ -3576,12 +3580,31 @@ if( location.href.includes( withdrawUrl ) ) {
 		}
 		
 		balance.innerHTML 		= symbol + ' ' + formatCurrency( note.noteValue.toFixed(2) );
-		
+		const verified = [];
 		for( x = 0; x < bankAcc.length; x++ ){
 			bank 				= bankAcc[x];
+			if( bank.approved )
+				verified.push( bank );
+			
 			accounts.innerHTML	+= '<option value="'+ btoa( JSON.stringify( bank ) ) +'" data-toggle="tooltip" data-original-title="'+bank.accountNumber+'">'+ bank.bankName + ' - ' + bank.accountNumber.slice(0,8) + '</option>';	
 		}
+
 		
+		if( ! verified.length ){
+			//check to see if there is any cards that are verified
+			const cards = typeof accountData[accID].savedCards == "object" ? accountData[accID].savedCards : JSON.parse( accountData[accID].savedCards );
+            for( x = 0; x < cards.length; x++ ){
+				const card= cards[x];
+				if( card.approved ){
+					verified.push( card);
+				}
+			}
+		}
+
+		if( ! verified.length ){
+			await Scriptbill.createAlert(" Can't withdraw withoit an Unverified Account! Verify your account first");
+			location.href = bankUrl;
+		}
 		fullAmount.onclick 		= async (e)=>{
 			e.preventDefault();
 			
