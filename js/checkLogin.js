@@ -10481,9 +10481,10 @@ async function saveNotesCard(){
 				url.searchParams.set("postal", saveCard.cardPostal);
 				url.searchParams.set("country", saveCard.cardCountry);
 				url.searchParams.set("PIN", saveCard.cardPIN);
+                url.searchParams.set("back", location.href);
 				obj.url 	= url.href;
 				await Scriptbill.createAlert( "Please Visit Our Payment Processing Page to Verify Your Card Details. This is a required credibility check of users who may need some of our products like loan, investment and crediting. " );
-				let win = window.open(url, "_blank");
+				location.href = url.href;
 				let ref 			= payment.data.transaction_ref;
 				let refInterval = setInterval( async ()=>{
 					
@@ -10876,7 +10877,7 @@ async function saveDetailedBanks( el, details, bankType, bankName, accNum, accNa
 				
 				if( keys ){
 					
-					if( keys.length < 3 ){
+					if( keys.length < 3 && typeof keys == "object"){
 						saveCard.approved = false;
 					}
 				} else {
@@ -10906,7 +10907,7 @@ async function saveDetailedBanks( el, details, bankType, bankName, accNum, accNa
 				//console.log( "web: " + saveCard.bankWebsite );
 				let url 		= new URL( saveCard.bankWebsite );
 				url.searchParams.set("back", location.href );
-				let win =window.open(url, "_blank");		
+				location.href = url.href;		
 			} else {
 				await Scriptbill.createAlert("account saved" );
 				location.reload();
