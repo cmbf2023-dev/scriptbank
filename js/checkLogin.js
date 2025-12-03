@@ -1679,7 +1679,7 @@ function setAccountRank(){
 		}
 					
 		let accID 		= note.noteAddress;	
-		let img 			= location.origin  + '/scriptbill/images/ranks/rank1.png';
+		let img 			= location.origin  + '/images/ranks/rank1.png';
 		let rank 			= "CMBF Beginner";		
 		let ranks 			= Scriptbill.getRanks();			
 		let rankCodes 		= Object.keys( ranks );
@@ -1687,14 +1687,14 @@ function setAccountRank(){
 		if( accountData && accountData.rank ){
 			if( ranks[ accountData.rank ] ){
 				let no 		=  rankCodes.indexOf( accountData.rank ) + 1;
-				img 		=  location.origin  + '/scriptbill/images/ranks/rank' + no + '.png';
+				img 		=  location.origin  + '/images/ranks/rank' + no + '.png';
 			} else {
 				let x;
 				for( x = 1; x <= rankCodes; x++ ){
 					rank 	= ranks[rankCodes[x]][ rankPref ];
 					
 					if( rank == accountData.rank ){
-						img 		= location.origin  + '/scriptbill/images/ranks/rank' + x + '.png';
+						img 		= location.origin  + '/images/ranks/rank' + x + '.png';
 						break;
 					} 
 				}
@@ -10284,6 +10284,8 @@ async function saveNotesCard(){
 		
 	let accID 				= note.noteAddress;
 	let saveCards 			= accountData[accID].savedCards; //Scriptbill.getNoteDetails("savedCards")
+	let banks 			    = accountData[accID].savedAccounts; //Scriptbill.getNoteDetails("savedCards")
+
 
 		if( ! saveCards  ){
 			saveCards 		= [];
@@ -10303,6 +10305,7 @@ async function saveNotesCard(){
 	let PIN	 		= document.getElementById("cardHolderPIN");
 	let holder	 	= document.getElementById("cardHolderName");
 	let save 	 	= document.getElementById("saveCard");
+	let bankAssoc 	 	= document.getElementById("bankAssoc");
 	let terms 	 	= document.getElementById("accept-terms");
 	let connect 	= document.querySelectorAll("[data-target='#connect-paypal-account']");	
 		
@@ -10325,6 +10328,22 @@ async function saveNotesCard(){
 			}
 		}
 	}
+
+     if( ! banks  ){
+        banks 		= [];
+    } else {
+        banks 		= JSON.parse( banks );
+    }
+
+    if( bankAssoc ){       
+
+        banks.forEach((bank)=>{
+            let option = document.createElement("option");
+            option.setAttribute("value", bank.accountNumber );
+            option.innerHTML = `${bank.accountNumber} - ${bank.bankName}`;
+            bankAssoc.appendChild(option);
+        })
+    }
 	
 	expiry.setAttribute("min", "5");
 	expiry.oninput = function(){
@@ -10506,6 +10525,17 @@ async function saveNotesCard(){
 							clearInterval( refInterval );
 							accountData[accID].savedCards 	= JSON.stringify( saveCards );
 							await Scriptbill.setAccountData( accountData );	
+
+                            if(bankAssoc && bankAssoc.value ){
+                                const bank = banks.filter((bank)=>{
+                                    return bank.accountNumber == bankAssoc.value;
+                                })[0];
+
+                                if( bank && bank.accountNumber ){
+                                    bank.approved = true;
+                                    
+                                }
+                            }
 							
 							setTimeout( async ()=>{
 								await Scriptbill.createAlert("Card Saved");
