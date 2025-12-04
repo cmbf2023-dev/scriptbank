@@ -2486,6 +2486,17 @@ if( location.href.includes( bankUrl ) ){
 	
 	let note 		= JSON.parse( Scriptbill.s.currentNote );
 	loadingDiv();
+	let url 		= new URL(location.href);
+
+	const ref 		= url.searchParams.get("payement_ref");
+	const gateway 		= url.searchParams.get("gateway");
+	const isReturn 		= url.searchParams.get("return");
+
+	if(ref && gateway && isReturn ){
+		verifyPayment(ref, 1);
+	}
+
+
 	
 	//getting all the elements
 	let cardRow 	= document.getElementById("cardRow");
@@ -10277,6 +10288,82 @@ async function checkAgreements(){
 	
 }
 
+async function verifyPayment(ref, seconds){
+					
+					
+	//console.log( request.status );
+	let request 		= await Scriptbill.getData(['verify', 'reference'], ['true', ref], SERVER);
+	let accountData 	= await getAccountData();
+	let savedCards 		= localStorage.getItem("toBeSavedCards");
+	let bankAssoc 		= localStorage.getItem("bankAssoc");
+
+	if( ! seconds )
+		seconds = 1;
+	
+	if( request && request.data && Object.keys( request.data ).length > 0 ){
+		
+		let data = JSON.parse( JSON.stringify( request ));
+		//console.log( "verify data", data, JSON.stringify( data ));
+		let refed 	  = data.data.transaction_status == "success";
+		
+		
+		if( refed && savedCards ){
+			accountData[accID].savedCards 	= savedCards;
+			await Scriptbill.setAccountData( accountData );	
+
+			if(bankAssoc  ){
+				const banks = accountData[accID].savedAccounts;
+				const bank = banks.filter((bank)=>{
+					return bank.accountNumber == bankAssoc;
+				})[0];
+
+				if( bank && bank.accountNumber ){
+					bank.approved = true;					
+				}
+
+				accountData[accID].savedAccounts = banks.map((banked)=>{
+					if(banked.accountNumber == bank.accountNumber )
+						return bank;
+
+					return banked;
+				})
+
+				await Scriptbill.setAccountData(accountData)
+			}
+			
+			setTimeout( async ()=>{
+				await Scriptbill.createAlert("Card Saved");
+				await Scriptbill.getData( ['cards', 'wallet'], [Scriptbill.Base64.encode( JSON.stringify( saveCard ) ), note.walletID],SERVER);
+				location.reload();
+			},1000);
+		} else {
+			seconds++;
+			
+			if( seconds > 60 ){
+				let time = await Scriptbill.createConfirm("We are about to end this transaction, Should We give you more time? ");
+				if( ! time ){
+					clearInterval( refInterval );
+					
+				} else {
+					seconds = 1;
+				}
+			}
+		}
+	} else {
+		seconds++;
+		
+		if( seconds > 60 ){
+			let time = await Scriptbill.createConfirm("We are about to end this transaction, Should We give you more time? ");
+			if( ! time ){
+				clearInterval( refInterval );
+				//window.close();
+			} else {
+				seconds = 1;
+			}
+		}
+	}
+}
+
 async function saveNotesCard(){
 
  if( ! Scriptbill.s.currentNote || ! Scriptbill.isJsonable( Scriptbill.s.currentNote ) )
@@ -10473,6 +10560,7 @@ async function saveNotesCard(){
 		saveCard.cardCountry		= country.value;
 		saveCard.cardPIN 			= PIN.value;
 		saveCards.push( saveCard );
+		localStorage.toBeSavedCards = JSON.stringify(saveCard);
 		let testType	= note.noteType.slice(0, note.noteType.lastIndexOf("CRD"));
 	
 		let currency 		= testType == "NGN" ? "NGN":"USD";
@@ -10534,6 +10622,7 @@ async function saveNotesCard(){
 							await Scriptbill.setAccountData( accountData );	
 
                             if(bankAssoc && bankAssoc.value ){
+								localStorage.bankAssoc = bankAssoc.value;
                                 const bank = banks.filter((bank)=>{
                                     return bank.accountNumber == bankAssoc.value;
                                 })[0];
@@ -10652,14 +10741,17 @@ async function billCard(amount = 1000, email = "henimastic@gmail.com", currency 
 	ref 		= ref.replaceAll(regex, "");
 	
 	await Scriptbill.createAlert( "Your Transaction Ref Is: " + ref + ". Please save this reference to this transaction to help Scriptbank trace your transaction details.");
-	
-	 let data = {
+	let url = new URL(location.href);
+	url.searchParams.set("return", "true");
+	url.searchParams.set("payment_ref", ref );
+	url.searchParams.set("gateway", "squad");
+	let data = {
 		"amount":amount,
 		"email":email,
 		"currency":currency,
 		"initiate_type": "inline",
 		"transaction_ref": ref,
-		"callback_url":SERVER
+		"callback_url":url.href
 	}; 
 	
 	
