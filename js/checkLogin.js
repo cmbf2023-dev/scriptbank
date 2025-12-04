@@ -10484,6 +10484,7 @@ async function saveNotesCard(){
 		}
 		
 		let payment 		= await billCard(amount, email, currency);
+		console.log("the payment data recieved: ", payment )
 		if( payment && typeof payment == "object" && payment.data && payment.data.checkout_url ){
 			let url 			= new URL( payment.data.checkout_url );
 			
@@ -10615,7 +10616,7 @@ function SquadPay( email, amount, currency ) {
 
 }
 
-async function billCard(amount = 1000, email = "henimastic@gmail.com", currency = "USD", reference = "" ){
+async function billCard(amount = 1000, email = "henimastic@gmail.com", currency = "USD", reference = "", isTest = true ){
 	
 		if( ! Scriptbill.s.currentNote || ! Scriptbill.isJsonable( Scriptbill.s.currentNote ) ) return false;
 	
@@ -10655,7 +10656,33 @@ async function billCard(amount = 1000, email = "henimastic@gmail.com", currency 
 		"callback_url":SERVER
 	}; 
 	
+	
+
 	  let result = "";
+	
+	if(isTest){
+		const endpoint = "https://sandbox-api-d.squadco.com/transaction/initiate";
+
+		let options = {
+			method:"post",
+			headers: {
+				Authorization:"sandbox_sk_74c81698e40d46309408a31f8242f3527e4217b75c5a",
+				"Content-Type":'application/json'
+			},
+			body:JSON.stringify(data)
+			
+		};
+		try {
+			result  = await fetch(endpoint, options);
+			result = await result.json()
+			return result;
+		} catch(e){
+			console.error("payment error: ", e)
+			return false;
+		}
+	  	
+	}
+	  
 	  
 	  /* if( response )
 		result = await response.text();
