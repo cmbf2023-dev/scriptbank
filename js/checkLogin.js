@@ -2930,8 +2930,12 @@ if( location.href.includes( depositUrl ) ) {
 	let button		 	= document.getElementById("continue");
 	let withdraw	 	= document.getElementById("uploadWithdraw");
 	let withdrawFile 	= document.getElementById("uploadWithdrawFile");
+	let depositForm 	= document.getElementById("form-send-money");
+	let fees 			= depositForm.querySelector("del");
 	let sym 			= document.getElementsByClassName("input-group-prepend");
 	let test 			= note.noteType.slice( 0, note.noteType.lastIndexOf("CRD"));
+	fees.innerHTML 			= "0.00 " + test;
+	summary.innerHTML 		= "0.00 " + test;
 
 	withdraw.setAttribute( "disabled", "disabled" );
 	
@@ -2999,6 +3003,8 @@ if( location.href.includes( depositUrl ) ) {
 				//console.log("withdraw block error: " + e);
 			}
 		}
+
+		fees.innerHTML = ( parseFloat(sendMoney.value) / 0.03 ).toFixed(2) + " " + currency.value;
 	}
 	
 	payment.onchange = function(){
