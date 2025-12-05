@@ -10291,6 +10291,15 @@ async function checkAgreements(){
 async function verifyPayment(ref, seconds, isTest = true ){
 					
 	let url;
+
+	let options = {
+		method:"get",
+		headers: {
+			Authorization:"sandbox_sk_74c81698e40d46309408a31f8242f3527e4217b75c5a",
+			"Content-Type":'application/json'
+		}
+		
+	};
 	
 	if(isTest){
 		url = `https://sandbox-api-d.squadco.com/transaction/verify/${ref}`;
@@ -10298,7 +10307,7 @@ async function verifyPayment(ref, seconds, isTest = true ){
 		url = `https://api-d.squadco.com/transaction/verify/${ref}`;
 	}
 	//console.log( request.status );
-	let request 		= await fetch(url);
+	let request 		= await fetch(url, options);
 	request 			= await request.json();
 	let accountData 	= await getAccountData();
 	let savedCards 		= localStorage.getItem("toBeSavedCards");
