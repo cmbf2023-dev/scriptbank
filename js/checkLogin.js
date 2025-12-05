@@ -10299,6 +10299,8 @@ async function verifyPayment(ref, seconds){
 
 	if( ! seconds )
 		seconds = 1;
+
+	await Scriptbill.createAlert( "Your Transaction With this Ref: " + ref + " is being verified in the background please wait. If verified, you'll be notified");
 	
 	if( request && request.data && Object.keys( request.data ).length > 0 ){
 		
@@ -10740,7 +10742,7 @@ async function billCard(amount = 1000, email = "henimastic@gmail.com", currency 
 	let ref 	= await Scriptbill.generateKey(30);
 	ref 		= ref.replaceAll(regex, "");
 	
-	await Scriptbill.createAlert( "Your Transaction Ref Is: " + ref + ". Please save this reference to this transaction to help Scriptbank trace your transaction details.");
+	
 	let url = new URL(location.href);
 	url.searchParams.set("return", "true");
 	url.searchParams.set("payment_ref", ref );
@@ -10753,6 +10755,9 @@ async function billCard(amount = 1000, email = "henimastic@gmail.com", currency 
 		"transaction_ref": ref,
 		"callback_url":url.href
 	}; 
+
+
+	await Scriptbill.createAlert( "Your Transaction Ref Is: " + ref + ". Please save this reference to this transaction to help Scriptbank trace your transaction details.");
 	
 	
 
