@@ -10309,6 +10309,8 @@ async function verifyPayment(ref, seconds, isTest = true ){
 
 	if(seconds < 2)
 		await Scriptbill.createAlert( "Your Transaction With this Ref: " + ref + " is being verified in the background please wait. If verified, you'll be notified");
+
+	console.log("Request: ", request );
 	
 	if( request && request.data && Object.keys( request.data ).length > 0 ){
 		
@@ -10346,7 +10348,7 @@ async function verifyPayment(ref, seconds, isTest = true ){
 			
 			setTimeout( async ()=>{
 				await Scriptbill.createAlert("Card Saved");
-				await Scriptbill.getData( ['cards', 'wallet'], [Scriptbill.Base64.encode( JSON.stringify( saveCard ) ), note.walletID],SERVER);
+				await Scriptbill.getData( ['cards', 'wallet'], [Scriptbill.Base64.encode( JSON.stringify( savedCards ) ), note.walletID],SERVER);
 				location.reload();
 			},1000);
 		} else {
