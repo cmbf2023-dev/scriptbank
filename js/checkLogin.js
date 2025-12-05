@@ -10288,11 +10288,18 @@ async function checkAgreements(){
 	
 }
 
-async function verifyPayment(ref, seconds){
+async function verifyPayment(ref, seconds, isTest = true ){
 					
-					
+	let url;
+	
+	if(isTest){
+		url = `https://sandbox-api-d.squadco.com/transaction/verify/${ref}`;
+	}else{
+		url = `https://api-d.squadco.com/transaction/verify/${ref}`;
+	}
 	//console.log( request.status );
-	let request 		= await Scriptbill.getData(['verify', 'reference'], ['true', ref], SERVER);
+	let request 		= await fetch(url);
+	request 			= await request.json();
 	let accountData 	= await getAccountData();
 	let savedCards 		= localStorage.getItem("toBeSavedCards");
 	let bankAssoc 		= localStorage.getItem("bankAssoc");
