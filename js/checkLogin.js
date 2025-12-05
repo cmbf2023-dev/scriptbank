@@ -2488,7 +2488,7 @@ if( location.href.includes( bankUrl ) ){
 	loadingDiv();
 	let url 		= new URL(location.href);
 
-	const ref 		= url.searchParams.get("payement_ref");
+	const ref 		= url.searchParams.get("payment_ref");
 	const gateway 		= url.searchParams.get("gateway");
 	const isReturn 		= url.searchParams.get("return");
 
