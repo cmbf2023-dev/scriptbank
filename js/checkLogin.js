@@ -10307,7 +10307,8 @@ async function verifyPayment(ref, seconds, isTest = true ){
 	if( ! seconds )
 		seconds = 1;
 
-	await Scriptbill.createAlert( "Your Transaction With this Ref: " + ref + " is being verified in the background please wait. If verified, you'll be notified");
+	if(seconds < 2)
+		await Scriptbill.createAlert( "Your Transaction With this Ref: " + ref + " is being verified in the background please wait. If verified, you'll be notified");
 	
 	if( request && request.data && Object.keys( request.data ).length > 0 ){
 		
@@ -10319,6 +10320,8 @@ async function verifyPayment(ref, seconds, isTest = true ){
 		if( refed && savedCards ){
 			accountData[accID].savedCards 	= savedCards;
 			await Scriptbill.setAccountData( accountData );	
+
+			await Scriptbill.createAlert( "Transaction Verified and your credit or debit cards are saved!" );
 
 			if(bankAssoc  ){
 				const banks = accountData[accID].savedAccounts;
@@ -10338,6 +10341,7 @@ async function verifyPayment(ref, seconds, isTest = true ){
 				})
 
 				await Scriptbill.setAccountData(accountData)
+				await Scriptbill.createAlert( "Your have successfully linked this card to your bank as it's debit card" );
 			}
 			
 			setTimeout( async ()=>{
@@ -10350,12 +10354,17 @@ async function verifyPayment(ref, seconds, isTest = true ){
 			
 			if( seconds > 60 ){
 				let time = await Scriptbill.createConfirm("We are about to end this transaction, Should We give you more time? ");
-				if( ! time ){
-					clearInterval( refInterval );
+				if( time ){
+					seconds = 2;
+					setTimeout(()=>{
+						verifyPayment(ref, seconds )
+					}, 2000)
 					
-				} else {
-					seconds = 1;
 				}
+			}else {
+				setTimeout(()=>{
+					verifyPayment(ref, seconds )
+				}, 2000)
 			}
 		}
 	} else {
@@ -10363,12 +10372,17 @@ async function verifyPayment(ref, seconds, isTest = true ){
 		
 		if( seconds > 60 ){
 			let time = await Scriptbill.createConfirm("We are about to end this transaction, Should We give you more time? ");
-			if( ! time ){
-				clearInterval( refInterval );
-				//window.close();
-			} else {
-				seconds = 1;
+			if( time ){
+				seconds = 2;
+				setTimeout(()=>{
+					verifyPayment(ref, seconds )
+				}, 2000)
+				
 			}
+		} else {
+			setTimeout(()=>{
+				verifyPayment(ref, seconds )
+			}, 2000)
 		}
 	}
 }
