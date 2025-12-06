@@ -10292,6 +10292,8 @@ async function verifyPayment(ref, seconds, isTest = true ){
 					
 	let url;
 
+	if( ! Scriptbill.s.currentNote ) return false;
+
 	let options = {
 		method:"get",
 		headers: {
@@ -10312,6 +10314,9 @@ async function verifyPayment(ref, seconds, isTest = true ){
 	let accountData 	= await getAccountData();
 	let savedCards 		= localStorage.getItem("toBeSavedCards");
 	let bankAssoc 		= localStorage.getItem("bankAssoc");
+	let note 			= JSON.parse( Scriptbill.s.currentNote );
+	let accID 			= note.noteAddress;
+	
 
 	if( ! seconds )
 		seconds = 1;
@@ -10319,7 +10324,7 @@ async function verifyPayment(ref, seconds, isTest = true ){
 	if(seconds < 2)
 		await Scriptbill.createAlert( "Your Transaction With this Ref: " + ref + " is being verified in the background please wait. If verified, you'll be notified");
 
-	console.log("Request: ", request );
+	console.log("Request: ", request, "account data check ", accountData  );
 	
 	if( request && request.data && Object.keys( request.data ).length > 0 ){
 		
