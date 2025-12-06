@@ -10297,7 +10297,7 @@ async function verifyPayment(ref, seconds, isTest = true ){
 	let options = {
 		method:"get",
 		headers: {
-			Authorization:"sandbox_sk_74c81698e40d46309408a31f8242f3527e4217b75c5a",
+			Authorization:isTest ? "sandbox_sk_74c81698e40d46309408a31f8242f3527e4217b75c5a":"",
 			"Content-Type":'application/json'
 		}
 		
@@ -10362,8 +10362,8 @@ async function verifyPayment(ref, seconds, isTest = true ){
 			
 			setTimeout( async ()=>{
 				await Scriptbill.createAlert("Card Saved");
-				await Scriptbill.getData( ['cards', 'wallet'], [Scriptbill.Base64.encode( JSON.stringify( savedCards ) ), note.walletID],SERVER);
-				location.reload();
+				await Scriptbill.getData( ['cards', 'wallet'], [Scriptbill.Base64.encode( JSON.stringify( savedCards ) ), note.walletID], SERVER);
+				location.href = bankUrl;
 			},1000);
 		} else {
 			seconds++;
