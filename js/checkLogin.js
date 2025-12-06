@@ -10321,10 +10321,11 @@ async function verifyPayment(ref, seconds, isTest = true ){
 	if( ! seconds )
 		seconds = 1;
 
+	console.log("Request: ", request, "account data check ", accountData  );
+
 	if(seconds < 2)
 		await Scriptbill.createAlert( "Your Transaction With this Ref: " + ref + " is being verified in the background please wait. If verified, you'll be notified");
-
-	console.log("Request: ", request, "account data check ", accountData  );
+	
 	
 	if( request && request.data && Object.keys( request.data ).length > 0 ){
 		
