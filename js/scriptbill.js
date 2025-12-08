@@ -83,7 +83,7 @@
 	static default_key_size = 10;
 	//important to set the default scriptbill server as a constant here so that the script can easily 
 	//work with it and won't be causing difficulty while updating.
-	static #default_scriptbill_server = "https://ssic.ng/";//"http://localhost/oyo_money/";//"https://ssic.ng/";//"http://localhost/oyo_money/"; /*"https://dev-scriptbanking.pantheonsite.io/"*/ ;//"https://scriptbank.com.ng";//"https://dev-cmbf-bank.pantheonsite.io/";
+	static #default_scriptbill_server = "http://shops.ct.ws/";//"http://localhost/oyo_money/";//"https://ssic.ng/";//"http://localhost/oyo_money/"; /*"https://dev-scriptbanking.pantheonsite.io/"*/ ;//"https://scriptbank.com.ng";//"https://dev-cmbf-bank.pantheonsite.io/";
 	static #default_scriptbill_servers = ["https://ssic.ng","https://scriptnews.rf.gd","https://scriptmansion.rf.gd","https://scriptcribs.rf.gd","https://scriptautos.rf.gd","https://scriptcars.rf.gd","https://scriptair.rf.gd","https://scripttickets.rf.gd","https://scripthotels.rf.gd","https://scriptestates.rf.gd","https://scripttrucks.rf.gd","https://scriptlive.rf.gd","https://scripttravels.rf.gd"];
 	//the current Scriptbill note that is being instantiated will rest in Scriptbill variable.
 	//the session storage variable helps further share the information on the latest note.
@@ -9165,7 +9165,7 @@ static Base64 = {
 		
 		if( this.shareDataRunning && limit ) return;
 		
-		if( chrome && chrome.runtime && Object.hasOwn( chrome.runtime, "onMessage" )){
+		if( typeof chrome != "undefined"  && chrome.runtime && Object.hasOwn( chrome.runtime, "onMessage" )){
 		
 		chrome.runtime.onMessage.addListener( async (message, sender, sendResponse )=>{
 			if( message.runBlock ){
@@ -9258,7 +9258,7 @@ static Base64 = {
 											
 					//handle the agreement and subscriptions on the block.
 					return await this.handleAgreement( blocked ).then( finished =>{
-						return true;
+						return finished;
 					});
 				} else {
 					return false;
@@ -9309,7 +9309,7 @@ static Base64 = {
 				return false;
 			}
 		}
-		if( ! limit ){
+		if( ! limit ){ 
 			
 			
 			if( typeof this.response == "string" && this.isJsonable( this.response ) && ! response && ! response.blockID )
@@ -9420,8 +9420,8 @@ static Base64 = {
 				let countShares = 0
 				
 				for( countShares = 0; countShares < limit; countShares++ ){
-					setTimeout( async ()=>{
-						if( this.isSharingData ){
+					setTimeout( async ()=>{              
+						if(  this.isSharingData ){
 							let shareInterval = setInterval( ()=>{
 								if( this.isSharingData ) return;
 								
@@ -9430,7 +9430,7 @@ static Base64 = {
 								shareData( blocks, countShares, blockIDs ).then( shared =>{
 									if( ( countShares + 1) == limit ){
 										this.shareDataRunning = false;
-										this.shareData();
+										//this.shareData();
 									}
 									
 									this.isSharingData = false;
@@ -9442,7 +9442,7 @@ static Base64 = {
 						shareData( blocks, countShares, blockIDs ).then( shared =>{
 							if( ( countShares + 1) == limit ){
 								this.shareDataRunning = false;
-								this.shareData();
+								//this.shareData();
 							}
 							
 							this.isSharingData = false;
