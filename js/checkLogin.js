@@ -10377,7 +10377,9 @@ async function verifyPayment(ref, seconds,  type = 'squad', isTest = true ){
 				})[0];
 
 				if( bank && bank.accountNumber ){
-					bank.approved = true;					
+					bank.approved = true;
+                    bank.ref       = ref;
+                    bank.isDebit   =  true;					
 				}
 
 				accountData[accID].savedAccounts = JSON.stringify(banks.map((banked)=>{
