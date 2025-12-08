@@ -10288,34 +10288,60 @@ async function checkAgreements(){
 	
 }
 
-async function verifyPayment(ref, seconds, isTest = true ){
+async function verifyPayment(ref, seconds,  type = 'squad', isTest = true ){
 					
 	let url;
+    let options
 
-	if( ! Scriptbill.s.currentNote ) return false;
+	if( ! Scriptbill.s.currentNote ) return;
 
-	let options = {
-		method:"get",
-		headers: {
-			Authorization:isTest ? "sandbox_sk_74c81698e40d46309408a31f8242f3527e4217b75c5a":"",
-			"Content-Type":'application/json'
-		}
-		
-	};
+
+    switch(type){
+        case "squad":
+            options = {
+                method:"get",
+                headers: {
+                    Authorization:isTest ? "sandbox_sk_74c81698e40d46309408a31f8242f3527e4217b75c5a":"",
+                    "Content-Type":'application/json'
+                }
+                
+            };
+            if(isTest){
+                url = `https://sandbox-api-d.squadco.com/transaction/verify/${ref}`;
+            }else{
+                url = `https://api-d.squadco.com/transaction/verify/${ref}`;
+            }
+            break;
+
+        default:
+            options = {
+                method:"get",
+                headers: {
+                    Authorization:isTest ? "sandbox_sk_74c81698e40d46309408a31f8242f3527e4217b75c5a":"",
+                    "Content-Type":'application/json'
+                }
+                
+            };
+            url = "";
+    }
+
 	
-	if(isTest){
-		url = `https://sandbox-api-d.squadco.com/transaction/verify/${ref}`;
-	}else{
-		url = `https://api-d.squadco.com/transaction/verify/${ref}`;
-	}
+	
+	
 	//console.log( request.status );
 	let request 		= await fetch(url, options);
 	request 			= await request.json();
 	let accountData 	= await getAccountData();
-	let savedCards 		= localStorage.getItem("toBeSavedCards");
+	let savedCard 		= localStorage.getItem("toBeSavedCards");
 	let bankAssoc 		= localStorage.getItem("bankAssoc");
 	let note 			= JSON.parse( Scriptbill.s.currentNote );
 	let accID 			= note.noteAddress;
+    const savedCards    = JSON.parse( Scriptbill.isJsonable( accountData[accID].savedCards ) ? accountData[accID].savedCards : "[]");
+    const isReffed      = await Promise.all(savedCards.map((card)=>{
+        return card.ref && card.ref == ref;
+    })).then(refs => refs.find((data)=> !!data))
+
+    if(isReffed) return;
 	
 
 	if( ! seconds )
@@ -10334,14 +10360,18 @@ async function verifyPayment(ref, seconds, isTest = true ){
 		let refed 	  = data.data.transaction_status == "success";
 		
 		
-		if( refed && savedCards ){
-			accountData[accID].savedCards 	= savedCards;
+		if( refed && savedCard ){
+            savedCard           = JSON.parse( savedCard);
+            savedCard.approved  = true;
+            savedCard.ref       = ref;
+            savedCards.push(savedCard);
+			accountData[accID].savedCards 	= JSON.stringify( savedCards );
 			await Scriptbill.setAccountData( accountData );	
 
 			await Scriptbill.createAlert( "Transaction Verified and your credit or debit cards are saved!" );
 
 			if(bankAssoc  ){
-				const banks = accountData[accID].savedAccounts;
+				const banks = JSON.parse( Scriptbill.isJsonable( accountData[accID].savedAccounts ) ? accountData[accID].savedAccounts : "[]");
 				const bank = banks.filter((bank)=>{
 					return bank.accountNumber == bankAssoc;
 				})[0];
@@ -10350,16 +10380,18 @@ async function verifyPayment(ref, seconds, isTest = true ){
 					bank.approved = true;					
 				}
 
-				accountData[accID].savedAccounts = banks.map((banked)=>{
+				accountData[accID].savedAccounts = JSON.stringify(banks.map((banked)=>{
 					if(banked.accountNumber == bank.accountNumber )
 						return bank;
 
 					return banked;
-				})
+				}))
 
 				await Scriptbill.setAccountData(accountData)
 				await Scriptbill.createAlert( "Your have successfully linked this card to your bank as it's debit card" );
+                localStorage.removeItem("bankAssoc")
 			}
+            localStorage.removeItem("toBeSavedCards");
 			
 			setTimeout( async ()=>{
 				await Scriptbill.createAlert("Card Saved");
