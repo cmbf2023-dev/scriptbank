@@ -6629,26 +6629,8 @@
 		//////console.log("recieveResponse running " + this.funcUp[ this.funcUp.length][ this.funcUp[ this.funcUp.length].length]);
 		this.funcUp[ this.funcUp.length] = "recieveResponse";
 		this.#noVerify	= false;
-		//initalizing storage.
-		try {
-			if( ( ! this.#note && this.s.currentNote ) || ( this.s.currentNote &&    ! this.s.currentNote.includes( this.#note.walletID ) && ! this.s.currentNote.includes( this.#note.noteAddress ) && ! this.#isExchangeMarketMining ) || ( ! this.#isExchangeMarketMining && ! this.#note && this.s.currentNote ))
-				this.#note = await this.#getCurrentNote();
-			
-			if( ! this.#note )					
-				return false;
-			
-			let server = this.#note.noteServer;
-			//////console.log("function recieveResponse", "server: " + server  );
-			let obj 	= {};
-			obj.response 	= "true";
-			obj.server 		= server;
-			obj.defaultServer = this.#default_scriptbill_server;
-			obj.note 		= JSON.stringify( this.#note );
-			let data 		= false;
-			
-			if( chrome && chrome.runtime && Object.hasOwn("onMessage")){
-				chrome.runtime.sendMessage(obj);
-				chrome.runtime.onMessage.addListener( async (data, sender, sendResponse) => {
+
+        runShareData =  async (data) => {
 					//////console.log("message response", data);
 					if( ! data || ! data.responseKey ) return false;
 					
@@ -6663,18 +6645,19 @@
 					   data 		= data.split("--");
 														
 					let x, dat;
-					for( x = 0; data.length && x < data.length && typeof data == "object" ; x++ ){
-							
-						if( ! this.isJsonable( data[x] ) ) {
-							dat = this.decrypt( data[x], await this.getPublicKey( id, true ) );
+
+                    if(typeof data == "object" && data.length ){
+                        await  Promise.all(data.map( async (dat)=>{
+                            if( ! this.isJsonable( dat ) ) {
+							dat = this.decrypt( dat, await this.getPublicKey( id, true ) );
 								
-							if( dat && dat != data[x] && this.isJsonable( dat ) ) {
+							if( dat && dat != dat && this.isJsonable( dat ) ) {
 								//parsing the data.
 								dat = JSON.parse( dat );
 															
 								if( dat.responseID && this.#note && dat.responseID == this.#note.blockID ){
 									//already recieved;
-									if( this.s[dat.responseID] ) continue;
+									if( this.s[dat.responseID] ) return;
 										
 									//recieved;
 									this.s[dat.responseID] 	= dat.code;
@@ -6698,7 +6681,7 @@
 								}else if( dat.blockID ){
 										
 									//already stored block no need to process.
-									if( this.l[ dat.blockID ] ) continue;
+									if( this.l[ dat.blockID ] ) return;
 										
 									//new block and can be processed.
 									this.response = JSON.parse( JSON.stringify( dat ) );
@@ -6721,7 +6704,7 @@
 								}
 								else {
 									//already stored;
-									if( dat.responseID && this.s[dat.responseID] ) continue;
+									if( dat.responseID && this.s[dat.responseID] ) return;
 									
 									//storing...
 									this.s[dat.responseID] = dat.code;
@@ -6734,7 +6717,7 @@
 							}
 						}
 						else{
-							dat = JSON.parse( data[x] );
+							dat = JSON.parse( dat );
 																
 							this.response = JSON.parse( JSON.stringify( dat ));
 							this.checkReferers( this.response, this.#note );
@@ -6742,93 +6725,39 @@
 							//this.monitorScriptbillExchanges();
 							this.profitSharing( this.response );
 						}
-					}
-				});
+                        }))
+                    }
+				}
+		//initalizing storage.
+		try {
+			if( ( ! this.#note && this.s.currentNote ) || ( this.s.currentNote &&    ! this.s.currentNote.includes( this.#note.walletID ) && ! this.s.currentNote.includes( this.#note.noteAddress ) && ! this.#isExchangeMarketMining ) || ( ! this.#isExchangeMarketMining && ! this.#note && this.s.currentNote ))
+				this.#note = await this.#getCurrentNote();
+			
+			if( ! this.#note )					
+				return false;
+			
+			let server = this.#note.noteServer;
+			//////console.log("function recieveResponse", "server: " + server  );
+			let obj 	= {};
+			obj.response 	= "true";
+			obj.server 		= server;
+			obj.defaultServer = this.#default_scriptbill_server;
+			obj.note 		= JSON.stringify( this.#note );
+			let data 		= false;
+			
+			if( typeof chrome != "undefined" && chrome.runtime && Object.hasOwn("onMessage")){
+				chrome.runtime.sendMessage(obj);
+				chrome.runtime.onMessage.addListener(runShareData);
 			} else {
 				const myWorker = new Worker("share.js");                             
 				let buf 	= this.str2ab( JSON.stringify( obj ));
-				data        =  myWorker.postMessage( buf );
+				myWorker.postMessage( buf );
+                myWorker.onmessage = function(event){
+                    runShareData(event.data);
+                }
 			}
 
-			if( ! data ) return false;
-			var id 				= await this.generateKey(10);
-			await this.setPrivateKey( this.#note.blockKey, id );
-			////////console.log( data, typeof data );
-
-			if( typeof data == 'string' && data.includes('--'))
-			   data 		= data.split("--");
-												
-			let x, dat;
-			for( x = 0; x < data.length; x++ ){
-					
-				if( ! this.isJsonable( data[x] ) ) {
-					dat = this.decrypt( data[x], await this.getPublicKey( id, true ) );
-						
-					if( dat && dat != data[x] && this.isJsonable( dat ) ) {
-						//parsing the data.
-						dat = JSON.parse( dat );
-													
-						if( dat.responseID && this.#note && dat.responseID == this.#note.blockID ){
-							//already recieved;
-							if( this.s[dat.responseID] ) continue;
-								
-							//recieved;
-							this.s[dat.responseID] 	= dat.code;
-								
-							//alerting the user.
-							if( this.alertDetails )
-								await this.createAlert( dat.code + " Response ID: " + dat.responseID );
-								
-						}else if( dat.blockID ){
-								
-							//already stored block no need to process.
-							if( this.l[ dat.blockID ] ) continue;
-								
-							//new block and can be processed.
-							this.response = JSON.parse( JSON.stringify( dat ) );
-							this.#noVerify		= false;
-							this.checkReferers( this.response, this.#note );
-							await this.storeBlock( this.response, this.#note );					
-						} else if( dat.type && this.#note ){
-							if( Object.keys( dat ).includes( this.#note.walletID ) ){
-								if( this.sendChannel ){
-									let desc 			= new RTCSessionDescription( JSON.parse( dat[this.#note.walletID].answer ) );
-									this.localConnection.setRemoteDescription( desc );
-									if( this.l.DNS ){
-										let dns 		= JSON.parse( this.l.DNS );
-										
-										if( dns[ this.#note.walletID ] ){
-											this.localConnection.setLocalDescription( dns[ this.#note.walletID ] );
-										}
-									}
-								}
-							}
-						}
-						else {
-							//already stored;
-							if( dat.responseID && this.s[dat.responseID] ) continue;
-							
-							//storing...
-							this.s[dat.responseID] = dat.code;
-								
-							//saving as error message.
-							this.errorMessage( dat.code );							
-						}
-									 
-							
-					}
-				}
-				else{
-					dat = JSON.parse( data[x] );
-														
-					this.response = JSON.parse( JSON.stringify( dat ));
-					this.#noVerify	= false;
-					this.checkReferers( this.response, this.#note );
-					this.storeBlock( this.response, this.#note );
-					//this.monitorScriptbillExchanges();
-					this.profitSharing( this.response );
-				}
-			}
+			
 		} catch(e){
 			console.error(e);
 			return false;
