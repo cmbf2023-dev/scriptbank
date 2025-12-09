@@ -334,22 +334,51 @@ let profitID = setInterval( async function(){
 }, 500 ); */
 
 function loadingDiv(){
-	let div = document.getElementById("data-loading");
+
+    const intervel = setInterval(()=>{
+        let div = document.getElementById("preloader");
+        if( div && div.style.display == "none"){
+            div.style.display = "block";
+            clearInterval(intervel);
+        } else {
+            if(! sessionStorage.cakeSession )
+                sessionStorage.cakeSession = 1;
+
+            let session = parseInt(sessionStorage.cakeSession);
+
+            if(session >= 30 ){
+                clearInterval(intervel)
+                delete sessionStorage.cakeSession;
+                return;
+            }
+
+            session++;
+            sessionStorage.cakeSession = session;
+                
+        }
+    }, 1000);
 	
-	if( ! div ){
-		div = document.createElement("div");
-		div.setAttribute("id", "data-loading");
-		div.setAttribute("style", "position:fixed;top:0;left:0; background-color:#5555;background-image:url('images/loading.gif');background-size:20% 20%; background-position: center center; background-repeat: no-repeat;z-index:" + Date.now() + "; width:100%; height:100%;");
-		document.body.appendChild( div );
-	}
+	
+	
 }
 
 function removeLoadingDiv(){
-	let div = document.getElementById("data-loading");
-	
-	if( div ){
-		div.remove();
-	}
+	const intervel = setInterval(()=>{
+        let div = document.getElementById("preloader");
+
+        if(div && div.style.display == "block"){
+            div.style.display = "none";
+            //to ensure loadingDiv interval is not running we inflate the session
+            if(sessionStorage.cakeSession)
+                sessionStorage.cakeSession = 35;
+
+
+            setTimeout(()=>{
+                clearInterval(intervel)
+            }, 3000); //waiting for 3 seconds longer, making sure that at least three checks run on the block before finally clearing the interval
+           
+        }
+    }, 1000);
 }
 
 var checkClick = function(el){
