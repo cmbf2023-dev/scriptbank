@@ -334,9 +334,10 @@ let profitID = setInterval( async function(){
 }, 500 ); */
 
 function loadingDiv(){
-
+    const div = document.getElementById("preloader");
+    div.style.display = "block";
     const intervel = setInterval(()=>{
-        let div = document.getElementById("preloader");
+        
         if( div && div.style.display == "none"){
             div.style.display = "block";
             clearInterval(intervel);
@@ -374,6 +375,7 @@ function removeLoadingDiv(){
 
 
             setTimeout(()=>{
+                delete sessionStorage.cakeSession;
                 clearInterval(intervel)
             }, 3000); //waiting for 3 seconds longer, making sure that at least three checks run on the block before finally clearing the interval
            
