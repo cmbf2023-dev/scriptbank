@@ -532,7 +532,7 @@ async function addEarnings( value ){
 async function getData( key, data, url = "", type = "GET" ){
 	
 	//////////console.log("url setting: " + url);
-	let url 	= new URL( url );
+	url 	= new URL( url );
 		
 	if( type == "GET" ){
 			
