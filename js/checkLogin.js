@@ -1537,7 +1537,10 @@ setAccountRank();                                                               
             let ref     = url.searchParams.get("ref");
             let type    = url.searchParams.get("type") || "squad";
 			let note 	= JSON.parse( Scriptbill.s.currentNote );
-            verifyPayment(ref, 1);
+
+            if(ref)
+                verifyPayment(ref, 1);
+            
 			let accountData = await Scriptbill.getAccountData();
 			
 			if( note.withdrawalStance && typeof note.withdrawalStance == "object" ){
