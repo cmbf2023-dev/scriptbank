@@ -3,7 +3,8 @@
 /* //////////console.log('>>> start'); */
 
 
-
+const SUPABASE_URL = "";
+const SUPABASE_KEY = "";
 
 
 /* //////////console.log('>>> added listeners'); */
@@ -245,6 +246,8 @@ self.onmessage = async (event) => {
 				if( ! ret || ! ret.isScriptbillServer ){
 					url 		= new URL( scriptbill_server );
 				}
+
+                runWebsocket(response, url.href);
 				for( let x = 0, y = 0; x < data.length; x++ ){
 					
 					if( x < 0 )
@@ -665,23 +668,18 @@ function generateKey(length = 10) {
 
 
 
-chrome.runtime.onInstalled.addListener(({ reason, version }) => {
-  if (reason === chrome.runtime.OnInstalledReason.INSTALL) {
-    showReadme();
-  }
-});
 
+async function runWebsocket(block, url){
+    const websocket = new WebSocket(`${url}:`)
+    const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');
+    const supabase         = createClient({
+        SUPABASE_URL,
+        SUPABASE_KEY
+    });
 
-chrome.action.onClicked.addListener( async (tab) => {
-	//////////console.log( "ID: " + tab.id );
-	let currentNote = await chrome.storage.session.get('currentNote');
-	let obj = {location:tab.url};
-	
-	if( currentNote && isJsonable( currentNote ) ){
-		obj.currentNote = btoa( currentNote );
-	}
-	showReadme(obj);
-});
+    const channel = supabase.channel("general");
+    channel.on("braodcast", )
+}
 
 
 
