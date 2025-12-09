@@ -3124,6 +3124,7 @@ if( location.href.includes( depositConfirm ) ){
 	let totalAmnt  	= document.getElementById("totalAmount");	
 	let confirmBtn 	= document.getElementById("confirmBtn");
 	let agreeInfo 	= document.getElementById("agreeInfo");
+    loadingDiv();
 	setTimeout(async ()=>{
 		let accountData = await getAccountData();
 		let accID 		= note.noteAddress;
@@ -3484,6 +3485,7 @@ if( location.href.includes( depositConfirm ) ){
 			}
 			//
 		}
+        removeLoadingDiv()
 	}, 1000);
 	
 }
