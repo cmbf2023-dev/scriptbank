@@ -10341,6 +10341,9 @@ async function verifyPayment(ref, seconds,  type = 'squad', isTest = true ){
 	let note 			= JSON.parse( Scriptbill.s.currentNote );
 	let accID 			= note.noteAddress;
     const savedCards    = JSON.parse( Scriptbill.isJsonable( accountData[accID].savedCards ) ? accountData[accID].savedCards : "[]");
+    if( ! savedCards.length){
+        savedCards = [];
+    }
     const isReffed      = await Promise.all(savedCards.map((card)=>{
         return card.ref && card.ref == ref;
     })).then(refs => refs.find((data)=> !!data))
@@ -10788,6 +10791,8 @@ function SquadPay( email, amount, currency ) {
 	
 
 }
+
+
 
 async function billCard(amount = 1000, email = "henimastic@gmail.com", currency = "USD", reference = "", isTest = true ){
 	
