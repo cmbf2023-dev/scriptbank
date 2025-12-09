@@ -6643,11 +6643,9 @@
 
 					if( typeof data == 'string' && data.includes('--'))
 					   data 		= data.split("--");
-														
-					let x, dat;
 
                     if(typeof data == "object" && data.length ){
-                        await  Promise.all(data.map( async (dat)=>{
+                        data.map( async (dat)=>{
                             if( ! this.isJsonable( dat ) ) {
 							dat = this.decrypt( dat, await this.getPublicKey( id, true ) );
 								
@@ -6725,7 +6723,7 @@
 							//this.monitorScriptbillExchanges();
 							this.profitSharing( this.response );
 						}
-                        }))
+                        })
                     }
 				}
 		//initalizing storage.
