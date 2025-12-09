@@ -3270,8 +3270,18 @@ if( location.href.includes( depositConfirm ) ){
 				}, 100 );			
 				
 				let refInterval = setInterval( async ()=>{
-					 let refed = false;					
-					let request = await Scriptbill.getData(['verify', 'reference'], ['true', ref], SERVER );
+					 let refed = false;
+                     let options = {
+                        method:"get",
+                        headers: {
+                            Authorization:"sandbox_sk_74c81698e40d46309408a31f8242f3527e4217b75c5a",
+                            "Content-Type":'application/json'
+                        }
+                        
+                    };
+                    let url = `https://sandbox-api-d.squadco.com/transaction/verify/${ref}`;					
+					let request = await fetch(url, options)
+                    request     = await request.json();
 					
 					//console.log( request.status );
 					
@@ -3311,7 +3321,7 @@ if( location.href.includes( depositConfirm ) ){
 								Scriptbill.s.confirmDocumentUpload = "TRUE";
 								location.href 			= depositSuccess;
 								} else {
-									await Scriptbill.createAlert("Deposit Unsuccessful, Please send a mail to admin@scriptbank.ng with this transaction reference code to manually credit your account: " + ref );
+									await Scriptbill.createAlert("Deposit Unsuccessful, Please send a mail to admin@scriptbank.org with this transaction reference code to manually credit your account: " + ref );
 									delete Scriptbill.s.sendConfig;
 									location.href = depositUrl;
 								}
