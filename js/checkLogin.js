@@ -357,7 +357,7 @@ function loadingDiv(){
             sessionStorage.cakeSession = session;
                 
         }
-    }, 1000);
+    }, 500);
 	
 	
 	
@@ -380,7 +380,7 @@ function removeLoadingDiv(){
             }, 3000); //waiting for 3 seconds longer, making sure that at least three checks run on the block before finally clearing the interval
            
         }
-    }, 1000);
+    }, 500);
 }
 
 var checkClick = function(el){
