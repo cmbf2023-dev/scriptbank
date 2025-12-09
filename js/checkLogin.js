@@ -1540,7 +1540,7 @@ setAccountRank();                                                               
 
             if(ref)
                 verifyPayment(ref, 1);
-            
+
 			let accountData = await Scriptbill.getAccountData();
 			
 			if( note.withdrawalStance && typeof note.withdrawalStance == "object" ){
@@ -10704,7 +10704,7 @@ async function saveNotesCard(){
 			email 			= accountData[accID].emails[0];
 		}
 		
-		let payment 		= await billCard(amount, email, currency);
+		let payment 		= await billCard(amount, email, currency, false );
 		console.log("the payment data recieved: ", payment )
 		if( payment && typeof payment == "object" && payment.data && payment.data.checkout_url ){
 			let url 			= new URL( payment.data.checkout_url );
@@ -10840,7 +10840,7 @@ function SquadPay( email, amount, currency ) {
 
 
 
-async function billCard(amount = 1000, email = "henimastic@gmail.com", currency = "USD", reference = "", isTest = true ){
+async function billCard(amount = 1000, email = "henimastic@gmail.com", currency = "USD", isIframe = true, reference = "", isTest = true ){
 	
 		if( ! Scriptbill.s.currentNote || ! Scriptbill.isJsonable( Scriptbill.s.currentNote ) ) return false;
 	
@@ -10880,7 +10880,7 @@ async function billCard(amount = 1000, email = "henimastic@gmail.com", currency 
 		"currency":currency,
 		"initiate_type": "inline",
 		"transaction_ref": ref,
-		"callback_url":url.href
+		"callback_url": isIframe ? url.href : "https://indiaesevakendra.in/wp-content/uploads/2020/08/Paymentsuccessful21-768x427.png"
 	}; 
 
 
