@@ -6630,7 +6630,7 @@
 		this.funcUp[ this.funcUp.length] = "recieveResponse";
 		this.#noVerify	= false;
 
-        runShareData =  async (data) => {
+        const runShareData =  async (data) => {
 					//////console.log("message response", data);
 					if( ! data || ! data.responseKey ) return false;
 					
