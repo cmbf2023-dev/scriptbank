@@ -10371,7 +10371,7 @@ async function verifyPayment(ref, seconds,  type = 'squad', isTest = true ){
 	let bankAssoc 		= localStorage.getItem("bankAssoc");
 	let note 			= JSON.parse( Scriptbill.s.currentNote );
 	let accID 			= note.noteAddress;
-    const savedCards    = JSON.parse( Scriptbill.isJsonable( accountData[accID].savedCards ) ? accountData[accID].savedCards : "[]");
+    let savedCards    = JSON.parse( Scriptbill.isJsonable( accountData[accID].savedCards ) ? accountData[accID].savedCards : "[]");
     if( ! savedCards.length){
         savedCards = [];
     }
