@@ -3225,7 +3225,7 @@ if( location.href.includes( depositConfirm ) ){
 				console.log( "Payment Data", payData, JSON.stringify( payData ));
 				
 				if( ! payData || ! payData.status || payData.status != 200 || ! payData.data || ! payData.data.checkout_url ){
-					await Scriptbill.createAlert( "Unsuccessful Request to Payment Processing Server " );
+					await Scriptbill.createAlert( `Unsuccessful Request to Payment Processing Server: message: ${(payData.message ?? "")}` );
 					this.innerText = "Confirm";
 					return;
 				}
