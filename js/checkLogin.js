@@ -3220,9 +3220,9 @@ if( location.href.includes( depositConfirm ) ){
 					return;
 				}
 				
-				let payData 		= await billCard( sendConfig.value * 100, email, sendConfig.currency );
+				let payData 		= await billCard( parseFloat( sendConfig.value ) * 100, email, sendConfig.currency );
 				
-				//console.log( "Payment Data", payData, JSON.stringify( payData ));
+				console.log( "Payment Data", payData, JSON.stringify( payData ));
 				
 				if( ! payData || ! payData.status || payData.status != 200 || ! payData.data || ! payData.data.checkout_url ){
 					await Scriptbill.createAlert( "Unsuccessful Request to Payment Processing Server " );
