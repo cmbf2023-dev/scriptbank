@@ -4972,7 +4972,7 @@
 	}//Mjd1SHhLVWJXbW5tMml2ckdwNm1JdU9XajlRbzFa
 	
 	static async #getCurrentNote(){		
-		console.log("getCurrentNote running " + this.funcUp[ this.funcUp.length][ this.funcUp[ this.funcUp.length].length]);
+		//console.log("getCurrentNote running " + this.funcUp[ this.funcUp.length][ this.funcUp[ this.funcUp.length].length]);
 		this.funcUp[ this.funcUp.length] = "getCurrentNote";
 		let funcUp = this.funcUp[ this.funcUp.length];
 		this.funcUp[ this.funcUp.length] = "getCurrentNote";
