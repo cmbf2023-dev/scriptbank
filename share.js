@@ -4,8 +4,8 @@ const SUPABASE_URL = ""
 const SUPABASE_KEY = ""
 
 // Declare chrome and browser variables
-const chrome = window.chrome
-const browser = window.browser || chrome
+//const chrome = window.chrome
+//const browser = window.browser || chrome
 
 /* console.log('>>> added listeners'); */
 
