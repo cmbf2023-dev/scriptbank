@@ -10365,8 +10365,7 @@ async function verifyPayment(ref, seconds,  type = 'squad', isTest = true ){
 			}
 			else if(  ! Scriptbill.s.isDepositRunning ){
 				Scriptbill.s.isDepositRunning = true;
-				clearInterval( refInterval );
-				//await Scriptbill.createAlert("Deposit Received Successfully...Deposit Transaction Starting!!!");
+				await Scriptbill.createAlert("Deposit Received Successfully...Deposit Transaction Starting!!!");
 				Scriptbill.isExchangeDeposit 		= true;
 				Scriptbill.exchangeKey 				= EXCHANGEKEY;
 				let nonce 							= await Scriptbill.getData('getTransNonce', 'TRUE', SERVER );
