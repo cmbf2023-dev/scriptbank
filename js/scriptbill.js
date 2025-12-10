@@ -24534,11 +24534,11 @@ static Base64 = {
 					return false;
 				}
 				this.result = false;
-				if(!this.url.includes(location.origin)){
-					this.url = new URL( `https://corsproxy.io/?url=${this.url}` );
+				if(!this.url.href.includes(location.origin)){
+					this.url = new URL( `https://corsproxy.io/?url=${this.url.href}` );
 				}
 				try {
-					return await fetch( this.url ).then( response =>{
+					return await fetch( this.url.href ).then( response =>{
 						return response.text();
 					}).then( async result=>{
 						if( this.isJsonable( result ) ){
@@ -24571,8 +24571,8 @@ static Base64 = {
 					this.errorMessage("data can't be gotten, Key and Data Gotten was not Properly Configured. Please Set the data and key as an array with the same length or as a String!!!");
 					return false;
 				}
-				if(!this.url.includes(location.origin)){
-					this.url = new URL( `https://corsproxy.io/?url=${this.url}` );
+				if(!this.url.href.includes(location.origin)){
+					this.url = new URL( `https://corsproxy.io/?url=${this.url.href}` );
 				}
 				
 				return await fetch( this.url.href, {
