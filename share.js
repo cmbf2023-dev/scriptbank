@@ -615,15 +615,15 @@ function chunk_data( data, limit = 50 ){
 	let remaining = data;
 	let chunked   = [];
 		
-	for( let x = 0; x < remaining.length; x++ ){
+	for( let x = 0; remaining && x < remaining.length; x++ ){
 		chunked.push( remaining.slice(0, limit ) );
 		remaining = remaining.slice(limit, remaining.length );
 	}
 		
-	if( remaining.length > limit ){
+	if( remaining && remaining.length > limit ){
 		let rechunked = chunk_data( remaining, limit );
 		chunked = chunked.concat( rechunked );
-	} else if( remaining.length ){
+	} else if( remaining && remaining.length ){
 		chunked.push( remaining );
 	}
 			
