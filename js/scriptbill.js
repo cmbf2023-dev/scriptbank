@@ -6135,13 +6135,18 @@
 		//alert("checks 2");
 		
 		let testType 		= noteType.slice( 0, noteType.lastIndexOf("CRD") );
-		let url    			= new URL( this.#note ? this.#note.noteServer : this.#default_scriptbill_server );
+		let url 			=  this.#note ? this.#note.noteServer : this.#default_scriptbill_server;
+		url 				= url.includes(location.origin) ? url : `https://corsproxy.io/?${url}`;
+		url    				= new URL( url );
 		url.searchParams.set("scriptbillPing", "true");
 		
 		let ping 			= await fetch( url.href ).then( resp =>{ return resp.json();}).catch( error =>{ console.error( error ); return false;});
 		
-		if( ! ping || ! ping.isScriptbillServer )
-			url 			= new URL( this.#default_scriptbill_server );
+		if( ! ping || ! ping.isScriptbillServer ){
+			
+			url 			= new URL( this.#default_scriptbill_server.includes(location.origin) ? this.#default_scriptbill_server :  `https://corsproxy.io/?${this.#default_scriptbill_server}`);
+		}
+			
 		
 		url.searchParams.set("exchangeNote", noteType);
 		url.searchParams.set("noteTypeBase", "TRUE");
