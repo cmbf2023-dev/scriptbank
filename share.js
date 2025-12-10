@@ -1,20 +1,20 @@
 
 
-/* //////////console.log('>>> start'); */
+/* console.log('>>> start'); */
 
 
 const SUPABASE_URL = "";
 const SUPABASE_KEY = "";
 
 
-/* //////////console.log('>>> added listeners'); */
+/* console.log('>>> added listeners'); */
 
 self.onmessage = async (event) => {
     
     let message = event.data;
 	
   // 2. A page requested user data, respond with a copy of `user`
-  //////////console.log( message, sender, typeof message );
+  console.log( message, sender, typeof message );
  
   if( typeof message == "string" ){	  
 	   
@@ -40,7 +40,7 @@ self.onmessage = async (event) => {
 				self.postMessage( {currentNote: {} } );
 		} 
   }	else if( typeof message == 'object' ){
-	  //////////console.log( "message object: " + JSON.stringify( message ) );
+	  console.log( "message object: " + JSON.stringify( message ) );
 	  if( message.setCheckout ){
 		  //localStorage.checkout = JSON.stringify( message.setCheckout );
 		  chrome.storage.session.set({"checkout": message.setCheckout});
@@ -78,7 +78,7 @@ self.onmessage = async (event) => {
 				
 		let adsTabs = await chrome.storage.session.get("adverts_tabs");
 		adsTabs		= adsTabs.adverts_tabs;
-		////////console.log( adsTabs );
+		console.log( adsTabs );
 		if( adsTabs ){
 			adsTabs		= JSON.parse( adsTabs );
 			adsTabs.forEach( async (ads, index)=>{
@@ -111,7 +111,7 @@ self.onmessage = async (event) => {
 			});
 		}
 		setTimeout( async function(){
-			//////////console.log( "Something" );		
+			console.log( "Something" );		
 			//first check if the code is running on a mobile platform.
 			let userA 		= navigator.userAgentData;
 			let isOnline 	= navigator.onLine;
@@ -125,7 +125,7 @@ self.onmessage = async (event) => {
 							adsTabs.forEach( async (ads, index)=>{
 								tabs.map( async (tab)=>{
 									if( tab.id == ads.id ){
-										////////console.log("True, found, " + ads.id );
+										console.log("True, found, " + ads.id );
 										result = time - ads.time;
 										
 										if( result > target && ! tab.active ){
@@ -138,15 +138,15 @@ self.onmessage = async (event) => {
 											}
 										}
 									} else {
-										////////console.log( "Not found " + ads.id );
+										console.log( "Not found " + ads.id );
 									}
 								});
 							});							
 						} else {
-							////////console.log("Lesser");
+							console.log("Lesser");
 						}
 					} catch(e){
-						////////console.log(e);
+						console.log(e);
 					}
 				} else {
 					adsTabs		= [];
@@ -188,7 +188,7 @@ self.onmessage = async (event) => {
 		let scriptbill_server = message.defaultServer;
 		let note 		= message.note;
 		
-		////////console.log("SERVER: ", scriptbill_server);
+		console.log("SERVER: ", scriptbill_server);
 		
 		if( typeof note == "string" && isJsonable( note ) )
 			note 		= JSON.parse( note );
@@ -227,7 +227,7 @@ self.onmessage = async (event) => {
 						x = 0;
 					
 					ret = await getData( ["streamKey", "blockData", "num", "serverKey"], [streamKey, data[x], x, serverKey ], url.href );
-					//console.log("note server self sending: " +  x + " times " + response.blockID, JSON.stringify( ret ) );
+					console.log("note server self sending: " +  x + " times " + response.blockID, JSON.stringify( ret ) );
 					
 					if( ! ret  ){
 						x -= 1;
@@ -238,7 +238,7 @@ self.onmessage = async (event) => {
 					
 					else if( ret.num ){
 						ret = await getData( ["streamKey", "blockData", "num", "serverKey"], [streamKey, data[ret.num], ret.num, serverKey ], url.href );
-						//console.log("note server self sending: " +  ret.num + " times " + response.blockID, JSON.stringify( ret ) );
+						console.log("note server self sending: " +  ret.num + " times " + response.blockID, JSON.stringify( ret ) );
 						x 	= ret.num;
 						y 	= 0;
 					} else {
@@ -247,7 +247,7 @@ self.onmessage = async (event) => {
 				}
 				
 				ret = await getData( ["streamKey", "blockData", "serverKey", "currentBlock"], [streamKey, "STOP", serverKey, note.blockID], url.href );
-				//console.log("note server self stopping: " + response.blockID, JSON.stringify( ret ));
+				console.log("note server self stopping: " + response.blockID, JSON.stringify( ret ));
 				
 				if( ! ret.isGet ){
 					self.postMessage({runBlock: ret.nextBlock});
@@ -265,7 +265,7 @@ self.onmessage = async (event) => {
 			let limit 		= 12, i = 0;
 			
 			servers.forEach( async server =>{
-				//////////console.log( "Check Data Server: ", server );
+				console.log( "Check Data Server: ", server );
 				let data = chunk_data( JSON.stringify( response ) );
 				setTimeout( async ()=>{
 					try {
@@ -277,7 +277,7 @@ self.onmessage = async (event) => {
 									
 						if( check && check.blockID ) return;
 						
-						//////////console.log( "server url: " + url.href );
+						console.log( "server url: " + url.href );
 						let serverKey 			= url.pathname.replaceAll('/', '');
 						let streamKey 			= generateKey(15);
 						
@@ -294,7 +294,7 @@ self.onmessage = async (event) => {
 								setTimeout( async ()=>{								
 								
 									ret = await getData( ["streamKey", "blockData", 'num', 'serverKey'], [streamKey, data[x], x, serverKey], url.href );
-									//////////console.log("note server sending: " +  x + " times " + response.blockID, JSON.stringify( ret ) );
+									console.log("note server sending: " +  x + " times " + response.blockID, JSON.stringify( ret ) );
 										
 									if( ! ret  ){
 									 return;
@@ -302,7 +302,7 @@ self.onmessage = async (event) => {
 									
 									else if( ret.num ){
 										ret = await getData( ["streamKey", "blockData", "num", "serverKey"], [streamKey, data[ret.num], ret.num, serverKey ], url.href );
-										//////////console.log("note server self sending: " +  ret.num + " times " + response.blockID, JSON.stringify( ret ) );
+										console.log("note server self sending: " +  ret.num + " times " + response.blockID, JSON.stringify( ret ) );
 										
 									} 
 								}, x * 10000, x, data, streamKey, response, url );
@@ -310,7 +310,7 @@ self.onmessage = async (event) => {
 							
 							setTimeout( async ()=>{
 								ret = await getData( ["streamKey", "blockData", 'serverKey'], [streamKey, "STOP", serverKey], url.href );
-								//////////console.log("note server stopping: " + response.blockID, JSON.stringify( ret ));
+								console.log("note server stopping: " + response.blockID, JSON.stringify( ret ));
 								if( ret.agreeSign ){
 									self.postMessage({createAgreementReq: true, blockID: ret.block.blockID, password: ret.password });
 								}
@@ -333,21 +333,21 @@ self.onmessage = async (event) => {
 							
 							let x;
 							let getData = await getData( ['blockData', 'streamKey'], [data, streamKey], url.href );
-							//////////console.log( "data gotten: " + JSON.stringify( getData ) );
+							console.log( "data gotten: " + JSON.stringify( getData ) );
 							if( getData && typeof getData == 'object' && getData.recieved == 'true' ){
 								data 	 = agreementData;
 								getData  = await getData(['blockData','agreeData', 'streamKey'], ['TRUE', data, streamKey], url.href );
-								//////////console.log( "data gotten: " + JSON.stringify( getData ), "key: " + streamKey );
+								console.log( "data gotten: " + JSON.stringify( getData ), "key: " + streamKey );
 								if( getData && typeof getData == 'object' && getData.recieved == 'true' ){
 									let agrees 	= JSON.parse( noteAgreements ), agreeID;
 									for ( agreeID in agrees ){
 										data 	 	= JSON.stringify( agrees[agreeID] );
 										getData  	= await getData( ['blockData', 'agreeData', 'streamKey', 'noteAgree'], ['TRUE', data, streamKey, 'TRUE'], url.href );
-										//////////console.log( "data gotten: " + JSON.stringify( getData ), "key: " + streamKey );
+										console.log( "data gotten: " + JSON.stringify( getData ), "key: " + streamKey );
 									}
 									data 	 = exchangeNoteData;
 									getData  = await getData(['blockData','exchangeData', 'streamKey'], ['TRUE', data, streamKey], url.href );
-									//////////console.log( "data gotten: " + JSON.stringify( getData ), "key: " + streamKey );
+									console.log( "data gotten: " + JSON.stringify( getData ), "key: " + streamKey );
 									if( getData && typeof getData == 'object' && getData.recieved == 'true' ){
 										
 										if( recipientData ) {
@@ -357,13 +357,13 @@ self.onmessage = async (event) => {
 											data 	= "EMPTY RECIPIENT";
 											getData  = await getData( ['blockData','repData', 'streamKey'], ['STOP',data, streamKey], url.href );
 										}
-										//////////console.log( "data gotten: " + JSON.stringify( getData ), "key: " + streamKey );
+										console.log( "data gotten: " + JSON.stringify( getData ), "key: " + streamKey );
 									}
 								}
 							}
 						}
 					} catch( e ){
-						//////////console.log( "no data gotten " + e );
+						console.log( "no data gotten " + e );
 						return false;
 					}
 				}, 10000 * i * data.length, server, limit, data );
@@ -504,7 +504,7 @@ async function addEarnings( value ){
 
 async function getData( key, data, url = "", type = "GET" ){
 	
-	//////////console.log("url setting: " + url);
+	console.log("url setting: " + url);
 	url 	= new URL( url );
 		
 	if( type == "GET" ){
@@ -593,7 +593,7 @@ async function getData( key, data, url = "", type = "GET" ){
 			return data;
 		}).catch( error =>{
 			console.error( error );
-			////////console.log( "url fetched: ", url.href );
+			console.log( "url fetched: ", url.href );
 			//this.errorMessage( error.toString() );
 			return false;
 		});
