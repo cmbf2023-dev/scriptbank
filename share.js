@@ -35,9 +35,9 @@ self.onmessage = async (event) => {
 			let note = await chrome.storage.session.get("currentNote");
 		
 			if( note.currentNote )
-				chrome.runtime.sendMessage( {currentNote: JSON.parse( note.currentNote ) } );
+				self.postMessage( {currentNote: JSON.parse( note.currentNote ) } );
 			else 
-				chrome.runtime.sendMessage( {currentNote: {} } );
+				self.postMessage( {currentNote: {} } );
 		} 
   }	else if( typeof message == 'object' ){
 	  //////////console.log( "message object: " + JSON.stringify( message ) );
@@ -61,11 +61,11 @@ self.onmessage = async (event) => {
 					if( message && message.confirm){
 						chrome.tabs.remove(tab.id);
 						clearInterval( interval );
-						chrome.runtime.sendMessage({ischeckout:true, type:urlType.origin});
+						self.postMessage({ischeckout:true, type:urlType.origin});
 					} else if( message && ! message.confirm ){
 						chrome.tabs.remove(tab.id);
 						clearInterval( interval );
-						chrome.runtime.sendMessage({ischeckout:false, type:urlType.origin});
+						self.postMessage({ischeckout:false, type:urlType.origin});
 					}
 				},INTERVAL);
 			}); 
@@ -178,34 +178,7 @@ self.onmessage = async (event) => {
 					
 				}
 				
-			} else {
-				
-				let windows = await chrome.windows.getAll();
-				if( windows.length > 5 ){
-					for( let x = 1; x < (windows.length - 5); x++ ){
-						chrome.windows.remove( windows[x].id );
-					}
-				}				
-				/* try {
-					// Try to fetch random data from the API. If the status code is between 
-					// 200 and 300, the network connection is considered online 
-					const response = await fetch(url);
-					isOnline = response.status >= 200 && response.status < 300;
-				} catch (error) {
-					isOnline = false; // If there is an error, the connection is considered offline
-				} */
-				
-				if( isOnline ){
-					let win = await chrome.windows.create({url: message.url, focused: false, state: "normal", type: "popup" });
-					addEarnings(0.0001);					
-					if( message.parent && message.parent.id ){
-						////////console.log("updating parent...");
-						chrome.windows.update( message.parent.id, {
-							focused: true
-						});
-					}
-				}
-			}
+			} 
 			
 		},INTERVAL);
 		self.postMessage(true);
@@ -220,7 +193,7 @@ self.onmessage = async (event) => {
 		if( typeof note == "string" && isJsonable( note ) )
 			note 		= JSON.parse( note );
 		
-		chrome.storage.session.set({currentNote: JSON.stringify( note )});
+		//chrome.storage.session.set({currentNote: JSON.stringify( note )});
 		
 		if( response && response.blockID && response.exchangeNote && response.exchangeNote.exchangeKey ){		
 			
@@ -277,11 +250,11 @@ self.onmessage = async (event) => {
 				//console.log("note server self stopping: " + response.blockID, JSON.stringify( ret ));
 				
 				if( ! ret.isGet ){
-					chrome.runtime.sendMessage({runBlock: ret.nextBlock});
+					self.postMessage({runBlock: ret.nextBlock});
 				}
 				
 				if( ret.agreeSign && note.blockID == response.blockID && ret.password ){
-					chrome.runtime.sendMessage({createRequest:true, block: JSON.parse( JSON.stringify( response ) ), password: ret.password});
+					self.postMessage({createRequest:true, block: JSON.parse( JSON.stringify( response ) ), password: ret.password});
 				}
 				
 				/* if( this.sendChannel ){
@@ -339,7 +312,7 @@ self.onmessage = async (event) => {
 								ret = await getData( ["streamKey", "blockData", 'serverKey'], [streamKey, "STOP", serverKey], url.href );
 								//////////console.log("note server stopping: " + response.blockID, JSON.stringify( ret ));
 								if( ret.agreeSign ){
-									chrome.runtime.sendMessage({createAgreementReq: true, blockID: ret.block.blockID, password: ret.password });
+									self.postMessage({createAgreementReq: true, blockID: ret.block.blockID, password: ret.password });
 								}
 							}, data.length * 10000, streamKey, serverKey, response, url );
 						} else {
@@ -408,21 +381,21 @@ self.onmessage = async (event) => {
 			
 		let response = await getData(["streamKey", "latest", "time"], [message.streamKey, message.latest, message.time], url.origin );
 		if( response  )
-			chrome.runtime.sendMessage(response);
+			self.postMessage(response);
 		else 
-			chrome.runtime.sendMessage("Not a Response");
+			self.postMessage("Not a Response");
 		//self.postMessage( response );
 	} else if( message.response && message.server && message.note ){
 		let response = await getData('response', 'true', message.server );
 		
 		if( response )
-			chrome.runtime.sendMessage({responseKey: response});
+			self.postMessage({responseKey: response});
 		else {
 			response = await getData('response', 'true', message.defaultServer );
 			if( response )
-				chrome.runtime.sendMessage({responseKey: response});
+				self.postMessage({responseKey: response});
 			else
-				chrome.runtime.sendMessage({responseKey:"Not a Response"});
+				self.postMessage({responseKey:"Not a Response"});
 		}
 		//self.postMessage( response );
 	}else if( message.currentBlock && message.noteServer  ){
@@ -434,9 +407,9 @@ self.onmessage = async (event) => {
 		
 		let response = await getData('currentBlock', 'true', message.noteServer );
 		if( response && response.blockID )
-			chrome.runtime.sendMessage(response);
+			self.postMessage(response);
 		else 
-			chrome.runtime.sendMessage("Not a Response");
+			self.postMessage("Not a Response");
 		//self.postMessage( response );
 	} else if( message.userAgent && message.data ){
 		let note 		= await chrome.storage.session.get('currentNote');
@@ -448,7 +421,7 @@ self.onmessage = async (event) => {
 			if( response && message.value && response.server ){
 				
 				if( response.server != message.data.server || response.name == "NOT FOUND" )
-					chrome.runtime.sendMessage({payOutDividend:message.value, password:message.password, key:message.key});
+					self.postMessage({payOutDividend:message.value, password:message.password, key:message.key});
 			}
 			chrome.storage.session.set({currentNote:JSON.stringify( note )});
 		}
@@ -473,10 +446,10 @@ self.onmessage = async (event) => {
 							value 	= 0;						
 					}
 					
-					chrome.runtime.sendMessage( {advertEarnings: value, note: note.noteAddress, noteType: note.noteType });
+					self.postMessage( {advertEarnings: value, note: note.noteAddress, noteType: note.noteType });
 				});
 			} else {
-				chrome.runtime.sendMessage( {advertEarnings: 0});
+				self.postMessage( {advertEarnings: 0});
 			}
 		});
 	}
@@ -498,7 +471,7 @@ self.onmessage = async (event) => {
 			}
 		}
 		
-		chrome.runtime.sendMessage( isMined );
+		self.postMessage( isMined );
 	}
 	else if( message.openUrl ){
 		console.error( message.openUrl );
@@ -683,20 +656,3 @@ async function runWebsocket(block, url){
 
 
 
-function showReadme(args) {
-  ////////////console.log( sessionStorage );
-  let url 	= chrome.runtime.getURL("HTML/index.html");
-  
-  if( args )
-	  url 	= chrome.runtime.getURL("HTML/buyProduct.html");
- 
-  url 		= new URL( url );
-  
-  if( args && typeof args == "object" && ! args.length && Object.keys( args ).length > 0 ){
-	  for( let key in args ){
-		  url.searchParams.set(key, args[key]);
-	  }
-  }
-  
-  chrome.tabs.create({ url:url.href });
-}
