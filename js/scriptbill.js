@@ -7343,7 +7343,7 @@
 			let alertInner = document.createElement("div");
 			let alertLogo 	= document.createElement("div");
 			alert.setAttribute("style", "position:fixed; background-color:rgba(0,0,0,0.4); top:0;left:0; width:100%;height:100%;display:flex;align-items:center;justify-content:center;z-index:" + Date.now()+";");
-			alertInner.setAttribute("style", "background-color:white;padding:35px;padding-bottom:50px;position:relative;width:60%; height:auto; min-height:40%;border-radius:8px;word-wrap: break-word;overflow-wrap: break-word;word-break: break-word;");
+			alertInner.setAttribute("style", "background-color:white;padding:4%;padding-bottom:50px;position:relative;width:60%; height:auto;border-radius:8px;word-wrap: break-word;overflow-wrap: break-word;word-break: break-word; max-width:400px;");
 			alertLogo.setAttribute("style", "width:30px;height:30px;border-radius:50%;background-image:url('images/logo.png');background-size:cover;background-repeat:no-repeat;background-position:center;position:absolute; top:5px; left:5px;");
 			button.setAttribute("style","position:absolute; bottom:10px; left:25%; width:50%; height:auto; padding:5px; color:white; background-color:#444;border:none; border-radius:3px;");
 			button.innerText 	= "Close";		
@@ -7368,7 +7368,7 @@
 			let alertInner = document.createElement("div");
 			let alertLogo 	= document.createElement("div");
 			alert.setAttribute("style", "position:fixed; background-color:rgba(0,0,0,0.4); top:0;left:0; width:100%;height:100%;display:flex;align-items:center;justify-content:center;z-index:" + this.currentTime() + ";");
-			alertInner.setAttribute("style", "background-color:white;padding:35px;padding-bottom:50px;position:relative;width:60%; height:auto; min-height:40%;border-radius:8px;");
+			alertInner.setAttribute("style", "background-color:white;padding:4%;padding-bottom:50px;position:relative;width:60%; height:auto;border-radius:8px;word-wrap: break-word;overflow-wrap: break-word;word-break: break-word; max-width:400px;");
 			alertLogo.setAttribute("style", "width:30px;height:30px;border-radius:50%;background-image:url('images/logo.png');background-size:cover;background-repeat:no-repeat;background-position:center;position:absolute; top:5px; left:5px;");
 			coverConfirm.setAttribute("style","position:absolute; bottom:10px; left:0%; width:100%; height:auto; padding:5px; color:white; background-color:transparent; display:flex; justify-content:space-between;flex-direction:column;gap:5px;align-items:center;");
 			confirm.setAttribute("style","width:50%; height:auto; padding:5px; color:white; background-color:green; border:none; border-radius:3px;");
@@ -7403,7 +7403,7 @@
 			let alertInner = document.createElement("div");
 			let alertLogo 	= document.createElement("div");
 			alert.setAttribute("style", "position:fixed; background-color:rgba(0,0,0,0.4); top:0;left:0; width:100%;height:100%;display:flex;align-items:center;justify-content:center;z-index:" + this.currentTime() + ";");
-			alertInner.setAttribute("style", "background-color:white;padding:35px;padding-bottom:50px;position:relative;width:60%; height:auto; min-height:40%;border-radius:8px;");
+			alertInner.setAttribute("style", "background-color:white;padding:4%;padding-bottom:50px;position:relative;width:60%; height:auto;border-radius:8px;word-wrap: break-word;overflow-wrap: break-word;word-break: break-word; max-width:400px;");
 			alertLogo.setAttribute("style", "width:30px;height:30px;border-radius:50%;background-image:url('images/logo.png');background-size:cover;background-repeat:no-repeat;background-position:center;position:absolute; top:5px; left:5px;");
 			coverConfirm.setAttribute("style","position:absolute; bottom:10px; left:0%; width:100%; height:auto; padding:5px 30px; color:white; background-color:transparent; display:flex; justify-content:space-between;");
 			confirm.setAttribute("style","width:fit-content; height:auto; padding:5px; color:white; background-color:green;border:none;border-radius:3px");
