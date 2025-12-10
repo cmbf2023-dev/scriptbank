@@ -7372,10 +7372,11 @@
 			alertLogo.setAttribute("style", "width:30px;height:30px;border-radius:50%;background-image:url('images/logo.png');background-size:cover;background-repeat:no-repeat;background-position:center;position:absolute; top:5px; left:5px;");
 			coverConfirm.setAttribute("style","position:absolute; bottom:10px; left:0%; width:100%; height:auto; padding:5px; color:white; background-color:transparent; display:flex; justify-content:space-between;flex-direction:column;gap:5px;align-items:center;");
 			confirm.setAttribute("style","width:50%; height:auto; padding:5px; color:white; background-color:green; border:none; border-radius:3px;");
-			button.setAttribute("style","width:70%; height:auto; padding:5px; color:black; background-color:white;outline:none; border:1px solid green; margin-bottom: 7px;border-radius:3px;");
             button.setAttribute("type", "text");
             button.setAttribute("name", "prompt");
-			button.value = def;
+			button.setAttribute("style","width:70%; height:auto; padding:5px; color:black; background-color:white;outline:none; border:1px solid green; margin-bottom: 7px;border-radius:3px;");
+           
+			button.setAttribute("value", def);
 			
 			confirm.innerText 	= "Done";		
 			confirm.addEventListener("click", function(){
@@ -7389,7 +7390,7 @@
 			alertInner.appendChild( alertLogo );
 			alertInner.appendChild( coverConfirm );
 			alert.appendChild( alertInner );
-			document.body.appendChild( alert );
+			document.body.appendChild( alert );                              
 		});
 	}
 	
