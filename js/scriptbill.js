@@ -6140,19 +6140,20 @@
 		url    				= new URL( url );
 		url.searchParams.set("scriptbillPing", "true");
 		
-		let ping 			= await fetch( url.href ).then( resp =>{ return resp.text();}).catch( error =>{ console.error( error ); return false;});
+		let ping 			= await fetch( url.href ).then( resp =>{ return resp.json();}).catch( error =>{ console.error( error ); return false;});
 
 		console.log("check ping: ", ping )
 		
 		if( ! ping || ! ping.isScriptbillServer ){
 			
-			url 			= new URL( this.#default_scriptbill_server.includes(location.origin) ? this.#default_scriptbill_server :  `https://corsproxy.io/?url=${encodeURIComponent( this.#default_scriptbill_server )}`);
+			url 			= new URL( this.#default_scriptbill_server );
 		}
 			
 		
 		url.searchParams.set("exchangeNote", noteType);
 		url.searchParams.set("noteTypeBase", "TRUE");
-		let note 			= await fetch( url.href ).then( resp =>{ return resp.text();}).catch( error =>{ console.error( error ); return false;}); 
+		url 				=  url.href.includes(location.origin) ? url : new URL( `https://corsproxy.io/?url=${encodeURIComponent( url.href ) }` );
+		let note 			= await fetch( url.href ).then( resp =>{ return resp.json();}).catch( error =>{ console.error( error ); return false;}); 
 
 		console.log("check note: ", note );
 		
