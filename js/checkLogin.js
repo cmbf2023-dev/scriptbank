@@ -10310,7 +10310,7 @@ async function verifyPayment(ref, seconds,  type = 'squad', isTest = true ){
 
 	console.log("Request: ", request, "account data check ", accountData  );
 
-	if(seconds < 2)
+	if(seconds < 2 && savedCard )
 		await Scriptbill.createAlert( "Your Transaction With this Ref: " + ref + " is being verified in the background please wait. If verified, you'll be notified");
 	
 	
