@@ -14,7 +14,7 @@ self.onmessage = async (event) => {
     let message = event.data;
 	
   // 2. A page requested user data, respond with a copy of `user`
-  console.log( message, sender, typeof message );
+  console.log( message, typeof message );
  
   if( typeof message == "string" ){	  
 	   
