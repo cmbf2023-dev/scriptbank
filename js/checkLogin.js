@@ -347,7 +347,7 @@ function loadingDiv(){
 
             let session = parseInt(sessionStorage.cakeSession);
 
-            if(session >= 30 ){
+            if(session >= 300 ){
                 clearInterval(intervel)
                 delete sessionStorage.cakeSession;
                 return;
@@ -357,7 +357,7 @@ function loadingDiv(){
             sessionStorage.cakeSession = session;
                 
         }
-    }, 500);
+    }, 100);
 	
 	
 	
@@ -380,7 +380,7 @@ function removeLoadingDiv(){
             }, 3000); //waiting for 3 seconds longer, making sure that at least three checks run on the block before finally clearing the interval
            
         }
-    }, 500);
+    }, 100);
 }
 
 var checkClick = function(el){
