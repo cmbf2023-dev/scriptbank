@@ -10880,7 +10880,7 @@ async function billCard(amount = 1000, email = "henimastic@gmail.com", currency 
 		"currency":currency,
 		"initiate_type": "inline",
 		"transaction_ref": ref,
-		"callback_url": isIframe ? url.href : "https://indiaesevakendra.in/wp-content/uploads/2020/08/Paymentsuccessful21-768x427.png"
+		"callback_url": !isIframe ? url.href : "https://indiaesevakendra.in/wp-content/uploads/2020/08/Paymentsuccessful21-768x427.png"
 	}; 
 
 
