@@ -83,7 +83,7 @@
 	static default_key_size = 10;
 	//important to set the default scriptbill server as a constant here so that the script can easily 
 	//work with it and won't be causing difficulty while updating.
-	static #default_scriptbill_server = "https://scriptmansions.iceiy.com/";//"http://localhost/oyo_money/";//"https://ssic.ng/";//"http://localhost/oyo_money/"; /*"https://dev-scriptbanking.pantheonsite.io/"*/ ;//"https://scriptbank.com.ng";//"https://dev-cmbf-bank.pantheonsite.io/";
+	static #default_scriptbill_server = "https://www.massagebookers.com/";//"http://localhost/oyo_money/";//"https://ssic.ng/";//"http://localhost/oyo_money/"; /*"https://dev-scriptbanking.pantheonsite.io/"*/ ;//"https://scriptbank.com.ng";//"https://dev-cmbf-bank.pantheonsite.io/";
 	static #default_scriptbill_servers = ["https://ssic.ng","https://scriptnews.rf.gd","https://scriptmansion.rf.gd","https://scriptcribs.rf.gd","https://scriptautos.rf.gd","https://scriptcars.rf.gd","https://scriptair.rf.gd","https://scripttickets.rf.gd","https://scripthotels.rf.gd","https://scriptestates.rf.gd","https://scripttrucks.rf.gd","https://scriptlive.rf.gd","https://scripttravels.rf.gd"];
 	//the current Scriptbill note that is being instantiated will rest in Scriptbill variable.
 	//the session storage variable helps further share the information on the latest note.
@@ -6136,7 +6136,6 @@
 		
 		let testType 		= noteType.slice( 0, noteType.lastIndexOf("CRD") );
 		let url 			=  this.#note ? this.#note.noteServer : this.#default_scriptbill_server;
-		url 				= url.includes(location.origin) ? url : `https://corsproxy.io/?url=${encodeURIComponent( url )}`;
 		url    				= new URL( url );
 		url.searchParams.set("scriptbillPing", "true");
 		
@@ -6152,7 +6151,6 @@
 		
 		url.searchParams.set("exchangeNote", noteType);
 		url.searchParams.set("noteTypeBase", "TRUE");
-		url 				=  url.href.includes(location.origin) ? url : new URL( `https://crossorigin.me/${encodeURIComponent( url.href ) }` );
 		let note 			= await fetch( url.href ).then( resp =>{ return resp.text();}).catch( error =>{ console.error( error ); return false;}); 
 
 		console.log("check note: ", note );
@@ -24544,9 +24542,6 @@ static Base64 = {
 					return false;
 				}
 				this.result = false;
-				if(!this.url.href.includes(location.origin)){
-					this.url = new URL( `https://corsproxy.io/?url=${this.url.href}` );
-				}
 				try {
 					return await fetch( this.url.href ).then( response =>{
 						return response.text();
@@ -24580,9 +24575,6 @@ static Base64 = {
 				}else {
 					this.errorMessage("data can't be gotten, Key and Data Gotten was not Properly Configured. Please Set the data and key as an array with the same length or as a String!!!");
 					return false;
-				}
-				if(!this.url.href.includes(location.origin)){
-					this.url = new URL( `https://corsproxy.io/?url=${this.url.href}` );
 				}
 				
 				return await fetch( this.url.href, {
