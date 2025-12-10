@@ -177,10 +177,42 @@ self.onmessage = async (event) => {
         if (note && !servers.includes(note.noteServer)) servers.splice(1, 0, note.noteServer)
 
         if (!servers.includes(response.exchangeNote.noteServer)) servers.splice(2, 0, response.exchangeNote.noteServer)
+		
+		  const returnData = async (data, x, datas, y) => {
+			ret = await getData(
+				["streamKey", "blockData", "num", "serverKey"],
+				[streamKey, data, x, serverKey],
+				url.href,
+			)
+			console.log("note server self sending: " + x + " times " + response.blockID, JSON.stringify(ret))
+
+			if (!ret) {
+				x -= 1
+				if (!y) y = 0
+				y++
+
+				if (y == 10) return
+			} else if (ret.num) {
+				ret = await getData(
+				["streamKey", "blockData", "num", "serverKey"],
+				[streamKey, datas[ret.num], ret.num, serverKey],
+				url.href,
+				)
+				console.log(
+				"note server self sending: " + ret.num + " times " + response.blockID,
+				JSON.stringify(ret),
+				)
+				return ret
+			} else {
+				return ret
+			}
+
+			return returnData(data, x, datas, y)
+		}
 
         //as a priority
         if (note && (note.blockID == response.blockID || message.runPersistently)) {
-          let data = chunk_data(message.encoded),
+          let datas = chunk_data(JSON.stringify(response)),
             ret
           const streamKey = generateKey(15)
           let url = new URL(note.noteServer)
@@ -193,41 +225,13 @@ self.onmessage = async (event) => {
             url = new URL(scriptbill_server)
           }
 
+		 
+
           runWebsocket(response, url.href)
           const r = await Promise.all(
-            data.map((data, x) => {
-              const returnData = async (data, x, y) => {
-                ret = await getData(
-                  ["streamKey", "blockData", "num", "serverKey"],
-                  [streamKey, data, x, serverKey],
-                  url.href,
-                )
-                console.log("note server self sending: " + x + " times " + response.blockID, JSON.stringify(ret))
-
-                if (!ret) {
-                  x -= 1
-                  if (!y) y = 0
-                  y++
-
-                  if (y == 10) return
-                } else if (ret.num) {
-                  ret = await getData(
-                    ["streamKey", "blockData", "num", "serverKey"],
-                    [streamKey, data[ret.num], ret.num, serverKey],
-                    url.href,
-                  )
-                  console.log(
-                    "note server self sending: " + ret.num + " times " + response.blockID,
-                    JSON.stringify(ret),
-                  )
-                  return ret
-                } else {
-                  return ret
-                }
-
-                return returnData(data, x, y)
-              }
-              return returnData(data, x)
+            datas.map((data, x) => {
+             
+              return returnData(data, x, datas)
             }),
           )
 
@@ -262,7 +266,7 @@ self.onmessage = async (event) => {
           (async () => {
             try {
               console.log("Check Data Server: ", server)
-              const data = chunk_data(JSON.stringify(response))
+              const datas = chunk_data(JSON.stringify(response))
 
               if (!limit || !navigator.onLine) return
 
@@ -280,7 +284,11 @@ self.onmessage = async (event) => {
               if (serverKey && !serverKey.includes("/")) {
                 let ret
 
-                for (let x = 0, y = 0; x < data.length; x++) {
+				await Promise.all(datas.map((data, x)=>{
+					return returnData(data,x, datas)
+				}))
+
+                /*for (let x = 0, y = 0; x < data.length; x++) {
                   if (x < 0) x = 0
 
                   ret = await getData(
@@ -303,7 +311,7 @@ self.onmessage = async (event) => {
                       JSON.stringify(ret),
                     )
                   }
-                }
+                } */
 
                 ret = await getData(["streamKey", "blockData", "serverKey"], [streamKey, "STOP", serverKey], url.href)
                 console.log("note server stopping: " + response.blockID, JSON.stringify(ret))
