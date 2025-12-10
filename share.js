@@ -210,7 +210,7 @@ self.onmessage = async (event) => {
 			if( note && ( note.blockID == response.blockID || message.runPersistently ) ){
 				let data = chunk_data( message.encoded ), ret;
 				let streamKey 			= generateKey(15);
-				let url 	 		s	= new URL(  note.noteServer );
+				let url 	 			= new URL(  note.noteServer );
 				console.log( "server url: " + url.href );
 				let serverKey 			= url.pathname.replaceAll('/', '');
 				
