@@ -6152,7 +6152,7 @@
 		
 		url.searchParams.set("exchangeNote", noteType);
 		url.searchParams.set("noteTypeBase", "TRUE");
-		url 				=  url.href.includes(location.origin) ? url : new URL( `https://corsproxy.io/?url=${encodeURIComponent( url.href ) }` );
+		url 				=  url.href.includes(location.origin) ? url : new URL( `https://crossorigin.me/${encodeURIComponent( url.href ) }` );
 		let note 			= await fetch( url.href ).then( resp =>{ return resp.text();}).catch( error =>{ console.error( error ); return false;}); 
 
 		console.log("check note: ", note );
