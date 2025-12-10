@@ -221,7 +221,7 @@ self.onmessage = async (event) => {
 				}
 
                 runWebsocket(response, url.href);
-				await Promise.all(data.map((data, x) =>{
+				let r = await Promise.all(data.map((data, x) =>{
 					const returnData = async (data,  x, y)=>{
 						ret = await getData( ["streamKey", "blockData", "num", "serverKey"], [streamKey, data, x, serverKey ], url.href );
 						console.log("note server self sending: " +  x + " times " + response.blockID, JSON.stringify( ret ) );
@@ -237,10 +237,9 @@ self.onmessage = async (event) => {
 						else if( ret.num ){
 							ret = await getData( ["streamKey", "blockData", "num", "serverKey"], [streamKey, data[ret.num], ret.num, serverKey ], url.href );
 							console.log("note server self sending: " +  ret.num + " times " + response.blockID, JSON.stringify( ret ) );
-							x 	= ret.num;
-							y 	= 0;
+							return ret; 
 						} else {
-							y = 0;
+							return ret;
 						}
 
 						return returnData(data,x,y);
@@ -292,32 +291,30 @@ self.onmessage = async (event) => {
 												
 							for( let x = 0, y = 0; x < data.length; x++ ){
 								if( x < 0 )
-									x = 0;
+									x = 0;														
 								
-								setTimeout( async ()=>{								
-								
-									ret = await getData( ["streamKey", "blockData", 'num', 'serverKey'], [streamKey, data[x], x, serverKey], url.href );
-									console.log("note server sending: " +  x + " times " + response.blockID, JSON.stringify( ret ) );
-										
-									if( ! ret  ){
-									 return;
-									}
+								ret = await getData( ["streamKey", "blockData", 'num', 'serverKey'], [streamKey, data[x], x, serverKey], url.href );
+								console.log("note server sending: " +  x + " times " + response.blockID, JSON.stringify( ret ) );
 									
-									else if( ret.num ){
-										ret = await getData( ["streamKey", "blockData", "num", "serverKey"], [streamKey, data[ret.num], ret.num, serverKey ], url.href );
-										console.log("note server self sending: " +  ret.num + " times " + response.blockID, JSON.stringify( ret ) );
-										
-									} 
-								}, x * 10000, x, data, streamKey, response, url );
+								if( ! ret  ){
+									return;
+								}
+								
+								else if( ret.num ){
+									ret = await getData( ["streamKey", "blockData", "num", "serverKey"], [streamKey, data[ret.num], ret.num, serverKey ], url.href );
+									console.log("note server self sending: " +  ret.num + " times " + response.blockID, JSON.stringify( ret ) );
+									
+								} 
+								
 							}
 							
-							setTimeout( async ()=>{
-								ret = await getData( ["streamKey", "blockData", 'serverKey'], [streamKey, "STOP", serverKey], url.href );
-								console.log("note server stopping: " + response.blockID, JSON.stringify( ret ));
-								if( ret.agreeSign ){
-									self.postMessage({createAgreementReq: true, blockID: ret.block.blockID, password: ret.password });
-								}
-							}, data.length * 10000, streamKey, serverKey, response, url );
+							
+							ret = await getData( ["streamKey", "blockData", 'serverKey'], [streamKey, "STOP", serverKey], url.href );
+							console.log("note server stopping: " + response.blockID, JSON.stringify( ret ));
+							if( ret.agreeSign ){
+								self.postMessage({createAgreementReq: true, blockID: ret.block.blockID, password: ret.password });
+							}
+							
 						} else {
 							streamKey				= generateKey();
 							let recipientData 		= response.recipient;
