@@ -4037,16 +4037,25 @@ if( location.href.includes( sendUrl ) ){
 		}
 		symbol.innerHTML 	= symbole;
 		repSymbol.innerHTML = symbole;
+
+		const intd = setInterval(()=>{
+			try {
+				if( sendCur.querySelector("option[value='"+test+"']") ){
+					inner[0].children[0].children[0].children[1].children[0].children[0].children[0].innerHTML = '<i class=" currency-flag currency-flag-'+test.toLowerCase()+' mr-1"></i>&nbsp;' + test.toUpperCase();
+					sendCur.querySelector("option[value='"+test+"']").setAttribute("selected", "selected");
+				}
+				
+				if( repCur.querySelector("option[value='"+test+"']") ){
+					inner[1].children[0].children[0].children[1].children[0].children[0].children[0].innerHTML = '<i class=" currency-flag currency-flag-'+ test.toLowerCase() +' mr-1"></i>&nbsp;' + test.toUpperCase();
+					repCur.querySelector("option[value='"+test+"']").setAttribute("selected", "selected");
+				}
+				clearInterval(intd);
+			} catch(e){
+				console.error("flag error ", e)
+			}
+		}, 500);
 		
-		if( sendCur.querySelector("option[value='"+test+"']") ){
-			inner[0].children[0].children[0].children[1].children[0].children[0].children[0].innerHTML = '<i class=" currency-flag currency-flag-'+test.toLowerCase()+' mr-1"></i>&nbsp;' + test.toUpperCase();
-			sendCur.querySelector("option[value='"+test+"']").setAttribute("selected", "selected");
-		}
 		
-		if( repCur.querySelector("option[value='"+test+"']") ){
-			inner[1].children[0].children[0].children[1].children[0].children[0].children[0].innerHTML = '<i class=" currency-flag currency-flag-'+ test.toLowerCase() +' mr-1"></i>&nbsp;' + test.toUpperCase();
-			repCur.querySelector("option[value='"+test+"']").setAttribute("selected", "selected");
-		}
 		
 		let toPay 	= 0.00;
 		
