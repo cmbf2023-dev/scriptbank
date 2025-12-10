@@ -4854,7 +4854,7 @@
 	}
 	
 	static async #getPassword( userInput = "", note = false ){
-		console.log("getPassword running!!! " + this.funcUp[ this.funcUp.length][ this.funcUp[ this.funcUp.length].length] );
+//		console.log("getPassword running!!! " + this.funcUp[ this.funcUp.length][ this.funcUp[ this.funcUp.length].length] );
 		this.funcUp[ this.funcUp.length] = "#getPassword";
 		try {
 			if( ! this.binary && this.s.uploaded ){
@@ -4953,7 +4953,7 @@
 	
 	
 	static async #generatePassword( userInput ){
-		console.log( "#generatePassword running " + this.funcUp[ this.funcUp.length][ this.funcUp[ this.funcUp.length].length] );
+		//console.log( "#generatePassword running " + this.funcUp[ this.funcUp.length][ this.funcUp[ this.funcUp.length].length] );
 		this.funcUp[ this.funcUp.length] = "#generatePassword";
 		try {
 			this.#password 		= CryptoJS.SHA256( CryptoJS.MD5( CryptoJS.SHA1( userInput ).toString( CryptoJS.enc.Base64 ) ).toString( CryptoJS.enc.Base64 ) + userInput ).toString( CryptoJS.enc.Base64 );	
@@ -6272,7 +6272,7 @@
 	
 	
 	static async setCurrentNote( note = false ){
-		console.log(" setCurrentNote running " + this.funcUp[ this.funcUp.length][ this.funcUp[ this.funcUp.length].length] );
+		//console.log(" setCurrentNote running " + this.funcUp[ this.funcUp.length][ this.funcUp[ this.funcUp.length].length] );
 		this.funcUp[ this.funcUp.length] = "setCurrentNote";
 		try {
 			if( ( ! note || ! note.noteAddress ) && this.#note )
@@ -6626,7 +6626,7 @@
 	}
 	
 	static async recieveResponse(){
-		console.log("recieveResponse running " + this.funcUp[ this.funcUp.length][ this.funcUp[ this.funcUp.length].length]);
+		//console.log("recieveResponse running " + this.funcUp[ this.funcUp.length][ this.funcUp[ this.funcUp.length].length]);
 		this.funcUp[ this.funcUp.length] = "recieveResponse";
 		this.#noVerify	= false;
 
@@ -6763,7 +6763,7 @@
 	}
 	
 	static async getWalletRank(){
-		console.log("getWalletRank running " + this.funcUp[ this.funcUp.length][ this.funcUp[ this.funcUp.length].length]);
+		//console.log("getWalletRank running " + this.funcUp[ this.funcUp.length][ this.funcUp[ this.funcUp.length].length]);
 		this.funcUp[ this.funcUp.length] = "getWalletRank";
 		try {
 			if( ( ! this.#note && this.s.currentNote ) || ( this.s.currentNote &&    ! this.s.currentNote.includes( this.#note.walletID ) && ! this.s.currentNote.includes( this.#note.noteAddress ) && ! this.#isExchangeMarketMining ) || ( ! this.#isExchangeMarketMining && ! this.#note && this.s.currentNote ))
@@ -6825,7 +6825,7 @@
 	
 	//this function is meant to calculate the rank for the current wallet
 	static async calculateWalletRank(){
-		console.log("calculateWalletRank running " + this.funcUp[ this.funcUp.length][ this.funcUp[ this.funcUp.length].length]);
+		//console.log("calculateWalletRank running " + this.funcUp[ this.funcUp.length][ this.funcUp[ this.funcUp.length].length]);
 		this.funcUp[ this.funcUp.length] = "calculateWalletRank";
 		
 		try {		
