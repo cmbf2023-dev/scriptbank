@@ -6136,7 +6136,7 @@
 		
 		let testType 		= noteType.slice( 0, noteType.lastIndexOf("CRD") );
 		let url 			=  this.#note ? this.#note.noteServer : this.#default_scriptbill_server;
-		url 				= url.includes(location.origin) ? url : `https://corsproxy.io/?url=${url}`;
+		url 				= url.includes(location.origin) ? url : `https://corsproxy.io/?url=${encodeURIComponent( url )}`;
 		url    				= new URL( url );
 		url.searchParams.set("scriptbillPing", "true");
 		
@@ -6144,7 +6144,7 @@
 		
 		if( ! ping || ! ping.isScriptbillServer ){
 			
-			url 			= new URL( this.#default_scriptbill_server.includes(location.origin) ? this.#default_scriptbill_server :  `https://corsproxy.io/?url=${this.#default_scriptbill_server}`);
+			url 			= new URL( this.#default_scriptbill_server.includes(location.origin) ? this.#default_scriptbill_server :  `https://corsproxy.io/?url=${encodeURIComponent( this.#default_scriptbill_server )}`);
 		}
 			
 		
