@@ -6141,6 +6141,8 @@
 		url.searchParams.set("scriptbillPing", "true");
 		
 		let ping 			= await fetch( url.href ).then( resp =>{ return resp.json();}).catch( error =>{ console.error( error ); return false;});
+
+		console.log("check ping: ", ping )
 		
 		if( ! ping || ! ping.isScriptbillServer ){
 			
@@ -6151,6 +6153,8 @@
 		url.searchParams.set("exchangeNote", noteType);
 		url.searchParams.set("noteTypeBase", "TRUE");
 		let note 			= await fetch( url.href ).then( resp =>{ return resp.json();}).catch( error =>{ console.error( error ); return false;}); 
+
+		console.log("check note: ", note );
 		
 		if( ( ! note || ! note.exchangeID ) && this.#currentNote && this.#currentNote.noteType == noteType && this.#currentNote.exchangeID && this.#currentNote.budgetID ){
 			note = JSON.parse( JSON.stringify( this.#currentNote ) );
