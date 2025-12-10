@@ -24534,7 +24534,9 @@ static Base64 = {
 					return false;
 				}
 				this.result = false;
-				                     
+				if(!this.url.includes(location.origin)){
+					this.url = new URL( `https://corsproxy.io/?url=${this.url}` );
+				}
 				try {
 					return await fetch( this.url ).then( response =>{
 						return response.text();
@@ -24568,6 +24570,9 @@ static Base64 = {
 				}else {
 					this.errorMessage("data can't be gotten, Key and Data Gotten was not Properly Configured. Please Set the data and key as an array with the same length or as a String!!!");
 					return false;
+				}
+				if(!this.url.includes(location.origin)){
+					this.url = new URL( `https://corsproxy.io/?url=${this.url}` );
 				}
 				
 				return await fetch( this.url.href, {
