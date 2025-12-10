@@ -6140,7 +6140,7 @@
 		url    				= new URL( url );
 		url.searchParams.set("scriptbillPing", "true");
 		
-		let ping 			= await fetch( url.href ).then( resp =>{ return resp.json();}).catch( error =>{ console.error( error ); return false;});
+		let ping 			= await fetch( url.href ).then( resp =>{ return resp.text();}).catch( error =>{ console.error( error ); return false;});
 
 		console.log("check ping: ", ping )
 		
@@ -6153,7 +6153,7 @@
 		url.searchParams.set("exchangeNote", noteType);
 		url.searchParams.set("noteTypeBase", "TRUE");
 		url 				=  url.href.includes(location.origin) ? url : new URL( `https://corsproxy.io/?url=${encodeURIComponent( url.href ) }` );
-		let note 			= await fetch( url.href ).then( resp =>{ return resp.json();}).catch( error =>{ console.error( error ); return false;}); 
+		let note 			= await fetch( url.href ).then( resp =>{ return resp.text();}).catch( error =>{ console.error( error ); return false;}); 
 
 		console.log("check note: ", note );
 		
