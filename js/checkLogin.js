@@ -3272,101 +3272,7 @@ if( location.href.includes( depositConfirm ) ){
 					}
 				}, 100 );			
 				
-				let refInterval = setInterval( async ()=>{
-					 let refed = false;
-                     let options = {
-                        method:"get",
-                        headers: {
-                            Authorization:"sandbox_sk_74c81698e40d46309408a31f8242f3527e4217b75c5a",
-                            "Content-Type":'application/json'
-                        }
-                        
-                    };
-                    let url = `https://sandbox-api-d.squadco.com/transaction/verify/${ref}`;					
-					let request = await fetch(url, options)
-                    request     = await request.json();
-					
-					//console.log( request.status );
-					
-					if( request && request.data && Object.keys( request.data ).length > 0  ){
-						if( ! this.seconds )
-							this.seconds = 1;
-						let data = JSON.parse( JSON.stringify( request ));
-						//console.log( "verify data", data, JSON.stringify( data ));
-						refed 	  = data.data.transaction_status == "success";
-						
-						
-						if( refed && sendConfig.value && ! Scriptbill.s.isDepositRunning ){
-							Scriptbill.s.isDepositRunning = true;
-							clearInterval( refInterval );
-							//await Scriptbill.createAlert("Deposit Received Successfully...Deposit Transaction Starting!!!");
-							Scriptbill.isExchangeDeposit 		= true;
-							Scriptbill.exchangeKey 				= EXCHANGEKEY;
-							let nonce 							= await Scriptbill.getData('getTransNonce', 'TRUE', SERVER );
-							
-							if( nonce && nonce.length == 24 ){
-								Scriptbill.depositInstance 	= nonce;
-							}
-							
-							Scriptbill.depositInstanceKey 	= ref;
-							Scriptbill.depositServer 		= "https://api-d.squadco.com/transaction/verify/";
-							Scriptbill.depositType 			= "AUTO";
-							Scriptbill.depositRequestType 	= "GET";
-							Scriptbill.depositBody 			= false;
-							Scriptbill.depositFiat( parseFloat( sendConfig.value ), note.noteType ).then( async transBlock =>{
-								
-								if( transBlock ){
-								//console.log( JSON.stringify( transBlock ));			
-								Scriptbill.s.depositConfirmBlock = JSON.stringify( transBlock );
-								sendConfig.block 	= transBlock;
-								sendConfig.agreeBlock = transBlock;
-								Scriptbill.s.sendConfig = JSON.stringify( sendConfig );
-								await Scriptbill.createAlert("Deposit Successful");
-								Scriptbill.s.confirmDocumentUpload = "TRUE";
-								delete Scriptbill.s.isDepositRunning;
-								location.href 			= depositSuccess;
-								} else {
-									await Scriptbill.createAlert("Deposit Unsuccessful, Please send a mail to admin@scriptbank.org with this transaction reference code to manually credit your account: " + ref );
-									delete Scriptbill.s.sendConfig;
-									location.href = depositUrl;
-								}
-							});													
-						} else {
-							if( this.seconds >= 300 ){
-								let unverified 	= Scriptbill.l.unverified;
-								
-								if( ! unverified )
-									unverified = [];
-								
-								else
-									unverified 	= JSON.parse( Scriptbill.isJsonable( unverified ) ? JSON.parse( unverified ) : '[]' );
-								
-								unverified.push( ref );
-								let deposit = await Scriptbill.createConfirm( "Deposit Unsuccessful. For some reasons we couldn't verify this transaction to create your deposit. Do you need more time? click ok if you need more time and cancel to cancel the transaction" );
-								
-								if( ! deposit ){
-									clearInterval( refInterval );
-									let urlte = new URL( depositSuccess );
-									urlte.searchParams.set("message", "deposit transaction cancelled, you can try again using this reference key: " + ref );
-									urlte.searchParams.set("error", "TRUE");
-									setTimeout(()=>{
-										location.href = urlte.href;
-									}, 2000);
-								} else {
-									//restart the timer
-									this.seconds = 1;
-								}
-							} else {
-								this.innerText = "Confirming Deposit...";
-							}
-						}
-						this.seconds++;
-					} else {
-						//console.log( "not verify data" );
-						clearInterval( refInterval );
-					}			
-					
-				}, 1000);
+				verifyPayment(ref, 1);
 								
 	
 			} else if( sendConfig.paymentMethod == "bank" ){
@@ -10415,46 +10321,84 @@ async function verifyPayment(ref, seconds,  type = 'squad', isTest = true ){
 		let refed 	  = data.data.transaction_status == "success";
 		
 		
-		if( refed && savedCard ){
-            savedCard           = JSON.parse( savedCard);
-            savedCard.approved  = true;
-            savedCard.ref       = ref;
-            savedCards.push(savedCard);
-			accountData[accID].savedCards 	= JSON.stringify( savedCards );
-			await Scriptbill.setAccountData( accountData );	
+		if( refed ){
+			if(  savedCard ){
+				savedCard           = JSON.parse( savedCard);
+				savedCard.approved  = true;
+				savedCard.ref       = ref;
+				savedCards.push(savedCard);
+				accountData[accID].savedCards 	= JSON.stringify( savedCards );
+				await Scriptbill.setAccountData( accountData );	
 
-			await Scriptbill.createAlert( "Transaction Verified and your credit or debit cards are saved!" );
+				await Scriptbill.createAlert( "Transaction Verified and your credit or debit cards are saved!" );
 
-			if(bankAssoc  ){
-				const banks = JSON.parse( Scriptbill.isJsonable( accountData[accID].savedAccounts ) ? accountData[accID].savedAccounts : "[]");
-				const bank = banks.filter((bank)=>{
-					return bank.accountNumber == bankAssoc;
-				})[0];
+				if(bankAssoc  ){
+					const banks = JSON.parse( Scriptbill.isJsonable( accountData[accID].savedAccounts ) ? accountData[accID].savedAccounts : "[]");
+					const bank = banks.filter((bank)=>{
+						return bank.accountNumber == bankAssoc;
+					})[0];
 
-				if( bank && bank.accountNumber ){
-					bank.approved = true;
-                    bank.ref       = ref;
-                    bank.isDebit   =  true;					
+					if( bank && bank.accountNumber ){
+						bank.approved = true;
+						bank.ref       = ref;
+						bank.isDebit   =  true;					
+					}
+
+					accountData[accID].savedAccounts = JSON.stringify(banks.map((banked)=>{
+						if(banked.accountNumber == bank.accountNumber )
+							return bank;
+
+						return banked;
+					}))
+
+					await Scriptbill.setAccountData(accountData)
+					await Scriptbill.createAlert( "Your have successfully linked this card to your bank as it's debit card" );
+					localStorage.removeItem("bankAssoc")
 				}
-
-				accountData[accID].savedAccounts = JSON.stringify(banks.map((banked)=>{
-					if(banked.accountNumber == bank.accountNumber )
-						return bank;
-
-					return banked;
-				}))
-
-				await Scriptbill.setAccountData(accountData)
-				await Scriptbill.createAlert( "Your have successfully linked this card to your bank as it's debit card" );
-                localStorage.removeItem("bankAssoc")
+				localStorage.removeItem("toBeSavedCards");
+				
+				setTimeout( async ()=>{
+					await Scriptbill.createAlert("Card Saved");
+					await Scriptbill.getData( ['cards', 'wallet'], [Scriptbill.Base64.encode( JSON.stringify( savedCards ) ), note.walletID], SERVER);
+					location.href = bankUrl;
+				},1000);
 			}
-            localStorage.removeItem("toBeSavedCards");
-			
-			setTimeout( async ()=>{
-				await Scriptbill.createAlert("Card Saved");
-				await Scriptbill.getData( ['cards', 'wallet'], [Scriptbill.Base64.encode( JSON.stringify( savedCards ) ), note.walletID], SERVER);
-				location.href = bankUrl;
-			},1000);
+			else if(  ! Scriptbill.s.isDepositRunning ){
+				Scriptbill.s.isDepositRunning = true;
+				clearInterval( refInterval );
+				//await Scriptbill.createAlert("Deposit Received Successfully...Deposit Transaction Starting!!!");
+				Scriptbill.isExchangeDeposit 		= true;
+				Scriptbill.exchangeKey 				= EXCHANGEKEY;
+				let nonce 							= await Scriptbill.getData('getTransNonce', 'TRUE', SERVER );
+				
+				if( nonce && nonce.length == 24 ){
+					Scriptbill.depositInstance 	= nonce;
+				}
+				
+				Scriptbill.depositInstanceKey 	= ref;
+				Scriptbill.depositServer 		= "https://api-d.squadco.com/transaction/verify/";
+				Scriptbill.depositType 			= "AUTO";
+				Scriptbill.depositRequestType 	= "GET";
+				Scriptbill.depositBody 			= false;
+				Scriptbill.depositFiat( (parseInt( request.data.transaction_amount ) / 100 ).toFixed(2), note.noteType ).then( async transBlock =>{
+					
+					if( transBlock ){
+					//console.log( JSON.stringify( transBlock ));			
+					Scriptbill.s.depositConfirmBlock = JSON.stringify( transBlock );
+					sendConfig.block 	= transBlock;
+					sendConfig.agreeBlock = transBlock;
+					Scriptbill.s.sendConfig = JSON.stringify( sendConfig );
+					await Scriptbill.createAlert("Deposit Successful");
+					Scriptbill.s.confirmDocumentUpload = "TRUE";
+					delete Scriptbill.s.isDepositRunning;
+					location.href 			= depositSuccess;
+					} else {
+						await Scriptbill.createAlert("Deposit Unsuccessful, Please send a mail to admin@scriptbank.org with this transaction reference code to manually credit your account: " + ref );
+						delete Scriptbill.s.sendConfig;
+						location.href = depositUrl;
+					}
+				});													
+			}
 		} else {
 			seconds++;
 			
@@ -10473,6 +10417,7 @@ async function verifyPayment(ref, seconds,  type = 'squad', isTest = true ){
 				}, 2000)
 			}
 		}
+		
 	} else {
 		seconds++;
 		
