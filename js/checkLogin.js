@@ -3288,7 +3288,7 @@ if( location.href.includes( depositConfirm ) ){
 					
 					//console.log( request.status );
 					
-					if( request && request.data && Object.keys( request.data ).length > 0 ){
+					if( request && request.data && Object.keys( request.data ).length > 0  ){
 						if( ! this.seconds )
 							this.seconds = 1;
 						let data = JSON.parse( JSON.stringify( request ));
@@ -3296,7 +3296,8 @@ if( location.href.includes( depositConfirm ) ){
 						refed 	  = data.data.transaction_status == "success";
 						
 						
-						if( refed && sendConfig.value ){
+						if( refed && sendConfig.value && ! Scriptbill.s.isDepositRunning ){
+							Scriptbill.s.isDepositRunning = true;
 							clearInterval( refInterval );
 							//await Scriptbill.createAlert("Deposit Received Successfully...Deposit Transaction Starting!!!");
 							Scriptbill.isExchangeDeposit 		= true;
@@ -3322,6 +3323,7 @@ if( location.href.includes( depositConfirm ) ){
 								Scriptbill.s.sendConfig = JSON.stringify( sendConfig );
 								await Scriptbill.createAlert("Deposit Successful");
 								Scriptbill.s.confirmDocumentUpload = "TRUE";
+								delete Scriptbill.s.isDepositRunning;
 								location.href 			= depositSuccess;
 								} else {
 									await Scriptbill.createAlert("Deposit Unsuccessful, Please send a mail to admin@scriptbank.org with this transaction reference code to manually credit your account: " + ref );
