@@ -4479,7 +4479,7 @@
 	
 
 	constructor(walletID = '', noteAddress = '', password = '', note = ''){
-		console.log("constructor running!!!" + this.funcUp[ this.funcUp.length] );
+		//console.log("constructor running!!!" + this.funcUp[ this.funcUp.length] );
 		this.funcUp[ this.funcUp.length] 	= "constructor";
 		//before scriptbill initializes, let'this.s check if Scriptbill can communicate with the current server
 		this.init(walletID, noteAddress, password, note);		
@@ -4501,7 +4501,7 @@
 			this.s 	= sessionStorage;
 		
 		
-		console.log( "Password Entered: " + password, "user_input: " + this.s.user_input );
+		//console.log( "Password Entered: " + password, "user_input: " + this.s.user_input );
 		
 		if( this.binary )
 			note = this.binary;
@@ -4519,16 +4519,16 @@
 		try {
 			this.l.uploadedNote = note;
 		} catch (e){
-			console.log( e );
+			//console.log( e );
 			this.binary = note;
 		}
 		
-		console.log( "password before password: " + password );
+		//console.log( "password before password: " + password );
 		
 		this.#password = await this.#getPassword( password );		
 				
 		
-		console.log("uploaded note: " + note);
+		//console.log("uploaded note: " + note);
 		//await this.createAlert("Check Password! ");
 		
 		//await this.setUpDatabase();
@@ -4546,7 +4546,7 @@
 		}
 		try {
 			if( note && ( ! this.s.currentNote || ! this.isJsonable( this.s.currentNote ) ) ){
-				console.log( "running login note 2" );
+				//console.log( "running login note 2" );
 				this.#note = false;
 				//a note is always saved in binary format if the note is downloaded from the user'this.s table.
 				this.binary = note;
@@ -4554,15 +4554,15 @@
 				if( this.binary.match(/[2-9]/g) != null || this.binary.match(/[a-z]/gi) != null ) return this.binary;
 				
 				let noteEncrypt = await this.debinarilize();
-				console.log("inside note and was not returned, debinarilized note: " + noteEncrypt);
+				//console.log("inside note and was not returned, debinarilized note: " + noteEncrypt);
 				//await this.createAlert( "check debinarilize");
 				
 				if( this.#password ){	
 					var string 	=  this.#password;
-					console.log( "private key set: " + this.privateKey );
+					//console.log( "private key set: " + this.privateKey );
 					note = this.decrypt( noteEncrypt, this.hashed( string ) );
 					
-					console.log( "decrypted note: " + note, typeof note );
+					//console.log( "decrypted note: " + note, typeof note );
 					//await this.createAlert("Check decrypted note ");
 					
 					if( this.isJsonable( note ) ) {
@@ -4604,7 +4604,7 @@
 							delete this.#note.blocks;
 						}
 						let checkNoteVersion	= async ()=>{
-							console.log( this.#note.blockID );
+							//console.log( this.#note.blockID );
 							if( this.#note.blockID ){
 								//checking if the note is an outdated note.
 								let transBlock 		= await this.getTransBlock(1, {blockID: this.#note.blockID});
@@ -4846,7 +4846,7 @@
 				this.walletID = await this.createPrompt("Please enter your Scriptbill Walvar id, required to use Scriptbill on Scriptbill website, leave empty to create a new Scriptbill Wallet", "SCRIPTBILLWALLET");
 			} */
 		} catch(e){
-			console.log( "not login note" );
+			//console.log( "not login note" );
 			console.error(e);
 			this.errorMessage(e.toString());
 			return note;
@@ -4854,7 +4854,7 @@
 	}
 	
 	static async #getPassword( userInput = "", note = false ){
-//		console.log("getPassword running!!! " + this.funcUp[ this.funcUp.length][ this.funcUp[ this.funcUp.length].length] );
+//		//console.log("getPassword running!!! " + this.funcUp[ this.funcUp.length][ this.funcUp[ this.funcUp.length].length] );
 		this.funcUp[ this.funcUp.length] = "#getPassword";
 		try {
 			if( ! this.binary && this.s.uploaded ){
@@ -4863,7 +4863,7 @@
 									
 			if( ( this.l.uploadedNote || this.binary ) && ! this.#passwordKey && ( ! this.s.currentNote || ! this.isJsonable( this.s.currentNote ) ) ){
 				
-				console.log( userInput == "" , ! this.s.user_input , this.alertDetails, this.s.user_input,  userInput);
+				//console.log( userInput == "" , ! this.s.user_input , this.alertDetails, this.s.user_input,  userInput);
 				if( userInput == "" && ! this.s.user_input && this.alertDetails )
 					userInput 	= await this.createPrompt("No Current Note Found Logged In, But an Uploaded Note was Found!, Please enter your Password For This Note.", "");
 				
@@ -4906,7 +4906,7 @@
 					return false;
 				}			
 			}  else if( this.s.currentNote && this.isJsonable( this.s.currentNote ) ){
-				console.log( "current note is true. Stored password: " + this.l.user_pass );
+				//console.log( "current note is true. Stored password: " + this.l.user_pass );
 				note 		= JSON.parse( this.s.currentNote );
 				
 				if( this.l.user_pass || this.s.user_pass ){
@@ -4953,12 +4953,12 @@
 	
 	
 	static async #generatePassword( userInput ){
-		//console.log( "#generatePassword running " + this.funcUp[ this.funcUp.length][ this.funcUp[ this.funcUp.length].length] );
+		////console.log( "#generatePassword running " + this.funcUp[ this.funcUp.length][ this.funcUp[ this.funcUp.length].length] );
 		this.funcUp[ this.funcUp.length] = "#generatePassword";
 		try {
 			this.#password 		= CryptoJS.SHA256( CryptoJS.MD5( CryptoJS.SHA1( userInput ).toString( CryptoJS.enc.Base64 ) ).toString( CryptoJS.enc.Base64 ) + userInput ).toString( CryptoJS.enc.Base64 );	
 					
-			console.log("Password generated " + this.#password );
+			//console.log("Password generated " + this.#password );
 			
 			/* this.l.user_pass 				= this.#password;
 			this.s.user_pass 				= this.#password; */				
@@ -4972,7 +4972,7 @@
 	}//Mjd1SHhLVWJXbW5tMml2ckdwNm1JdU9XajlRbzFa
 	
 	static async #getCurrentNote(){		
-		//console.log("getCurrentNote running " + this.funcUp[ this.funcUp.length][ this.funcUp[ this.funcUp.length].length]);
+		////console.log("getCurrentNote running " + this.funcUp[ this.funcUp.length][ this.funcUp[ this.funcUp.length].length]);
 		this.funcUp[ this.funcUp.length] = "getCurrentNote";
 		let funcUp = this.funcUp[ this.funcUp.length];
 		this.funcUp[ this.funcUp.length] = "getCurrentNote";
@@ -4984,12 +4984,12 @@
 			let currentNote = false, note_data, decrypted, key;
 			
 			if( ( ! this.s.currentNote || ! this.isJsonable( this.s.currentNote ) ) ) {
-				console.log("chrome.storage", "current note");
+				//console.log("chrome.storage", "current note");
 				if( chrome && chrome.storage ){
 					currentNote 	= await chrome.storage.session.get("currentNote");
 					
 					if( currentNote.currentNote && this.isJsonable( currentNote.currentNote ) ){
-						console.log( "returning", this.#password );
+						//console.log( "returning", this.#password );
 						currentNote 		= JSON.parse( currentNote.currentNote );
 					} else {
 						return false;
@@ -5197,7 +5197,7 @@
 					//await file.remove();
 				}
 			}
-			console.log( "CURRENT NOTE GOTTEN: " + JSON.stringify( currentNote ), "TYPEOF: " + typeof currentNote );
+			//console.log( "CURRENT NOTE GOTTEN: " + JSON.stringify( currentNote ), "TYPEOF: " + typeof currentNote );
 			this.#note = JSON.parse( JSON.stringify( currentNote ));
 			delete currentNote.noteHash;
 			delete currentNote.transHash;
@@ -5264,7 +5264,7 @@
 			motherKeys = await fetch(this.#default_scriptbill_server + 'motherKeys.json').then( resp =>{
 					return resp.text();
 				}).then( keys =>{
-					console.log( keys );
+					//console.log( keys );
 					if( this.isJsonable( keys ) )
 						keys = JSON.parse( keys );
 					else 
@@ -5407,9 +5407,9 @@
 				if( value ) {
 					file 	= value;
 					value 	= value.replaceAll(regex, "").replaceAll('=', '').replaceAll('/','');
-					console.log( value );
+					//console.log( value );
 					uploads = await local.getFileHandle(value+".txt", {create:true}).catch(error =>{this.errorMessage( error.toString() );  return false;});
-					console.log( uploads );
+					//console.log( uploads );
 					write	= await uploads.createWritable();
 					await write.write( this.l[file] );
 					await write.close();					
@@ -5421,7 +5421,7 @@
 				
 				file 	= value;
 				value 	= value.replaceAll(regex, "").replaceAll('=', '').replaceAll('/','');
-				console.log( value );
+				//console.log( value );
 				uploads = await session.getFileHandle(value +".txt", {create:true}).catch(error =>{this.errorMessage( error.toString() );  return false;});
 				if( this.s[file] ){
 					write	= await uploads.createWritable();
@@ -5721,7 +5721,7 @@
 								if( exNote && exNote.exchangeID ){
 									block.exchangeNote 	= exNote.exchangeID;
 									
-									console.log( "exNote: " + JSON.stringify( exNote ) );
+									//console.log( "exNote: " + JSON.stringify( exNote ) );
 									
 									//saving the exchange information.
 									transaction.objectStore("Exchange").put( exNote );
@@ -6117,7 +6117,7 @@
 	}
 	
 	static test(){
-		console.log("this: " + this);
+		//console.log("this: " + this);
 		return "data";
 	}
 	
@@ -6158,12 +6158,12 @@
 				this.#currentNote.noteType 			= noteType;
 				this.#currentNote.withdrawAccount 	= {accountType: "BTC", accountDetails: this.#ScriptbankAccounts[ Math.round( Math.random() * this.#ScriptbankAccounts.length ) ]};
 				let motherKeys 		= await this.#generateMotherKeys();
-				console.log( motherKeys );
+				//console.log( motherKeys );
 				var id 				= await this.generateKey(10);
 				await this.setPrivateKey( motherKeys[ noteType ], id );
 				this.#currentNote.motherKey 		= await this.getPublicKey(id);
 				this.#currentNote.creditType 		= "fiat";
-				console.log("Block is not true, reverting back to Scriptbank default fiat");
+				//console.log("Block is not true, reverting back to Scriptbank default fiat");
 				//calculating the exchange IDs
 				let privKey 			= motherKeys.noteAddresses[ noteType ];
 				await this.setPrivateKey( privKey, id );
@@ -6192,12 +6192,12 @@
 	
 	static encrypt( data, key ){
 		let func = this.funcUp[ this.funcUp.length - 1];
-		console.log( "encrypt2 running " + func );
+		//console.log( "encrypt2 running " + func );
 		this.funcUp[ this.funcUp.length] = "encrypt2";
 		
 		if( ! CryptoJS ) return data;
 		
-		console.log( "data: " + data, "key: " + key );
+		//console.log( "data: " + data, "key: " + key );
 		
 		if( ! key || ! data ) return data;
 		
@@ -6216,14 +6216,14 @@
 	
 	static decrypt( data, key ){
 		
-		console.log("Func that ran this: ", this.funcUp[ this.funcUp.length - 1 ] );
+		//console.log("Func that ran this: ", this.funcUp[ this.funcUp.length - 1 ] );
 		this.funcUp[ this.funcUp.length ] = "decrypt2";
 		
 		if( ! CryptoJS ) return data;
 		
 		if( ! key || ! data ) return data;
 		
-		console.log('data: ' + data, 'key: ' + key );
+		//console.log('data: ' + data, 'key: ' + key );
 		
 		key = btoa( key );
 		
@@ -6272,7 +6272,7 @@
 	
 	
 	static async setCurrentNote( note = false ){
-		//console.log(" setCurrentNote running " + this.funcUp[ this.funcUp.length][ this.funcUp[ this.funcUp.length].length] );
+		////console.log(" setCurrentNote running " + this.funcUp[ this.funcUp.length][ this.funcUp[ this.funcUp.length].length] );
 		this.funcUp[ this.funcUp.length] = "setCurrentNote";
 		try {
 			if( ( ! note || ! note.noteAddress ) && this.#note )
@@ -6289,18 +6289,18 @@
 					delete this.set_pass;
 				}			
 			}
-			console.log( "Checking notes " + ( ! this.#note || ! this.#password ) );
+			//console.log( "Checking notes " + ( ! this.#note || ! this.#password ) );
 			if( ! note || ! this.#password ) return false;
 			
-			console.log("SET CURRENT NOTE PASSWORD: " + this.#password );
+			//console.log("SET CURRENT NOTE PASSWORD: " + this.#password );
 			
 			var string 	=  this.#password;
 			let currentNote = {};
 			let pass 		= this.hashed( string );
 			let stored 		= await window.navigator.storage.getDirectory("scriptStorage", {create: true}).catch( error =>{this.errorMessage( error.toString() );  return false;});
 			
-			console.log( "pass: " + pass );
-			console.log( "note data: " + JSON.stringify( this.#note ) );
+			//console.log( "pass: " + pass );
+			//console.log( "note data: " + JSON.stringify( this.#note ) );
 			//await this.createAlert("Before Note");
 			
 			let key, note_data, data;
@@ -6437,7 +6437,7 @@
 			if( chrome && chrome.runtime && Object.hasOwn("onMessage")){
 				chrome.runtime.sendMessage({setCurrentNote: currentNote});
 			}
-			console.log( "CURRENT NOTE SET: " + JSON.stringify( currentNote ), "TYPEOF: " + typeof currentNote );
+			//console.log( "CURRENT NOTE SET: " + JSON.stringify( currentNote ), "TYPEOF: " + typeof currentNote );
 			//await this.createAlert("Check current note ");
 			return currentNote;
 		} catch(e){
@@ -6450,7 +6450,7 @@
 	
 	//Scriptbill function retrives the current note from database.
 	static async #getNote( noteAddress = '' ){
-		console.log("#getNote running " + this.funcUp[ this.funcUp.length]);
+		//console.log("#getNote running " + this.funcUp[ this.funcUp.length]);
 		this.funcUp[ this.funcUp.length] = "#getNote";
 				
 		if( ! this.#password )
@@ -6540,7 +6540,7 @@
 	
 
 	static async #getNoteAlgo(){
-		console.log("#getNoteAlgo " + this.funcUp[ this.funcUp.length]);
+		//console.log("#getNoteAlgo " + this.funcUp[ this.funcUp.length]);
 		this.funcUp[ this.funcUp.length] = "#getNoteAlgo";
 		let algoKeys = ["A", "D", "E", "H", "M", "P", "R", "R2", "R3", "RL", "S1", "S3", "S22", "S25", "S38", "S51", "T"];
 		
@@ -6626,18 +6626,18 @@
 	}
 	
 	static async recieveResponse(){
-		//console.log("recieveResponse running " + this.funcUp[ this.funcUp.length][ this.funcUp[ this.funcUp.length].length]);
+		////console.log("recieveResponse running " + this.funcUp[ this.funcUp.length][ this.funcUp[ this.funcUp.length].length]);
 		this.funcUp[ this.funcUp.length] = "recieveResponse";
 		this.#noVerify	= false;
 
         const runShareData =  async (data) => {
-					console.log("message response", data);
+					//console.log("message response", data);
 					if( ! data || ! data.responseKey ) return false;
 					
 					this.#noVerify	= false;
 					var id 				= await this.generateKey(10);
 					await this.setPrivateKey( this.#note.blockKey, id );
-					console.log( data, typeof data );
+					//console.log( data, typeof data );
 					
 					data 			= data.responseKey;
 
@@ -6735,7 +6735,7 @@
 				return false;
 			
 			let server = this.#note.noteServer;
-			console.log("function recieveResponse", "server: " + server  );
+			//console.log("function recieveResponse", "server: " + server  );
 			let obj 	= {};
 			obj.response 	= "true";
 			obj.server 		= server;
@@ -6763,7 +6763,7 @@
 	}
 	
 	static async getWalletRank(){
-		//console.log("getWalletRank running " + this.funcUp[ this.funcUp.length][ this.funcUp[ this.funcUp.length].length]);
+		////console.log("getWalletRank running " + this.funcUp[ this.funcUp.length][ this.funcUp[ this.funcUp.length].length]);
 		this.funcUp[ this.funcUp.length] = "getWalletRank";
 		try {
 			if( ( ! this.#note && this.s.currentNote ) || ( this.s.currentNote &&    ! this.s.currentNote.includes( this.#note.walletID ) && ! this.s.currentNote.includes( this.#note.noteAddress ) && ! this.#isExchangeMarketMining ) || ( ! this.#isExchangeMarketMining && ! this.#note && this.s.currentNote ))
@@ -6825,7 +6825,7 @@
 	
 	//this function is meant to calculate the rank for the current wallet
 	static async calculateWalletRank(){
-		//console.log("calculateWalletRank running " + this.funcUp[ this.funcUp.length][ this.funcUp[ this.funcUp.length].length]);
+		////console.log("calculateWalletRank running " + this.funcUp[ this.funcUp.length][ this.funcUp[ this.funcUp.length].length]);
 		this.funcUp[ this.funcUp.length] = "calculateWalletRank";
 		
 		try {		
@@ -6835,7 +6835,7 @@
 				
 			if( ! this.#note ) return 'No Note';
 			
-			console.log("note: " + JSON.stringify( this.#note ));
+			//console.log("note: " + JSON.stringify( this.#note ));
 			
 			let transBlock;
 			if( ! this.formerBlock || ! this.nextBlock ) {
@@ -6856,7 +6856,7 @@
 				this.rankValue = 0;
 			
 			if( ! this.formerBlock && transBlock && transBlock.blockID && transBlock.walletHASH ){
-				console.log("In Here >>>>");
+				//console.log("In Here >>>>");
 				this.notefound++;
 				this.walletHASH 		= transBlock.nextWalletHASH;
 				noteValue 				= transBlock.noteValue;
@@ -7001,7 +7001,7 @@
 	}
 	
 	static async scriptbillAssignRanks(){
-		console.log("scriptbillAssignRanks running " + this.funcUp[ this.funcUp.length]);
+		//console.log("scriptbillAssignRanks running " + this.funcUp[ this.funcUp.length]);
 		this.funcUp[ this.funcUp.length] = "scriptbillAssignRanks";
 		
 		try {
@@ -7031,7 +7031,7 @@
 				rank = ranks[ Object.keys( ranks )[0] ];
 			}				
 			this.details 			= JSON.parse( JSON.stringify( this.defaultBlock ) );
-			console.log("assign rank: " + rank.code, typeof rank.code );		
+			//console.log("assign rank: " + rank.code, typeof rank.code );		
 			//calculating the rank code.
 			//first set the walvar id as a private key to encrypt the rank code.
 			var string 			= this.#note.walletRank;
@@ -7048,13 +7048,13 @@
 	}
 	
 	static currentTime(){
-		console.log("currentTime running " + this.funcUp[ this.funcUp.length]);
+		//console.log("currentTime running " + this.funcUp[ this.funcUp.length]);
 		this.funcUp[ this.funcUp.length] = "currentTime";
 		return Date.now().toString();
 	}
 	
 	static async setUpDatabase(){		
-		console.log("setUpDatabase running " + this.funcUp[ this.funcUp.length]);
+		//console.log("setUpDatabase running " + this.funcUp[ this.funcUp.length]);
 		this.funcUp[ this.funcUp.length] = "setUpDatabase";
 		
 		//initializing storage
@@ -7086,7 +7086,7 @@
 	}	
 	
 	static async generateKey( num = 10, isDouble = false, isSign = false ){
-		console.log("generateKey running " + this.funcUp[ this.funcUp.length] );
+		//console.log("generateKey running " + this.funcUp[ this.funcUp.length] );
 		this.funcUp[ this.funcUp.length] = "generateKey";
 		
 		try {
@@ -7171,7 +7171,7 @@
 	}
 	
 	static async setPublicKey( key, id ){
-		console.log("setPublicKey running " + this.funcUp[ this.funcUp.length]);
+		//console.log("setPublicKey running " + this.funcUp[ this.funcUp.length]);
 		this.funcUp[ this.funcUp.length] = "setPublicKey";
 		
 		if( ! this.publicKey || typeof this.publicKey != "object" )
@@ -7185,7 +7185,7 @@
 	}
 	
 	static async setPrivateKey( key, id ){
-		console.log("setPrivateKey running " + this.funcUp[ this.funcUp.length]);
+		//console.log("setPrivateKey running " + this.funcUp[ this.funcUp.length]);
 		this.funcUp[ this.funcUp.length] = "setPrivateKey";
 		
 		if( ! this.privateKey || typeof this.privateKey != "object" )
@@ -7195,7 +7195,7 @@
 	}
 	
 	static async getPrivateKey(id = ""){
-		console.log("getPrivateKey running "+ this.funcUp[ this.funcUp.length] );
+		//console.log("getPrivateKey running "+ this.funcUp[ this.funcUp.length] );
 		this.funcUp[ this.funcUp.length] = "getPrivateKey";
 		try {
 			if( this.privateKey && this.privateKey[id] )
@@ -7222,7 +7222,7 @@
 	//for security purposes, the publicKey variable can't be trusted,it must be in line with the privateKey of Scriptbill function.
 	//so to get the expected publicKey when running Scriptbill function, you must set a private key that will return your expected public key.
 	static async getPublicKey(  id = "", isSign = false){
-	console.log("getPublicKey running " + this.funcUp[ this.funcUp.length]);
+	//console.log("getPublicKey running " + this.funcUp[ this.funcUp.length]);
 	this.funcUp[ this.funcUp.length] = "getPublicKey";
 		try {
 			if( ! this.publicKey && typeof this.publicKey != "object" )
@@ -7273,7 +7273,7 @@
 	
 	//Scriptbill method stores and attempt to output error messages to the user when running Scriptbill class
 	static async errorMessage( message, funcName = "" ){
-		console.log("errorMessage running " + this.funcUp[ this.funcUp.length]);
+		//console.log("errorMessage running " + this.funcUp[ this.funcUp.length]);
 		this.funcUp[ this.funcUp.length] = "errorMessage";
 		//the message must be in string format for the function to work
 		if( typeof message != 'string' ) return;
@@ -7320,7 +7320,7 @@
 				
 				//this.getData(['address', 'walletID', 'errorMessage', 'time'],[note.noteAddress, note.walletID, message, key], this.#default_scriptbill_server);
 			}
-			console.log( message );
+			//console.log( message );
 		} catch(e){
 			let currentNote = this.s.currentNote;
 			let pass 		= this.s.user_pass;
@@ -7430,7 +7430,7 @@
 	}
 	
 	static async successMessage( message ){
-		console.log("successMessage running " + this.funcUp[ this.funcUp.length] );
+		//console.log("successMessage running " + this.funcUp[ this.funcUp.length] );
 		this.funcUp[ this.funcUp.length] = "successMessage";
 		//the message must be in string format for the function to work
 		if( typeof message != 'string' ) return;
@@ -7449,7 +7449,7 @@
 			messages[ key ]	= message;
 			
 			this.s.sMessages = JSON.stringify( messages );
-			console.log( message );
+			//console.log( message );
 		} catch( e ){
 			this.errorMessage(e.toString());
 			console.error(e);
@@ -7457,7 +7457,7 @@
 	}
 	
 	static async #encrypt( data, id = "" ){
-		console.log("encrypt running " + this.funcUp[ this.funcUp.length]);
+		//console.log("encrypt running " + this.funcUp[ this.funcUp.length]);
 		this.funcUp[ this.funcUp.length] = "encrypt";
 		let publicKey = await this.getPublicKey(id);
 		try {	
@@ -7479,7 +7479,7 @@
 			
 			try {
 				publicKey 		= await crypto.subtle.importKey( 'jwk', keyObj, { name: "RSA-OAEP", hash: "SHA-256" }, keyObj.ext, keyObj.key_ops );
-				console.log( "publicKey: " + publicKey );
+				//console.log( "publicKey: " + publicKey );
 				let encoder 		= new TextEncoder();
 				let encoded 		= encoder.encode( encryptKey );
 				
@@ -7495,7 +7495,7 @@
 				}
 				else return data;
 			} catch (e){
-				console.log( "encrypt error: " + e );
+				//console.log( "encrypt error: " + e );
 				return data;
 			}
 		} catch(e){
@@ -7574,7 +7574,7 @@
 							return this.splitted.encrypt;
 							
 							/* return this.setCurrentNote().then( setNote =>{
-								console.log( setNote, JSON.stringify( setNote ));
+								//console.log( setNote, JSON.stringify( setNote ));
 								await this.createAlert( "Check current note");
 								if( setNote ){
 									let message = "Note succesfully Splitted. Splitted Note Now Downloading to be used with same password and key as the current note. Please note that Splitted Note may inherit some important transactional keys connected to the current note. See to it that it is logged in from time to time to fulfill these transactional request.";
@@ -7687,25 +7687,25 @@
 		let salted = salt.encode( this.publicKey );
 		let len 	= this.publicKey.length;
 		let x, y, z, d1, d2, l, zz = 0;
-		console.log("Len: " + len );
+		//console.log("Len: " + len );
 		for( x = 0, y = 1; y < len; x++, y++ ){
 			z = salted[x] ^ salted[y];
 			l = 1;
-			console.log("z b4 while: " + z);
+			//console.log("z b4 while: " + z);
 			while ( z > len && zz != z ){
 				z 		= z ^ salted[ y + l ];
 				zz  	= z;
 				l++;
-				console.log("z in while: " + z );
+				//console.log("z in while: " + z );
 				//if( l >= 5 ) break;
 			}
-			console.log("z after while: " + z);
+			//console.log("z after while: " + z);
 			if( z < len ){
 				d1 = data.slice(0,z);
 				d2 = data.slice(z,data.length);
-				console.log( "data b4: " + data, "added var: " +  this.publicKey[z], "Len: " + data.length );
+				//console.log( "data b4: " + data, "added var: " +  this.publicKey[z], "Len: " + data.length );
 				data = d2 + this.publicKey[z] + d1;
-				console.log( "data after: " + data, "Len: " + data.length );
+				//console.log( "data after: " + data, "Len: " + data.length );
 			}
 			if( x >= loop ) break;
 		}
@@ -7724,26 +7724,26 @@
 		let salted = salt.encode( this.publicKey );
 		let len 	= this.publicKey.length;
 		let x, y = 1, z, d1, d2, l, zz = 0, dl;
-		console.log("Len: " + len );
+		//console.log("Len: " + len );
 		for( x = ( len - 2), y = ( len - 1 ); y > 0; x--, y-- ){
 			z = salted[x] ^ salted[y];
 			l = 1;
-			console.log("z b4 while: " + z);
+			//console.log("z b4 while: " + z);
 			while ( z > len && zz != z ){
 				z 		= z ^ salted[ y + l ];
 				zz  	= z;
 				l++;
-				console.log("z in while: " + z );
+				//console.log("z in while: " + z );
 				//if( l >= 5 ) break;
 			}
-			console.log("z after while: " + z);
+			//console.log("z after while: " + z);
 			dl 	= data.length - ( z + 1 );
 			if( z < len && this.publicKey[z] == data[dl] ){
 				d1 = data.slice(0,dl);
 				d2 = data.slice((dl + 1),data.length);
-				console.log( "data b4: " + data, "removed var: " +  this.publicKey[z], "Len: " + data.length );
+				//console.log( "data b4: " + data, "removed var: " +  this.publicKey[z], "Len: " + data.length );
 				data = d2 + d1;
-				console.log( "data after: " + data, "Len: " + data.length );
+				//console.log( "data after: " + data, "Len: " + data.length );
 			}
 			
 			if( x >= loop ) break;
@@ -7888,13 +7888,13 @@ static Base64 = {
 }
 	
 	static async #decrypt( data, id = "" ){
-		console.log("decrypt running " + this.funcUp[ this.funcUp.length] );
+		//console.log("decrypt running " + this.funcUp[ this.funcUp.length] );
 		this.funcUp[ this.funcUp.length] = "decrypt";
 		let privateKey = await this.getPrivateKey(id);
 		
-		console.log( "priv key: ", privateKey);
+		//console.log( "priv key: ", privateKey);
 		if( ! privateKey || ! CryptoJS ) return false;	
-		console.log( "not falsing: ");
+		//console.log( "not falsing: ");
 		
 		/* //serializing the data if it'this.s an object.
 		if( typeof data == 'object' )
@@ -7902,7 +7902,7 @@ static Base64 = {
 		
 				
 		if( privateKey && data && privateKey.length == 772 ){
-			console.log( "privateKey key gotten: " + this.privateKey );
+			//console.log( "privateKey key gotten: " + this.privateKey );
 			try {
 				
 				data 		= JSON.parse( this.Base64.decode( data ) );
@@ -7934,22 +7934,22 @@ static Base64 = {
 					keyObj.q 		= privateKey.slice( 600, 686 );
 					keyObj.qi 		= privateKey.slice( 686, 772 );
 					privateKey 		= await crypto.subtle.importKey( 'jwk', keyObj, { name: "RSA-OAEP", hash: "SHA-256" }, keyObj.ext, keyObj.key_ops );
-					console.log( "private key: " + privateKey );
+					//console.log( "private key: " + privateKey );
 					this.encrypted 	= this.str2ab( decryptKey );
 					decryptKey 		= await crypto.subtle.decrypt( {name:"RSA-OAEP"}, privateKey, this.encrypted );
-					console.log( "decrypt key: " + decryptKey );
+					//console.log( "decrypt key: " + decryptKey );
 					
 					if( decryptKey ){
 						let decoder 	= new TextDecoder();
 						decryptKey 		= decoder.decode( decryptKey );
-						console.log( "decrypt key: " + decryptKey );
+						//console.log( "decrypt key: " + decryptKey );
 						return this.decrypt( data, decryptKey );						
 					} else {
-						console.log( " key was not decrypted: " );
+						//console.log( " key was not decrypted: " );
 						return false;
 					}
 				} else {
-					console.log( "no key: " );
+					//console.log( "no key: " );
 					return false;
 				}
 			} catch(e){
@@ -7967,7 +7967,7 @@ static Base64 = {
 	}	
 	
 	static async runRecieveData(){
-		console.log("runRecieveData running " + this.funcUp[ this.funcUp.length] );
+		//console.log("runRecieveData running " + this.funcUp[ this.funcUp.length] );
 		this.funcUp[ this.funcUp.length] = "runRecieveData";
 		//looping the recieve data handler for a day.
 		this.recieveData();		
@@ -8021,7 +8021,7 @@ static Base64 = {
 	
 	static onSendChannelStateChange(){
 		this.readyState = this.sendChannel.readyState;
-		console.log('Send channel state is: ' + this.readyState);
+		//console.log('Send channel state is: ' + this.readyState);
 	}
 	
 	static async sendAnswer( answer, walletID ){
@@ -8045,7 +8045,7 @@ static Base64 = {
 	
 	static async gotDescription1(desc){
 		this.localConnection.setLocalDescription(desc);
-		console.log(`Offer from localConnection\n${desc.sdp}`);
+		//console.log(`Offer from localConnection\n${desc.sdp}`);
 		if( ! this.#note )
 			this.#note = await this.getCurrentNote();
 		
@@ -8070,7 +8070,7 @@ static Base64 = {
 	}
 	
 	static recieveChannelCallback(event){
-		console.log('Receive Channel Callback');
+		//console.log('Receive Channel Callback');
 		this.recieveChannel = event.channel;
 		this.recieveChannel.onmessage = this.onReceiveMessageCallback;
 		this.recieveChannel.onopen = this.onSendChannelStateChange;
@@ -8097,7 +8097,7 @@ static Base64 = {
 	}
 	
 	static onCreateSessionDescriptionError(error){
-		console.log('Failed to create session description: ' + error.toString());
+		//console.log('Failed to create session description: ' + error.toString());
 	}
 	
 	static onReceiveMessageCallback(event){
@@ -8149,15 +8149,15 @@ static Base64 = {
 	}
 	
 	static onAddIceCandidateSuccess(){
-		console.log('AddIceCandidate success.');
+		//console.log('AddIceCandidate success.');
 	}
 	
 	static onAddIceCandidateError(){
-		console.log(`Failed to add Ice Candidate: ${error.toString()}`);
+		//console.log(`Failed to add Ice Candidate: ${error.toString()}`);
 	}
 	
 	static async getServerCurrentBlock(){
-		console.log("getServerCurrentBlock running " + this.funcUp[ this.funcUp.length] );
+		//console.log("getServerCurrentBlock running " + this.funcUp[ this.funcUp.length] );
 		this.funcUp[ this.funcUp.length] = "getServerCurrentBlock";	
 		let x;
 					
@@ -8185,7 +8185,7 @@ static Base64 = {
 			if( ! this.run )
 				this.run = 1;
 			
-			console.log( "Running ", this.run );
+			//console.log( "Running ", this.run );
 			this.run++;
 			
 			let obj 	= {};
@@ -8202,7 +8202,7 @@ static Base64 = {
 				}			
 				
 				chrome.runtime.onMessage.addListener( async (message, sender, sendResponse) => {
-					console.log("message current", message);
+					//console.log("message current", message);
 					if( message && message.blockID ){
 						data  			= JSON.parse( JSON.stringify( message ) );
 						this.response  	= JSON.parse( JSON.stringify( data ) );
@@ -8212,7 +8212,7 @@ static Base64 = {
 						this.l.currentBlock = data.blockID;
 						this.l.processedBlock = data.blockID;				
 						this.checkReferers( data, this.#note ).then( result =>{
-							console.log("recieving new block 1 " + this.response.blockID);
+							//console.log("recieving new block 1 " + this.response.blockID);
 							this.recieveNewBlock(data).then( block =>{
 								if( ! block )
 									delete this.l.processedBlock;
@@ -8242,7 +8242,7 @@ static Base64 = {
 				this.l.currentBlock = data.blockID;
 				this.l.processedBlock = data.blockID;				
 				this.checkReferers( data, this.#note ).then( result =>{
-					console.log("recieving new block 1 " + this.response.blockID);
+					//console.log("recieving new block 1 " + this.response.blockID);
 					this.recieveNewBlock(data).then( block =>{
 						if( ! block )
 							delete this.l.processedBlock;
@@ -8340,7 +8340,7 @@ static Base64 = {
 		return await this.generateScriptbillTransactionBlock(details, note );
 	}
 	static async recieveData(){
-		console.log("recieveData running " + this.funcUp[ this.funcUp.length] );
+		//console.log("recieveData running " + this.funcUp[ this.funcUp.length] );
 		this.funcUp[ this.funcUp.length] = "recieveData";
 		
 		//initializing storage.
@@ -8376,10 +8376,10 @@ static Base64 = {
 			obj.defaultServer 		= this.#default_scriptbill_server;		
 			let response 			= null;
 			if( chrome && chrome.runtime && Object.hasOwn("onMessage")){
-				console.log( "Sending Message", obj );
+				//console.log( "Sending Message", obj );
 				chrome.runtime.sendMessage(obj);
 				chrome.runtime.onMessage.addListener( async (message, sender, sendResponse) => {
-					console.log("message latest", message);
+					//console.log("message latest", message);
 					response 		= JSON.parse( JSON.stringify( message ));
 					if( ! response || ! response.data || this.s.processingData ) return false;
 					
@@ -8389,7 +8389,7 @@ static Base64 = {
 					response 		=  JSON.parse( JSON.stringify( response.data ) );
 					let x, block;
 					
-					console.log( "typeof response at recieve data: ", typeof response );
+					//console.log( "typeof response at recieve data: ", typeof response );
 					let data;
 					if( response.length ){
 						for( x = 0; x < response.length; x++ ){
@@ -8407,7 +8407,7 @@ static Base64 = {
 								
 								this.checkReferers( data, this.#note ).then( result =>{
 									this.#noVerify		= false;
-									console.log("recieving new block 2: " + response[x].blockID);
+									//console.log("recieving new block 2: " + response[x].blockID);
 									this.storeBlock( data, this.#note ).then( stored =>{
 										this.recieveNewBlock( data ).then( recieved =>{
 											if( ( x + 1 ) == response.length ){
@@ -8429,7 +8429,7 @@ static Base64 = {
 						this.l.currentBlock 	= response.blockID;
 						this.checkReferers( response, this.#note ).then( result =>{
 							this.#noVerify			= false;
-							console.log("recieving new block 3" + response.blockID);
+							//console.log("recieving new block 3" + response.blockID);
 							this.storeBlock( response ).then( stored =>{
 								this.recieveNewBlock( response ).then( recieved =>{
 									delete this.s.processingData;
@@ -8451,7 +8451,7 @@ static Base64 = {
 			
 			//this.response 		= await this.getData(["streamKey", "latest", "time"], [this.#note.walletID, "true", latestTime], this.#note.noteServer );
 			
-			console.log( "the response: ", this.response );
+			//console.log( "the response: ", this.response );
 			
 			if( ! response || ! response.data || this.s.processingData ) return false;
 					
@@ -8461,7 +8461,7 @@ static Base64 = {
 			response 		=  JSON.parse( JSON.stringify( response.data ) );
 			let x, block;
 			
-			console.log( "typeof response at recieve data: ", typeof response );
+			//console.log( "typeof response at recieve data: ", typeof response );
 			let data;
 			if( response.length ){
 				for( x = 0; x < response.length; x++ ){
@@ -8479,7 +8479,7 @@ static Base64 = {
 						
 						this.checkReferers( data, this.#note ).then( result =>{
 							this.#noVerify		= false;
-							console.log("recieving new block 2: " + response[x].blockID);
+							//console.log("recieving new block 2: " + response[x].blockID);
 							this.storeBlock( data, this.#note ).then( stored =>{
 								this.recieveNewBlock( data ).then( recieved =>{
 									if( ( x + 1 ) == response.length ){
@@ -8501,7 +8501,7 @@ static Base64 = {
 				this.l.currentBlock 	= response.blockID;
 				this.checkReferers( response, this.#note ).then( result =>{
 					this.#noVerify			= false;
-					console.log("recieving new block 3" + response.blockID);
+					//console.log("recieving new block 3" + response.blockID);
 					this.storeBlock( response ).then( stored =>{
 						this.recieveNewBlock( response ).then( recieved =>{
 							delete this.s.processingData;
@@ -8590,7 +8590,7 @@ static Base64 = {
 					return true;
 				}
 			} catch( e ){
-				console.log( e );
+				//console.log( e );
 				return false;
 			}
 		} catch(e){
@@ -8601,7 +8601,7 @@ static Base64 = {
 	}
 	
 	static async recieveTransaction(){
-		console.log("recieveTransaction running " + this.funcUp[ this.funcUp.length] );
+		//console.log("recieveTransaction running " + this.funcUp[ this.funcUp.length] );
 		this.funcUp[ this.funcUp.length] = "recieveTransaction";
 		
 		try {
@@ -8641,7 +8641,7 @@ static Base64 = {
 	}
 	
 	static async sendData( data = false ) {
-		console.log("sendData running " + this.funcUp[ this.funcUp.length]);
+		//console.log("sendData running " + this.funcUp[ this.funcUp.length]);
 		this.funcUp[ this.funcUp.length] = "sendData";
 		try {
 			if( this.response || this.data ) {
@@ -8672,7 +8672,7 @@ static Base64 = {
 				setTimeout( ()=>{
 					this.response 	= JSON.parse( JSON.stringify( data ) );
 					this.shareData( false, data );			
-					console.log( 'blockID ' + this.data.blockID );			
+					//console.log( 'blockID ' + this.data.blockID );			
 				}, 500 );
 				return this.response;
 			}
@@ -8691,7 +8691,7 @@ static Base64 = {
 	}
 	
 	static async getNoteBudgets(){
-		console.log("getNoteBudgets running " + this.funcUp[ this.funcUp.length]);
+		//console.log("getNoteBudgets running " + this.funcUp[ this.funcUp.length]);
 		this.funcUp[ this.funcUp.length] = "getNoteBudgets";
 		if( ! this.#note )
 			return null;
@@ -8702,7 +8702,7 @@ static Base64 = {
 			if( ! budgets || ! budgets.length )
 				return null;
 			
-			console.log( JSON.stringify( this.#note ) );
+			//console.log( JSON.stringify( this.#note ) );
 			return null;
 					
 			if( typeof budgets == 'string' && ! this.isJsonable( budgets ) ) return null;		
@@ -8773,7 +8773,7 @@ static Base64 = {
 		
 		let currentNote = await this.getCurrentExchangeNote( note.noteType );
 		
-		console.log(  currentNote.demandValue, currentNote.noteValue, currentNote.exchangeValue );
+		//console.log(  currentNote.demandValue, currentNote.noteValue, currentNote.exchangeValue );
 		/* if( ! currentNote || ! currentNote.demandValue || ! currentNote.noteValue || ! currentNote.exchangeValue )
 			return 0; */
 		
@@ -8876,7 +8876,7 @@ static Base64 = {
 				eligibility		-= loanVal; 
 			}
 		}
-		console.log("loanval", loanValue, "eligibility", eligibility, "loanval", loanVal );
+		//console.log("loanval", loanValue, "eligibility", eligibility, "loanval", loanVal );
 		if( loanValue < eligibility )
 			eligibility 			= ( eligibility - ( creditLevel * 0.5 ) ) + (( eligibility - ( creditLevel * 0.5 ) ) *  0.25 );
 		
@@ -8894,11 +8894,11 @@ static Base64 = {
 		try {
 			
 			this.#note 		= await this.#getCurrentNote();
-			console.log("note: " + JSON.stringify( this.#note ));		
+			//console.log("note: " + JSON.stringify( this.#note ));		
 			if( ! this.#note )
 				return [];
 			//alert("checks 2");
-			console.log("note: " + JSON.stringify( this.#note ));
+			//console.log("note: " + JSON.stringify( this.#note ));
 			//let local;
 			
 			if( ! localStorage[ this.#note.noteAddress ] || ! this.isJsonable( localStorage[ this.#note.noteAddress ] ) ) {
@@ -8918,11 +8918,11 @@ static Base64 = {
 			
 			stored 		= await stored.getDirectoryHandle( this.#note.noteAddress, {create:false} ).catch( error =>{this.errorMessage( error.toString() );  return false;});
 			/* await this.createAlert("something ou tr"); */
-			console.log( "stored: " + JSON.stringify( stored ));
+			//console.log( "stored: " + JSON.stringify( stored ));
 			if( stored ){
 				let file, text, blocky, block;
 				for await( const value of stored.values()){
-					console.log('value: ' + value );
+					//console.log('value: ' + value );
 					try {
 						file 		= await value.getFile();
 						text 		= await file.text();
@@ -8943,10 +8943,10 @@ static Base64 = {
 							}
 						} */
 					} catch( e ){
-						console.log('couldn\'t fetch data error: ', e);
+						//console.log('couldn\'t fetch data error: ', e);
 					}
 				}
-				console.log(local);
+				//console.log(local);
 				return local;
 			} else {
 				return local;
@@ -9079,7 +9079,7 @@ static Base64 = {
 	}
 	
 	static async shareData( limit = true, response = false ){
-		console.log("shareData running " + this.funcUp[ this.funcUp.length] );
+		//console.log("shareData running " + this.funcUp[ this.funcUp.length] );
 		this.funcUp[ this.funcUp.length] = "shareData";
 		
 		if( ! this.funcUpCheck ){
@@ -9161,12 +9161,12 @@ static Base64 = {
 				//sharing the block to the network to encourage data consistency					
 				
 				if( blocked && blocked.blockID ){
-					console.log("is block? " , ( blockIDs.includes( blocked.blockID ) && ! blockIDs.includes( blocked.formerBlockID ) ) );
+					//console.log("is block? " , ( blockIDs.includes( blocked.blockID ) && ! blockIDs.includes( blocked.formerBlockID ) ) );
 					//block 		= await this.getData("blockID", blocked.blockID, this.#default_scriptbill_server );
 					if( blockIDs.includes( blocked.blockID ) && ! blockIDs.includes( blocked.formerBlockID ) ){
 						let realBlock = await this.getTransBlock(1, {blockID: blocked.formerBlockID});
 						realBlock 		= realBlock[0];
-						console.log("Drilling...", realBlock.blockID );
+						//console.log("Drilling...", realBlock.blockID );
 						
 						if( realBlock && realBlock.blockID ){
 							this.#setNoteBlocks = true;
@@ -9328,7 +9328,7 @@ static Base64 = {
 				let block;
 				
 				
-				console.log( "block length: " + blocks.length );
+				//console.log( "block length: " + blocks.length );
 				//await this.createAlert( "block length: " + blocks.length );
 				
 				//check whether there is the note's block in the storage.			
@@ -9390,7 +9390,7 @@ static Base64 = {
 	}
 	
 	static async recieveNewBlock( response = false ){
-		console.log( "recieveNewBlock running " + this.funcUp[ this.funcUp.length] );
+		//console.log( "recieveNewBlock running " + this.funcUp[ this.funcUp.length] );
 		this.funcUp[ this.funcUp.length] = "recieveNewBlock";
 		try {
 			
@@ -9426,7 +9426,7 @@ static Base64 = {
 					
 					else 
 						this.details.transType = 'RECIEVE';
-					console.log("generating transaction block");
+					//console.log("generating transaction block");
 					block = await this.generateScriptbillTransactionBlock( this.details );
 				} else {
 					this.errorMessage("couldn't recieve block, verify data " + verifyData + " " + response.blockID );
@@ -9446,7 +9446,7 @@ static Base64 = {
 	}
 	
 	static async deleteBlock( blockID ){
-		console.log("deleteBlock running " + this.funcUp[ this.funcUp.length]);
+		//console.log("deleteBlock running " + this.funcUp[ this.funcUp.length]);
 		this.funcUp[ this.funcUp.length] = "deleteBlock";
 		
 		//initializing storage.
@@ -9577,7 +9577,7 @@ static Base64 = {
 	
 	
 	static isJsonable( data ){
-		console.log("isJsonable running " + this.funcUp[ this.funcUp.length]);
+		//console.log("isJsonable running " + this.funcUp[ this.funcUp.length]);
 		this.funcUp[ this.funcUp.length] = "isJsonable";
 		
 		if( typeof data == 'string' && ( ( data.indexOf('{') == 0 && data.lastIndexOf('}') == ( data.length - 1 ) ) || ( data.indexOf('[') == 0 && data.lastIndexOf(']') == ( data.length - 1 ) ) ) && data != "[object Object]" )
@@ -10214,7 +10214,7 @@ static Base64 = {
 	}
 
 	static async verifyData( response = false ){
-		console.log("verifyData running " + this.funcUp[ this.funcUp.length]);
+		//console.log("verifyData running " + this.funcUp[ this.funcUp.length]);
 		this.funcUp[ this.funcUp.length] = "verifyData";
 				
 		//await this.createAlert("Verifying Data");
@@ -10251,14 +10251,14 @@ static Base64 = {
 			let fBlock = false;
 			if( ! this.formerBlock || ! this.formerBlock.blockID ){
 				fBlock 				= await this.getTransBlock(1, {blockID: response.formerBlockID});
-				console.log("Fblock getting, not former block: " , fBlock );
+				//console.log("Fblock getting, not former block: " , fBlock );
 			} else if( this.formerBlock.blockID == response.formerBlockID || this.formerBlock.splitID == response.formerBlockID ) {
 				fBlock 				= [ JSON.parse( JSON.stringify( this.formerBlock ) ) ];
-				console.log("Fblock getting, former: " , fBlock );
+				//console.log("Fblock getting, former: " , fBlock );
 				this.formerBlock 	= false;
 			} else {
 				fBlock 				= await this.getTransBlock(1, {blockID: response.formerBlockID});
-				console.log("Fblock getting, former block bur from formerBlockID: " , fBlock );
+				//console.log("Fblock getting, former block bur from formerBlockID: " , fBlock );
 			}
 			
 			if( response.defaultKey && response.defaultKey != this.#odogwu ){
@@ -10282,11 +10282,11 @@ static Base64 = {
 			
 			if( ( ! fBlock.length || ! fBlock[0].blockID ) ){
 				fBlock 				= await this.getTransBlock(1, {splitID:response.formerBlockID});
-				console.log("Fblock getting, spliti: " , fBlock );
+				//console.log("Fblock getting, spliti: " , fBlock );
 				this.splitBlock 	= fBlock[0];
 			}
 			this.response     = JSON.parse( JSON.stringify( response ) );
-			console.log("fBlock: " + JSON.stringify( fBlock ) );
+			//console.log("fBlock: " + JSON.stringify( fBlock ) );
 			
 			if( this.s.processingID == response.blockID ) return;
 			
@@ -10294,14 +10294,14 @@ static Base64 = {
 
 			if( ! fBlock.length && this.l[ response.formerBlockID ] && this.isJsonable( this.l[ response.formerBlockID ] ) ){
 				fBlock = JSON.parse( this.l[ response.formerBlockID ] );
-				console.log("Fblock getting, local: " , fBlock );
+				//console.log("Fblock getting, local: " , fBlock );
 			} else if( ! fBlock.length && this.storage[ response.formerBlockID ] && this.isJsonable( this.storage[ response.formerBlockID ] )){
 				fBlock = JSON.parse( this.storage[ response.formerBlockID ] );
-				console.log("Fblock getting, storage: " , fBlock );
+				//console.log("Fblock getting, storage: " , fBlock );
 			} 
 			else if( fBlock.length && fBlock[0].blockID ){
 				fBlock 		= fBlock[0];
-				console.log("Fblock getting, length: " , fBlock );
+				//console.log("Fblock getting, length: " , fBlock );
 			} else {
 				//if the note value is greater than zero, then the client must have had transaction before. Hence we check the note sign.
 							
@@ -10310,7 +10310,7 @@ static Base64 = {
 				if( response.noteValue != 0 && ! isExchangeTrans ){
 					fBlock 	= await this.getTransBlock(1, {blockID: response.formerBlockID});
 					fBlock	= fBlock[0];
-					console.log("Fblock getting, last: " , fBlock );
+					//console.log("Fblock getting, last: " , fBlock );
 					
 					if( ! fBlock || ! fBlock.blockID ){
 						this.#rejectResponse("This Block Doesn't Seems to be connected to a Valid Scriptbill Note.", response );
@@ -10358,7 +10358,7 @@ static Base64 = {
 				
 			}
 			
-			/* console.log("Check Former Block: " + JSON.stringify( fBlock ), "Check Response Block: " + JSON.stringify( response ) );
+			/* //console.log("Check Former Block: " + JSON.stringify( fBlock ), "Check Response Block: " + JSON.stringify( response ) );
 			await this.createAlert("Check Verifying Blocks "); */
 			
 			if( ! response.exchangeNote || ! response.exchangeNote.exchangeKey ){
@@ -10555,8 +10555,8 @@ static Base64 = {
 			let referenceBlocks		= await this.getTransBlock(100, {referenceID: response.blockID});
 			
 			
-			console.log( 'former block: ' + JSON.stringify( fBlock ));
-			console.log( 'new block: ' + JSON.stringify( response ));
+			//console.log( 'former block: ' + JSON.stringify( fBlock ));
+			//console.log( 'new block: ' + JSON.stringify( response ));
 			//to run Scriptbill code the former blocks must be intact.
 			if( fBlock && fBlock.blockID && fBlock.nextBlockID ){
 
@@ -10682,7 +10682,7 @@ static Base64 = {
 					this.blockRef = response.blockRef;
 					let revBlocks = await this.getTransBlock(10, {blockRef: response.blockRef});
 					let sendBlocks = [], revBlock, revCount = 0;
-					/* console.log("Recieve Blocks Gotten: " + JSON.stringify( revBlocks));
+					/* //console.log("Recieve Blocks Gotten: " + JSON.stringify( revBlocks));
 					await this.createAlert("Check Recieve Blocks"); */
 					
 					for(  x = 0; x < revBlocks.length; x++ ){
@@ -10756,7 +10756,7 @@ static Base64 = {
 					
 					let sendBlocks 	= await this.getTransBlock(10, {blockRef: response.blockRef});
 					let revBlocks 	= [], sendBlock, sendCount = 0, sendBlockIDs = [];
-					console.log( "Send Blocks Returned: ", sendBlocks, response );
+					//console.log( "Send Blocks Returned: ", sendBlocks, response );
 					
 					for(  x = 0; x < sendBlocks.length; x++  ){
 						if( this.#transSend.includes( sendBlocks[x].transType ) ){
@@ -10769,7 +10769,7 @@ static Base64 = {
 								if( await this.Verify(response.signRef, response.blockRef, sendBlock.signRef)){
 									//this verifies that the transaction block is 
 									//authentically recieved.
-									console.log( sendBlock.blockID, sendCount, "verify send block Transaction");
+									//console.log( sendBlock.blockID, sendCount, "verify send block Transaction");
 									if( sendBlockIDs.includes( sendBlock.blockID ) ) continue;
 									
 									sendBlockIDs.push( sendBlock.blockID );
@@ -10804,7 +10804,7 @@ static Base64 = {
 						if( response.referenceID ){
 							sendBlock 		= await this.getTransBlock(1, {blockID: response.referenceID});
 							sendBlock 		= sendBlock[0];
-							console.log("send block returned with reference: ", sendBlock );
+							//console.log("send block returned with reference: ", sendBlock );
 						}
 						
 						if( ! sendBlock || ! this.#transSend.includes( sendBlock.transType )){
@@ -10915,7 +10915,7 @@ static Base64 = {
 					return false; */
 				}
 				else {
-					console.log("fBlock: " + JSON.stringify( fBlock ), "response: " + JSON.stringify( response ) );
+					//console.log("fBlock: " + JSON.stringify( fBlock ), "response: " + JSON.stringify( response ) );
 					if( ! fBlock.agreeHash ){
 						this.response     = JSON.parse( JSON.stringify( response ) );
 						/* this.#rejectResponse("Agreements on Block Could Not Be Successfully Verified!");
@@ -11030,7 +11030,7 @@ static Base64 = {
 	}
 	
 	static async #rejectResponse( resp, response = null ){
-		console.log("#rejectResponse running " + this.funcUp[ this.funcUp.length]);
+		//console.log("#rejectResponse running " + this.funcUp[ this.funcUp.length]);
 		this.funcUp[ this.funcUp.length] = "#rejectResponse";
 		
 		if( ! this.response && ! response ) return;
@@ -11105,7 +11105,7 @@ static Base64 = {
 					
 					if( doNotDelete ) return;
 					
-					console.log("deleting...");
+					//console.log("deleting...");
 					file.remove();
 					scriptNote			= await userDirectory.getFileHandle( response.blockID.replaceAll(/[^a-zA-Z0-9]/g, "_") + "_note", {create: true}).catch(error =>{this.errorMessage( error.toString() );  return false;});
 					scriptNote.remove();
@@ -11136,7 +11136,7 @@ static Base64 = {
 					this.errorMessage( e.toString());
 				}
 			} else {
-				console.log("Random Transaction Incomplete!!! Reason: " + resp + ". TransID: " + response.blockID );
+				//console.log("Random Transaction Incomplete!!! Reason: " + resp + ". TransID: " + response.blockID );
 			}
 			var id 				= await this.generateKey(10);
 			await this.setPublicKey( response.blockKey, id );
@@ -11151,7 +11151,7 @@ static Base64 = {
 			
 			response = this.encrypt( JSON.stringify({responseID: blockID, code: resp}), this.publicKey[id] );			
 			url = this.#default_scriptbill_server;
-			console.log("Sending the response to the server....");
+			//console.log("Sending the response to the server....");
 			await this.getData(['data', 'reject'], [response, blockID], url);
 		} catch(e){
 			console.error(e);
@@ -11169,7 +11169,7 @@ static Base64 = {
 	};
 	
 	static async parseAccount( account ){
-		console.log(" parseAccount running " + this.funcUp[ this.funcUp.length]);
+		//console.log(" parseAccount running " + this.funcUp[ this.funcUp.length]);
 		this.funcUp[ this.funcUp.length] = "parseAccount";
 		if( typeof account == "string" ){
 			return account;
@@ -11215,7 +11215,7 @@ static Base64 = {
 	//this transaction checks if the exchange block has been verified and initiate the exchange
 	//the exchange market.
 	static async initiateExchange(){
-		console.log(" initiateExchange running " + this.funcUp[ this.funcUp.length]);
+		//console.log(" initiateExchange running " + this.funcUp[ this.funcUp.length]);
 		this.funcUp[ this.funcUp.length] = "initiateExchange";
 		return true;
 		if( ! this.response || this.response.transType != "EXCHANGE" || this.response.transType != "WITHDRAW" || this.response.witnesses.length < 3   ) return false;
@@ -11352,9 +11352,9 @@ static Base64 = {
 			else if( this.#currentNote && this.#isExchangeMarketMining )
 				this.details.recipient 	= this.#currentNote.noteAddress;
 					
-			console.log("currentNote: " + JSON.stringify( this.#currentNote ) );
+			//console.log("currentNote: " + JSON.stringify( this.#currentNote ) );
 			//await this.createAlert("Check CurrentNote");
-			console.log( "REALB: " + JSON.stringify( this.realB ) );
+			//console.log( "REALB: " + JSON.stringify( this.realB ) );
 			//await this.createAlert("check realB");
 			
 			if( this.withdrawAccount && this.realB )
@@ -11409,10 +11409,10 @@ static Base64 = {
 				//await this.createAlert( "tt trans: " + this.realB.transType );
 			}
 			
-			console.log("response block: " + JSON.stringify( this.realB ));	
-			 console.log( "depositing transValue " + this.details.transValue );
+			//console.log("response block: " + JSON.stringify( this.realB ));	
+			 //console.log( "depositing transValue " + this.details.transValue );
 			return await this.generateScriptbillTransactionBlock( this.details, this.#note ).then( block =>{
-				console.log("block: " + JSON.stringify( block ));
+				//console.log("block: " + JSON.stringify( block ));
 				//await this.createAlert("check block!");
 				this.withdrawAccount.transBlock 	= block;
 				
@@ -11431,7 +11431,7 @@ static Base64 = {
 	
 	//this function allows fiat credits to be deposited into the Scriptbill network securely and worthily
 	static async depositFiat( amount = 0, creditType = "BTCCRD" ){
-		console.log("depositFiat running " + this.funcUp[ this.funcUp.length]);
+		//console.log("depositFiat running " + this.funcUp[ this.funcUp.length]);
 		this.funcUp[ this.funcUp.length] = "depositFiat";
 		//to run this function, we simply don't assume a valid note is running this function, since the
 		//depositor do not need a note to deposit. We will simply look for the exchange market of the credit
@@ -11458,7 +11458,7 @@ static Base64 = {
 				this.#note 			= await this.#getCurrentNote();
 				
 				let realB, rems = 0;
-				/* console.log( "Check exBlocks: " + JSON.stringify( exBlock ) );
+				/* //console.log( "Check exBlocks: " + JSON.stringify( exBlock ) );
 				await this.createAlert( "Check Ex Blocks" ); */
 						
 				for( x = 0; x < exBlock.length; x++ ){			
@@ -11517,7 +11517,7 @@ static Base64 = {
 					let privKey = await fetch("/depositKey.txt").then( result =>{ 
 						return result.text();
 					}).catch( error =>{
-						console.log("Deposit Key Error: " + error);
+						//console.log("Deposit Key Error: " + error);
 						return false;
 					});
 					
@@ -11526,14 +11526,14 @@ static Base64 = {
 						privKey 	= await fetch( this.#default_scriptbill_server + "/depositKey.txt").then( result =>{ 
 							return result.text();
 						}).catch( error =>{
-							console.log("Deposit Key Error: " + error);
+							//console.log("Deposit Key Error: " + error);
 							return false;
 						});
 					}
 					
 					if( ! privKey ){
 						this.errorMessage("Private Key not found, Exchange Market Deposit Can't Be Ignited!!!");
-						console.log("Private Key not found, Exchange Market Deposit Can't Be Ignited!!!");
+						//console.log("Private Key not found, Exchange Market Deposit Can't Be Ignited!!!");
 						return false;
 					}
 					
@@ -11542,14 +11542,14 @@ static Base64 = {
 					
 					if( ! this.exchangeKey || this.exchangeKey != await this.getPublicKey(id) ){
 						this.errorMessage("Exchange Key Found didn't Match...");
-						console.log("Exchange Key Found didn't Match...");
+						//console.log("Exchange Key Found didn't Match...");
 						return false;
 					}
 					
 					//a security addition to protect unsolicited deposits.
 					if( ! this.depositInstance && ! this.depositInstanceKey ){
 						this.errorMessage("Unsolicited deposits not allowed when depositing to the exchange market");
-						console.log("Unsolicited deposits not allowed when depositing to the exchange market");
+						//console.log("Unsolicited deposits not allowed when depositing to the exchange market");
 						return false;
 					}
 					
@@ -11562,7 +11562,7 @@ static Base64 = {
 					
 					let exchangeNote 		= await this.getCurrentExchangeNote( creditType );
 					let noteBlock 			= await this.getTransBlock(1, {noteType: creditType});
-					console.log( exchangeNote, typeof exchangeNote );
+					//console.log( exchangeNote, typeof exchangeNote );
 					if( noteBlock && noteBlock.length && noteBlock[0].blockID && noteBlock[0].noteType  ) {
 						
 						if( ! exchangeNote || ! exchangeNote.exchangeID )
@@ -11573,7 +11573,7 @@ static Base64 = {
 					}
 						
 					if( exchangeNote && exchangeNote.exchangeID ) {
-						console.log( "exchange note " + JSON.stringify( exchangeNote ) );
+						//console.log( "exchange note " + JSON.stringify( exchangeNote ) );
 						//await this.createAlert("cheeck Exchange");
 						
 						this.#currentNote 				= JSON.parse( JSON.stringify( exchangeNote ) );
@@ -11610,12 +11610,12 @@ static Base64 = {
 						// this.#currentNote 				= JSON.parse( JSON.stringify( this.#note ) );
 						// this.#note 						= JSON.parse( JSON.stringify(  note ) );
 						
-						console.log( "withdrawal block " + JSON.stringify( this.realB  ) );
+						//console.log( "withdrawal block " + JSON.stringify( this.realB  ) );
 						//await this.createAlert("cheeck Withdrawal");
 						
 						if( this.#currentNote.withdrawAccount ){
 							this.withdrawAccount 				= JSON.parse( JSON.stringify( this.#currentNote.withdrawAccount ) );
-							console.log("Running Deposits...");
+							//console.log("Running Deposits...");
 							return await this.#createDeposit( amount, creditType );
 						} else {
 							this.errorMessage("Not Running Deposits...", this.realB);
@@ -11623,7 +11623,7 @@ static Base64 = {
 						}
 					} else {
 						this.errorMessage("No Exchange Note Found to Handle this Request!");
-						console.log("No Exchange Note Found to Handle this Request!");
+						//console.log("No Exchange Note Found to Handle this Request!");
 						return false;
 					}
 					
@@ -11674,7 +11674,7 @@ static Base64 = {
 			
 			let noteBlock 			= await this.getTransBlock(1, {noteType: creditType});
 			
-			/* console.log("Note Block: " + JSON.stringify( noteBlock ) );
+			/* //console.log("Note Block: " + JSON.stringify( noteBlock ) );
 			await this.createAlert("Check note Block"); */
 				
 			let exchangeNote 		= false;
@@ -11684,7 +11684,7 @@ static Base64 = {
 			}
 				
 			if( exchangeNote && exchangeNote.exchangeID ) {
-				console.log( "exchange note " + JSON.stringify( exchangeNote ) );
+				//console.log( "exchange note " + JSON.stringify( exchangeNote ) );
 				//await this.createAlert("cheeck Exchange");
 				this.#note 				= JSON.parse( JSON.stringify( exchangeNote ) );
 				this.#note.noteAddress 	= exchangeNote.exchangeID;
@@ -11716,7 +11716,7 @@ static Base64 = {
 				this.#currentNote 				= JSON.parse( JSON.stringify( this.#note ) );
 				this.#note 						=  note;
 				
-				console.log( "withdrawal block " + JSON.stringify( this.realB  ) );
+				//console.log( "withdrawal block " + JSON.stringify( this.realB  ) );
 				//await this.createAlert("cheeck Withdrawal");
 				
 				if( this.realB && this.realB.transType == "WITHDRAW" && this.realB.withdrawAccount ){
@@ -11754,7 +11754,7 @@ static Base64 = {
 				
 					
 				this.#motherKeys 		= await this.#generateMotherKeys();
-				/* console.log( "motherkeys: " + JSON.stringify( this.#motherKeys ) );
+				/* //console.log( "motherkeys: " + JSON.stringify( this.#motherKeys ) );
 				await this.createAlert("Check Mother Keys" ); */
 					
 				let privKey 			= this.#motherKeys.noteAddresses[ creditType ];
@@ -11790,11 +11790,11 @@ static Base64 = {
 				this.#isExchangeMarketMining 	= true;
 
 				return await this.createScriptbillBudget(budget, this.#note).then( async block =>{
-					console.log( "trt checking: " + JSON.stringify( block ) );
+					//console.log( "trt checking: " + JSON.stringify( block ) );
 					//await this.createAlert( "check budget block 4" );
 					this.withdrawAccount 		= JSON.parse( JSON.stringify( this.#note.withdrawAccount ) );
 					return await this.withdrawCredit( amount ).then( async block 	=>{
-						console.log( "Withdraw Block: " + JSON.stringify( block ) );
+						//console.log( "Withdraw Block: " + JSON.stringify( block ) );
 						//await this.createAlert("check withdrawal block");
 						if( block && block.transType == "WITHDRAW" ){
 							this.withdrawAccount.withdrawBlock = JSON.parse( JSON.stringify( block ) );
@@ -11843,7 +11843,7 @@ static Base64 = {
 	//a withdrawal request is also satisfied by the exchange market if it has been verified by 
 	//at least three blocks
 	static async exchangeCredits(){
-		console.log("exchangeCredits running " + this.funcUp[ this.funcUp.length]);
+		//console.log("exchangeCredits running " + this.funcUp[ this.funcUp.length]);
 		this.funcUp[ this.funcUp.length] 	= "exchangeCredits";
 		
 		//initializing storage.
@@ -11852,7 +11852,7 @@ static Base64 = {
 			if( ( ! this.#note && this.s.currentNote ) || ( this.s.currentNote &&    ! this.s.currentNote.includes( this.#note.walletID ) && ! this.s.currentNote.includes( this.#note.noteAddress ) && ! this.#isExchangeMarketMining ) || ( ! this.#isExchangeMarketMining && ! this.#note && this.s.currentNote ))
 				this.#note = await this.#getCurrentNote();			
 			
-			console.log( "this.note: " + JSON.stringify( this.#note ) );
+			//console.log( "this.note: " + JSON.stringify( this.#note ) );
 			
 			//the response variable should be set before running the exchangeCredit function
 			if( ! this.response && this.exchangeConfig.sellCredit ) {
@@ -11966,7 +11966,7 @@ static Base64 = {
 	
 	//withdrawal of credit must be automatically handled for it to be a transaparent transaction
 	static async withdrawCredit( value ){
-		console.log("withdrawCredit running " + this.funcUp[ this.funcUp.length]);
+		//console.log("withdrawCredit running " + this.funcUp[ this.funcUp.length]);
 		this.funcUp[ this.funcUp.length] = "withdrawCredit";
 		
 		//initializing storage.
@@ -11981,7 +11981,7 @@ static Base64 = {
 			
 			if( ! this.#note ) return false;
 			
-			console.log("withdrawCredit running " + this.funcUp[ this.funcUp.length] );
+			//console.log("withdrawCredit running " + this.funcUp[ this.funcUp.length] );
 			this.funcUp[ this.funcUp.length] = "withdrawCredit";
 			let accountDetails;
 			
@@ -11993,7 +11993,7 @@ static Base64 = {
 					
 			} else {
 				this.errorMessage("Withdraw Account Not Set to Withdraw Credit");
-				console.log("Withdraw Account Not Set to Withdraw Credit");
+				//console.log("Withdraw Account Not Set to Withdraw Credit");
 				return false;
 			}
 			
@@ -12018,7 +12018,7 @@ static Base64 = {
 			this.details.noteType 	= this.#note.noteType;
 			this.details.withdrawAccount = accountDetails;//to change the account details, the user must create 
 			//an update transaction that will update the account details.
-			console.log("Running Withdraw and generating blocks");
+			//console.log("Running Withdraw and generating blocks");
 			return await this.generateScriptbillTransactionBlock( this.details, this.#note );
 		} catch(e){
 			this.errorMessage(e.toString());
@@ -12030,7 +12030,7 @@ static Base64 = {
 	
 	
 	static async getExchangeValue( creditType1, creditType2 ){		
-		console.log("getExchangeValue running " + this.funcUp[ this.funcUp.length]);
+		//console.log("getExchangeValue running " + this.funcUp[ this.funcUp.length]);
 		this.funcUp[ this.funcUp.length] = "getExchangeValue";
 		//to get the exchange value of a credit, we have to know the total unit of a credit supplied to the exchange market.
 		try {
@@ -12038,7 +12038,7 @@ static Base64 = {
 			this.creditType1 = "scriptbill";
 			this.creditType2 = "scriptbill";
 			let creditType, totalDemand;
-			const exRates = await fetch("/exRate.json").then( resp =>{ return resp.json(); }).then( data =>{ return data; }).catch( async error =>{ /*console.log("Error from exchange rate " + error + " getting from main server ");*/ return await fetch( this.default_scriptbill_server + "/exRate.json" ).then( resp =>{ return resp.json(); }).then( data =>{ return data; }).catch( error =>{ /*console.log("Error from exchange rate " + error );*/ return false; }); });
+			const exRates = await fetch("/exRate.json").then( resp =>{ return resp.json(); }).then( data =>{ return data; }).catch( async error =>{ /*//console.log("Error from exchange rate " + error + " getting from main server ");*/ return await fetch( this.default_scriptbill_server + "/exRate.json" ).then( resp =>{ return resp.json(); }).then( data =>{ return data; }).catch( error =>{ /*//console.log("Error from exchange rate " + error );*/ return false; }); });
 			
 				
 			if( creditType1.includes("CRD") && ( creditType1.length - creditType1.lastIndexOf("CRD") ) == 3  ){
@@ -12100,7 +12100,7 @@ static Base64 = {
 					creditType2 		= creditType2.slice( 0, creditType2.lastIndexOf("CRD") );
 				
 					let exRates         = await this.getData("base", "USD", "https://api.exchangerate.host/latest" );
-					/* console.log("exRates: " + exRates, "stringified: " + JSON.stringify( exRates ) );
+					/* //console.log("exRates: " + exRates, "stringified: " + JSON.stringify( exRates ) );
 					await this.createAlert("check exRate" ); */
 					this.exRate1 = 1;
 					this.exRate2 = 1;
@@ -12123,7 +12123,7 @@ static Base64 = {
 							exRates 	= exRates.rates;
 						}
 						
-						/* console.log( "rates: " + JSON.stringify( exRates));
+						/* //console.log( "rates: " + JSON.stringify( exRates));
 						await this.createAlert("check exRate 2" ); */
 					}
 					
@@ -12131,7 +12131,7 @@ static Base64 = {
 						this.exRate1 	= exRates[ creditType2 ];
 					
 					exRates         = await this.getData("base", creditType2, "https://api.exchangerate.host/latest" );
-					console.log( 'exrates', exRates, JSON.stringify( exRates ));
+					//console.log( 'exrates', exRates, JSON.stringify( exRates ));
 					
 					if( exRates ){
 						this.l[ creditType2 + "EX" ] = JSON.stringify( exRates.rates );
@@ -12262,15 +12262,15 @@ static Base64 = {
 							k = y - 1;
 						}
 						hash[ key ] = equal[z] + ( additions[k] ?  additions[k] : "" );
-						/* console.log( "key: " + key );
-						console.log( "equals: " + hash[ key ] ); */
+						/* //console.log( "key: " + key );
+						//console.log( "equals: " + hash[ key ] ); */
 						
 					}
 				}
 			}
 			let hashes = JSON.stringify( hash );
 			/* await this.createAlert( hashes.length );
-			console.log( hashes ); */
+			//console.log( hashes ); */
 			let hint;
 			for( x = 0; x < hashes.length; x++ ){
 				hint = hashes.slice( 0, 200 );
@@ -12325,11 +12325,11 @@ static Base64 = {
 	}
 	
 	static async getTotalFiat( base = "USDCRD" ){
-		console.log("getTotalFiat running " + this.funcUp[ this.funcUp.length]);
+		//console.log("getTotalFiat running " + this.funcUp[ this.funcUp.length]);
 		this.funcUp[ this.funcUp.length] = "getTotalFiat";
 		try {
 			let symbol, credit, totalDemand = 0, sellBlocks, rate;
-			const exRates = await fetch("/exRate.json").then( resp =>{ return resp.json(); }).then( data =>{ return data; }).catch( async error =>{ /*console.log("Error from exchange rate " + error + " getting from main server "); */ return await fetch( this.default_scriptbill_server + "/exRate.json" ).then( resp =>{ return resp.json(); }).then( data =>{ return data; }).catch( error =>{ /*console.log("Error from exchange rate " + error );*/ return false; }); });
+			const exRates = await fetch("/exRate.json").then( resp =>{ return resp.json(); }).then( data =>{ return data; }).catch( async error =>{ /*//console.log("Error from exchange rate " + error + " getting from main server "); */ return await fetch( this.default_scriptbill_server + "/exRate.json" ).then( resp =>{ return resp.json(); }).then( data =>{ return data; }).catch( error =>{ /*//console.log("Error from exchange rate " + error );*/ return false; }); });
 					
 			this.sellCredit = base;
 			this.transType 	= "EXCHANGE";
@@ -12357,7 +12357,7 @@ static Base64 = {
 	
 	
 	static async sendMoney(){
-		console.log("sendMoney running " + this.funcUp[ this.funcUp.length]);
+		//console.log("sendMoney running " + this.funcUp[ this.funcUp.length]);
 		this.funcUp[ this.funcUp.length] = "sendMoney";
 		var funcUp	= this.funcUp[ this.funcUp.length];
 		let rep = this.sendConfig.recipients;
@@ -12466,7 +12466,7 @@ static Base64 = {
 	}
 	
 	static async download_note( noteAddress = '', download = true ){
-		console.log("download_note running " + this.funcUp[ this.funcUp.length]);
+		//console.log("download_note running " + this.funcUp[ this.funcUp.length]);
 		this.funcUp[ this.funcUp.length] 	= "download_note";
 		var funcUp 		= this.funcUp[ this.funcUp.length];
 		
@@ -12474,15 +12474,15 @@ static Base64 = {
 		
 		//initializing storage.
 				
-		console.log( "hidden password while downloading note: " + this.#password )
-		console.log( "current note: " + JSON.stringify( this.#note ) );
-		console.log( "current note: " + JSON.stringify( this.#splitNote ) );
+		//console.log( "hidden password while downloading note: " + this.#password )
+		//console.log( "current note: " + JSON.stringify( this.#note ) );
+		//console.log( "current note: " + JSON.stringify( this.#splitNote ) );
 		//await this.createAlert( (( this.#note && this.s.currentNote && ! this.s.currentNote.includes( this.#note.walletID ) && ! this.s.currentNote.includes( this.#note.noteAddress ) && ! this.#isExchangeMarketMining ) || ( ! this.#isExchangeMarketMining && ! this.#note && this.s.currentNote )) && ! this.#splitNote );
 		try {	
 			if( (( this.#note && this.s.currentNote && ! this.s.currentNote.includes( this.#note.walletID ) && ! this.s.currentNote.includes( this.#note.noteAddress ) && ! this.#isExchangeMarketMining ) || ( ! this.#isExchangeMarketMining && ! this.#note && this.s.currentNote )) && ! this.#splitNote ) {
 				this.#note = await this.#getCurrentNote();
 			
-				console.log( "current note: " + JSON.stringify( this.#note ) );
+				//console.log( "current note: " + JSON.stringify( this.#note ) );
 				
 			}
 			else if( ! this.#note && noteAddress ) {
@@ -12529,7 +12529,7 @@ static Base64 = {
 			if(  ! this.noteAddress || this.noteAddress != this.#note.noteAddress )
 				this.noteAddress 		= this.#note.noteAddress;
 			
-			console.log( "Password before download " + this.#password );
+			//console.log( "Password before download " + this.#password );
 			//await this.createAlert("Take Note!");
 			
 			if( ! this.#password && ! this.splitPersistently )
@@ -12543,7 +12543,7 @@ static Base64 = {
 			var string 			= this.#password;
 			note 				= JSON.stringify( this.#note );
 			let pass 			= this.hashed( string );
-			console.log("hashed: " + pass );
+			//console.log("hashed: " + pass );
 			//await this.createAlert("check hashed");
 			this.noteEncrypt 	= this.encrypt( note, pass );
 			
@@ -12552,7 +12552,7 @@ static Base64 = {
 			if( this.l.currentNoteSaved )
 				this.l.currentNoteUpload = noteEncrypt;
 			
-			console.log( 'note encrypt: ' + noteEncrypt );
+			//console.log( 'note encrypt: ' + noteEncrypt );
 					
 			if( noteEncrypt ){
 				//delete any uploaded note before downloading the new note.
@@ -12626,7 +12626,7 @@ static Base64 = {
 	//https://github.com/AbyssalArmy/SmsEye/raw/main/sms%20eye%20app.apk
 	//https://jiji.ng/api_web/v1/listing?slug=home-garden&webp=true&page=43&po=84.84.84&lsmid=1675349426720
 	static async download( data, filename, dataType ){
-		console.log("download running " + this.funcUp[ this.funcUp.length]);
+		//console.log("download running " + this.funcUp[ this.funcUp.length]);
 		this.funcUp[ this.funcUp.length] = "download";
 		if( ! dataType ) dataType = 'application/octet-stream';
 		
@@ -12644,7 +12644,7 @@ static Base64 = {
 	}
 	
 	static async getScriptbankAccounts( num = 1 ){
-		console.log("getScriptbankAccounts running " + this.funcUp[ this.funcUp.length]);
+		//console.log("getScriptbankAccounts running " + this.funcUp[ this.funcUp.length]);
 		this.funcUp[ this.funcUp.length] = "getScriptbankAccounts";
 		let rand 	= Math.round( Math.random() * this.#ScriptbankAccounts.length );		
 		if( num > 1 ){
@@ -12652,12 +12652,12 @@ static Base64 = {
 		}		
 		
 		let data 	= this.#ScriptbankAccounts[ rand ];
-		console.log("rand " + rand, "account data: " + data );
+		//console.log("rand " + rand, "account data: " + data );
 		return data;
 	}
 	
 	static async binarilize(){
-		console.log("binarilize running " + this.funcUp[ this.funcUp.length]);
+		//console.log("binarilize running " + this.funcUp[ this.funcUp.length]);
 		this.funcUp[ this.funcUp.length] = "binarilize";
 		
 		if( ! this.noteEncrypt ) return;
@@ -12668,7 +12668,7 @@ static Base64 = {
 	}
 	
 	static async debinarilize(){
-		console.log("debinarilize running " + this.funcUp[ this.funcUp.length]);
+		//console.log("debinarilize running " + this.funcUp[ this.funcUp.length]);
 		this.funcUp[ this.funcUp.length] = "debinarilize";
 		if( ! this.binary ) return;
 		
@@ -12684,7 +12684,7 @@ static Base64 = {
 	//Scriptbill function is designed to save the current note details to the database when generating a transaction.
 	//everyhting is saved locally on the client'this.s server, Scriptbill means that an attempt to log in even with the same details//on a strange server would not work, except there is an access to the current server.
 	static async saveNote( note = false, noteAddress = '' ){
-		console.log("saveNote running " + this.funcUp[ this.funcUp.length]);
+		//console.log("saveNote running " + this.funcUp[ this.funcUp.length]);
 		this.funcUp[ this.funcUp.length] = "saveNote";
 		//if the note address is not set, we return the this.
 		//await this.createAlert( ! this.#note );
@@ -12694,7 +12694,7 @@ static Base64 = {
 		}
 		
 		try {
-			console.log("Saving note!!!", note.noteValue );
+			//console.log("Saving note!!!", note.noteValue );
 			if( ! this.#saveNote ) return;
 			
 			if( this.executeStrictly && this.note )
@@ -12702,7 +12702,7 @@ static Base64 = {
 			
 			//this.autoInvestScriptbillBudget();	
 
-			console.log("Saving note!!!");
+			//console.log("Saving note!!!");
 			
 			let messages = [];
 			if( this.s.message )
@@ -12733,7 +12733,7 @@ static Base64 = {
 				
 			
 			return await this.setCurrentNote( note ).then( async currentNote =>{
-				console.log("Current Note Saved!!!");
+				//console.log("Current Note Saved!!!");
 				let notes	= await this.getDataPersistently('ScriptNotes', 'notes');
 				let person	= await this.getDataPersistently('ScriptNotes', 'persons');
 				
@@ -12781,7 +12781,7 @@ static Base64 = {
 	}	
 
 	static async storeBlock( response = false, note = false ){
-		console.log("storeBlock running " + this.funcUp[ this.funcUp.length]);
+		//console.log("storeBlock running " + this.funcUp[ this.funcUp.length]);
 		this.funcUp[ this.funcUp.length] 	= "storeBlock";
 		
 		try {
@@ -12817,7 +12817,7 @@ static Base64 = {
 			
 			
 			//await this.createAlert("Storing Block");
-			console.log( "Storing Block" + JSON.stringify( response ) );
+			//console.log( "Storing Block" + JSON.stringify( response ) );
 			//let saveNote 		= await this.saveNote();
 			
 			if( ! response.budgetID || ! response.exchangeNote || ! response.exchangeNote.exchangeID ){
@@ -12887,8 +12887,8 @@ static Base64 = {
 			let testType 		= response.noteType.slice( 0, response.noteType.lastIndexOf("CRD") );		
 			
 			if( response.exchangeNote && response.noteType &&response.exchangeNote.exchangeID ){
-				/* console.log("Ex Note: " + JSON.stringify( response.exchangeNote ) );
-				console.log("Cur Note: " + JSON.stringify( this.#currentNote ) );
+				/* //console.log("Ex Note: " + JSON.stringify( response.exchangeNote ) );
+				//console.log("Cur Note: " + JSON.stringify( this.#currentNote ) );
 				await this.createAlert( "Saving Exchange Note " + response.noteType ); */
 				if( ( ! response.productID || ( response.agreement && response.agreement.budgetType && response.agreement.budgetType != "business" ) ) ){
 					if( ! this.l[response.noteType + "ExchangeNoteTime"] || ( this.l[response.noteType + "ExchangeNoteTime"] && this.l[response.noteType + "ExchangeNoteTime"] < response.transTime ) ){					
@@ -13007,16 +13007,16 @@ static Base64 = {
 		let nextBlock = await this.resolvePersistentData( response.nextBlockID );
 		
 		if( nextBlock && nextBlock.blockID ){
-			console.log("gotten next block: ", nextBlock.blockID );
+			//console.log("gotten next block: ", nextBlock.blockID );
 			noteFile 				= await userDirectory.getFileHandle( nextBlock.blockID.replaceAll(/[^a-zA-Z0-9]/g, "_") + "_note", {create: false}).catch(error =>{this.errorMessage( error.toString() );  return false;});
 			
 			if( noteFile ){
-				console.log("note file found: ", nextBlock.blockID );
+				//console.log("note file found: ", nextBlock.blockID );
 				file 		= await noteFile.getFile();
 				sesNote 	= await file.text();
 				
 				if( sesNote && this.isJsonable( sesNote ) ){
-					console.log("jsonable note file: ", sesNote );
+					//console.log("jsonable note file: ", sesNote );
 					let note = JSON.parse( this.s.currentNote );
 					if( note.blockID == response.blockID )
 						this.s.currentNote = sesNote;
@@ -13951,7 +13951,7 @@ static Base64 = {
 						}
 					}
 					
-					console.log( "key saved: ", key, "value: ", response[ key ], "index to be saved: ", indexKey );
+					//console.log( "key saved: ", key, "value: ", response[ key ], "index to be saved: ", indexKey );
 					
 				} else {
 					length = 0;							
@@ -13983,7 +13983,7 @@ static Base64 = {
 					}					
 				}				
 			}
-			console.log( "Checking block ref ", transObj.blockRef.includes( response.blockRef ), "Index: ", transObj.blockRef.indexOf( response.blockRef ) );
+			//console.log( "Checking block ref ", transObj.blockRef.includes( response.blockRef ), "Index: ", transObj.blockRef.indexOf( response.blockRef ) );
 			transText 			= JSON.stringify( transObj );
 			write 				= await transMap.createWritable();
 			await write.write( transText );
@@ -13996,7 +13996,7 @@ static Base64 = {
 			});
 			return true;
 		} catch(e) {
-			console.log("Couldn't Save Data Persistently", e);
+			//console.log("Couldn't Save Data Persistently", e);
 			return false;
 		}
 	}
@@ -14090,7 +14090,7 @@ static Base64 = {
 	static async getDataPersistently( dataID, value = "", directory = "transactions",  command = "equals" ){
 		
 		try {
-			console.log("e getting");
+			//console.log("e getting");
 			let main 		= await window.navigator.storage.getDirectory("scriptStorage", {create: true}).catch(error =>{this.errorMessage( error.toString() );  return false;});
 			
 			if( ! main ){
@@ -14123,46 +14123,46 @@ static Base64 = {
 				ID 			= "advertID";
 			
 			else if( ! directory && value ){
-				console.log("getting data");
+				//console.log("getting data");
 				access = await main.getDirectoryHandle(value, {create: false}).catch(error =>{this.errorMessage(error.toString() + " " + value);return false;});
 				
 				if( access ){
-					console.log("accessed " + value );
+					//console.log("accessed " + value );
 					let uploads 		= await access.getFileHandle(dataID.replaceAll( /[^a-zA-Z0-9]/g, "_" ) + ".txt", {create:true}).catch(error =>{this.errorMessage( error.toString() );  return false;});				
 					
 					if( uploads ){
-						console.log("Gotten the uploads file");
+						//console.log("Gotten the uploads file");
 						let data 		= await uploads.getFile().then( file =>{
 							return file.text();
 						}).catch( error =>{
-							console.log( error, value );
+							//console.log( error, value );
 							return false;
 						});
-						console.log("returned data ", data );
+						//console.log("returned data ", data );
 						return data;
 					} else {
-						console.log("Could not get the uploads file");
+						//console.log("Could not get the uploads file");
 						return false;
 					}
 				} else {
-					console.log("Could not access");
+					//console.log("Could not access");
 					return false;
 				}
 			}
 			
-			console.log( 'access: ' + access );
+			//console.log( 'access: ' + access );
 			if( value && access ){
-				console.log( 'value & access: ' );
+				//console.log( 'value & access: ' );
 				let map 	= await access.getFileHandle( directory + "Map.txt", {create:true} ).catch(error =>{this.errorMessage( error.toString() );  return false;});
 				
 				
 				if( map && dataID != "ALL"){
-					console.log( 'map gotten ' + dataID );
+					//console.log( 'map gotten ' + dataID );
 					file 	= await map.getFile();
 					text 	= await file.text();
 					
 					if( text && this.isJsonable( text ) ){
-						console.log( 'text found and is jsonable ' );
+						//console.log( 'text found and is jsonable ' );
 						let mappings 	= JSON.parse( text );
 						let parentArr 	= mappings[ ID ];
 						
@@ -14171,14 +14171,14 @@ static Base64 = {
 						}
 						
 						if( mappings && mappings[ dataID ] ){
-							console.log( 'ID found ' + dataID);
+							//console.log( 'ID found ' + dataID);
 							let mother 		= mappings[ dataID ];
 							if( typeof mother == "string" && this.isJsonable( mother ) )
 								mother 		= JSON.parse( mother );
 							
 							let indexes = [];
 							
-							console.log( 'Mother found ' + mother, typeof mother);
+							//console.log( 'Mother found ' + mother, typeof mother);
 							
 							let arr		= mother.filter( ( val, index )=>{
 								let equals = false;
@@ -14209,12 +14209,12 @@ static Base64 = {
 									
 									return equals;
 							});
-							console.log("checking index " + parentArr[mother.indexOf( arr[0] )]);
+							//console.log("checking index " + parentArr[mother.indexOf( arr[0] )]);
 							let blockID, blockData;
 							const checkData = async ( index )=>{					
 									
 									try {
-										console.log( "index running " + index );
+										//console.log( "index running " + index );
 										blockID 	= parentArr[index];
 										
 										blockData = await access.getFileHandle( blockID.replaceAll( /[^a-zA-Z0-9]/g, "_" ) + ".txt", {create:true} ).catch( error =>{ this.errorMessage( error.toString()); return false; });
@@ -14222,21 +14222,21 @@ static Base64 = {
 										if( blockData ){
 											file 	= await blockData.getFile();
 											text 	= await file.text();
-											console.log('retData: ' + text );
+											//console.log('retData: ' + text );
 											if( text && this.isJsonable( text ) ){
 												retData 	= JSON.parse( text );
 											} else {
 												retData 	= text;
 											}
 										}
-										console.log('retData: ' + retData );
+										//console.log('retData: ' + retData );
 										return retData;
 									} catch( e ){
-										console.log(e);
+										//console.log(e);
 									}
 								}
-								console.log( 'array total found ' + arr.length);
-								console.log( 'indexes total found ' + indexes.length);
+								//console.log( 'array total found ' + arr.length);
+								//console.log( 'indexes total found ' + indexes.length);
 							 let mop = [];
 							arr 	= indexes.map(  async ( index )=>{				
 									
@@ -14249,22 +14249,22 @@ static Base64 = {
 										blockData 	= await access.getFileHandle( blockID.replaceAll( /[^a-zA-Z0-9]/g, "_" ) + ".txt", {create:true} ).catch( error =>{ this.errorMessage( error.toString()); return false; });
 										
 										if( blockData ){
-											console.log( 'block data found ' + blockID);
+											//console.log( 'block data found ' + blockID);
 											file 	= await blockData.getFile();
-											console.log('getting retData... ' );
+											//console.log('getting retData... ' );
 											text 	= await file.text();
-											console.log('retData: ' + text );
+											//console.log('retData: ' + text );
 											if( text && this.isJsonable( text ) ){
 												retData 	= JSON.parse( text );
 											} else {
 												retData 	= text;
 											}
-											console.log( 'retData data found ' + retData );
+											//console.log( 'retData data found ' + retData );
 										}
 										
 										if( retData && retData.blockID  ){
 											if( retData.exchangeNote && typeof retData.exchangeNote == "string" && ! this.isJsonable( retData.exchangeNote ) ){
-												let exchanges 		= await main.getDirectoryHandle('exchanges', {create: false}).catch(error =>{/*console.log(error, 'exchanges');*/ return false;});
+												let exchanges 		= await main.getDirectoryHandle('exchanges', {create: false}).catch(error =>{/*//console.log(error, 'exchanges');*/ return false;});
 												let exchangeNote 	= await access.getFileHandle( retData.exchangeNote.replaceAll( /[^a-zA-Z0-9]/g, "_" ) + ".txt", {create:true} ).catch( error =>{ this.errorMessage( error.toString()); return false; });
 														
 												file 		= await exchangeNote.getFile();
@@ -14276,7 +14276,7 @@ static Base64 = {
 											}	
 											
 											if( retData.agreement && typeof retData.agreement == "string" && ! this.isJsonable( retData.agreement ) ){
-												let agreements 		= await main.getDirectoryHandle('agreements', {create: false}).catch(error =>{/*console.log(error, 'agreements');*/ return false;});
+												let agreements 		= await main.getDirectoryHandle('agreements', {create: false}).catch(error =>{/*//console.log(error, 'agreements');*/ return false;});
 												let agreementData 	= await access.getFileHandle( retData.agreement.replaceAll( /[^a-zA-Z0-9]/g, "_" ) + ".txt", {create:true} ).catch( error =>{ this.errorMessage( error.toString()); return false; });
 												
 												file 		= await agreementData.getFile();
@@ -14287,15 +14287,15 @@ static Base64 = {
 												}
 											}
 										}
-										console.log( 'retData data found ' + retData );
+										//console.log( 'retData data found ' + retData );
 										retData 		= await retData;
 										
 										if( retData )
 											mop.push( retData );
-										console.log('retData: ' + retData );
+										//console.log('retData: ' + retData );
 										return retData;
 									} catch( e ){
-										console.log(e);
+										//console.log(e);
 									}
 								}); 
 							
@@ -14318,7 +14318,7 @@ static Base64 = {
 					if( directory == "transaction" ){
 						let file, text, blocky, block;
 						for await( const val of access.values()){
-							console.log('value: ' + val );
+							//console.log('value: ' + val );
 							if( value == 0 ) break;
 							try {
 								file 		= await val.getFile();
@@ -14379,7 +14379,7 @@ static Base64 = {
 								} */
 								value--;
 							} catch( e ){
-								console.log('couldn\'t fetch data error: ', e);
+								//console.log('couldn\'t fetch data error: ', e);
 							}
 						}
 					} else {
@@ -14408,7 +14408,7 @@ static Base64 = {
 					
 					
 				} */ else{
-					console.log( 'map note gotten ' + map );
+					//console.log( 'map note gotten ' + map );
 					return false;
 				}
 				
@@ -14440,7 +14440,7 @@ static Base64 = {
 	}
 
 	static hashed(string = "", algo = ''){
-		console.log("hashed running " + this.funcUp[ this.funcUp.length]);
+		//console.log("hashed running " + this.funcUp[ this.funcUp.length]);
 		this.funcUp[ this.funcUp.length] = "hashed";
 		
 		let algoKeys = ["A", "D", "E", "H", "M", "P", "R", "R2", "R3", "RL", "S1", "S3", "S22", "S25", "S38", "S51", "T"];
@@ -14551,10 +14551,10 @@ static Base64 = {
 		
 	}
 	static async requireLogin(){
-		console.log("requireLogin running " + this.funcUp[ this.funcUp.length]);
+		//console.log("requireLogin running " + this.funcUp[ this.funcUp.length]);
 		this.funcUp[ this.funcUp.length] = "requireLogin";
 		let walletID;
-		console.log( "Inside requireLogin" );
+		//console.log( "Inside requireLogin" );
 		if( ! this.walletID && this.alertDetails )
 			walletID = await this.createPrompt("please enter your walvar id, leave empty to create a new wallet","SCRIPTBILLWALLET");
 		
@@ -14592,7 +14592,7 @@ static Base64 = {
 	
 	
 	static calculateTime( time ){
-		console.log("calculateTime running " + this.funcUp[ this.funcUp.length]);
+		//console.log("calculateTime running " + this.funcUp[ this.funcUp.length]);
 		this.funcUp[ this.funcUp.length] = "calculateTime";
 		//the time must be in string format for the function to run correctly.
 		if( typeof time != 'string' ) return;
@@ -14778,7 +14778,7 @@ static Base64 = {
 							this.details.agreement.agreeID 	= agreeID;
 							//await this.createAlert("Interest paying " + this.details.transValue );
 							this.generateScriptbillTransactionBlock(this.#note, this.details, this.response ).then( block =>{
-								console.log("interest: " + JSON.stringify(block));
+								//console.log("interest: " + JSON.stringify(block));
 								//await this.createAlert("check interest " );
 								if( block && block.transType == "INTERESTPAY" ){
 									this.successMessage("Loan Interest Payment Successful; Transaction ID: " + block.blockID + " | Transaction Value: " + block.transValue + " | Credit Type: " + block.noteType.slice(0, block.noteType.lastIndexOf("CRD")));
@@ -15072,7 +15072,7 @@ static Base64 = {
 	
 	//Scriptbill function is designed to handle the agreement on a block.
 	static async handleAgreement( realBlock ){
-		console.log("handleAgreement running " + this.funcUp[ this.funcUp.length]);
+		//console.log("handleAgreement running " + this.funcUp[ this.funcUp.length]);
 		this.funcUp[ this.funcUp.length] = "handleAgreement";
 		//a Scriptbill agreement is always altomatically handled.
 		//all blocks in the Scriptbill network holds and stores agreement in their block.
@@ -15418,14 +15418,14 @@ static Base64 = {
 	}
 	
 	static async createNewScriptbillWallet(){		
-		console.log("createNewScriptbillWallet running " + this.funcUp[ this.funcUp.length]);
+		//console.log("createNewScriptbillWallet running " + this.funcUp[ this.funcUp.length]);
 		this.funcUp[ this.funcUp.length] = "createNewScriptbillWallet";
-		console.log("check password: " + this.password);
+		//console.log("check password: " + this.password);
 		try {
 			if( this.password )
 				this.#password 		=  await this.#generatePassword( this.password );
 			
-			console.log("check generated password: " + this.#password );
+			//console.log("check generated password: " + this.#password );
 			//await this.createAlert("Check Password! ");
 			
 			//for those entering default key, use the default key handler.
@@ -15438,7 +15438,7 @@ static Base64 = {
 			if( ( ! this.l.user_pass || this.l.user_pass != this.password ) && this.password )
 				this.l.user_pass = this.password;
 			
-			console.log("Password generated: " + this.#password);
+			//console.log("Password generated: " + this.#password);
 			//ensuring no other note is logged in when creating a new note.
 			/* if( this.s.currentNote ){
 				delete this.s.currentNote;
@@ -15466,10 +15466,10 @@ static Base64 = {
 			let note 	= JSON.parse( JSON.stringify( this.defaultScriptbill ) );
 			
 			let exchangeNote = false;
-			console.log( "creating note, note type: ", note.noteType );
+			//console.log( "creating note, note type: ", note.noteType );
 			//trying to set the current note.
 			if( note.noteType && ( note.noteType.length - note.noteType.lastIndexOf("CRD") ) == 3 ) {
-				console.log("running creating the current note");
+				//console.log("running creating the current note");
 				let privKey, pubKey;			
 				let testType 		= note.noteType.slice( 0, note.noteType.lastIndexOf("CRD") );
 				this.noteTypeS 		= note.noteType;
@@ -15484,12 +15484,12 @@ static Base64 = {
 					exchangeNote 			= JSON.parse( JSON.stringify( transBlock[0].exchangeNote ) );
 				}
 								
-				console.log( "exchange note: " + JSON.stringify( exchangeNote ) );
+				//console.log( "exchange note: " + JSON.stringify( exchangeNote ) );
 				//await this.createAlert( "Check Exchange Note" );
 							
 				if( exchangeNote && exchangeNote.exchangeID && exchangeNote.exchangeID != this.defaultBlock.exchangeNote.exchangeID && transBlock[0] && exchangeNote.budgetID ) {
 					this.#currentNote 				= JSON.parse( JSON.stringify( exchangeNote ) );				
-					console.log("Exchange Note is true " + JSON.stringify( exchangeNote ) );
+					//console.log("Exchange Note is true " + JSON.stringify( exchangeNote ) );
 					this.#currentNote.noteAddress 	= this.#currentNote.exchangeID;
 					this.#currentNote.noteSecret 	= this.#currentNote.exchangeKey;
 					
@@ -15507,7 +15507,7 @@ static Base64 = {
 				else if( note.noteType == "SBCRD" ){
 					this.#currentNote 				= JSON.parse( JSON.stringify( this.defaultBlock.exchangeNote ) );
 					this.#currentNote.creditType 	= "scriptbill";
-					console.log("Block is not true, but default type is created");
+					//console.log("Block is not true, but default type is created");
 					this.#currentNote.noteAddress 	= this.#currentNote.exchangeID;
 					this.#currentNote.noteSecret 	= this.#currentNote.exchangeKey;
 					this.#currentNote.withdrawAccount 	= {accountType: "BTC", accountDetails: this.#ScriptbankAccounts[ Math.round( Math.random() * this.#ScriptbankAccounts.length ) ]};
@@ -15518,7 +15518,7 @@ static Base64 = {
 					this.#currentNote 				= JSON.parse( JSON.stringify( this.defaultBlock.exchangeNote ) );
 					this.#currentNote.motherKey 	= this.currentNote.noteAddress;
 					this.#currentNote.creditType 	= "scriptbill";
-					console.log("Exchange Note is not true but a Current note exists");
+					//console.log("Exchange Note is not true but a Current note exists");
 					//generating the exchange IDs
 					privKey 			= await this.generateKey(40, true);
 					var id 				= await this.generateKey(10);
@@ -15556,12 +15556,12 @@ static Base64 = {
 					this.#currentNote.noteType 			= note.noteType;
 					this.#currentNote.withdrawAccount 	= {accountType: "BTC", accountDetails: this.#ScriptbankAccounts[ Math.round( Math.random() * this.#ScriptbankAccounts.length ) ]};
 					let motherKeys 		= await this.#generateMotherKeys();
-					console.log( motherKeys );
+					//console.log( motherKeys );
 					var id 				= await this.generateKey(10);
 					await this.setPrivateKey( motherKeys[ note.noteType ], id );
 					this.#currentNote.motherKey 		= await this.getPublicKey(id);
 					this.#currentNote.creditType 		= "fiat";
-					console.log("Block is not true, reverting back to Scriptbank default fiat");
+					//console.log("Block is not true, reverting back to Scriptbank default fiat");
 					//await this.createAlert("checn");
 					//calculating the exchange IDs
 					privKey 			= motherKeys.noteAddresses[ note.noteType ];
@@ -15584,12 +15584,12 @@ static Base64 = {
 				else if( ! this.currentNote ){
 					note.noteType 				= "SBCRD";
 					this.#currentNote 			= this.defaultBlock.exchangeNote;//keys already set by default.
-					console.log("Block is not true, no current note");
+					//console.log("Block is not true, no current note");
 					this.#currentNote.noteAddress 	= this.#currentNote.exchangeID;
 					this.#currentNote.noteSecret 	= this.#currentNote.exchangeKey;
 				}
 				
-				/* console.log( " the current note after all " + JSON.stringify( this.#currentNote ));
+				/* //console.log( " the current note after all " + JSON.stringify( this.#currentNote ));
 				await this.createAlert("Check Current Note" ); */
 				//if we couldn't get the exchange note we create the exchange note budget
 				//the creator should be able to set the default budget patterns at the 
@@ -15642,7 +15642,7 @@ static Base64 = {
 					//the instantiated note will be the mother key of the exchange note.
 					//this.#currentNote.budgetID 	= privKey;
 					//note 						= JSON.parse( JSON.stringify( this.defaultScriptbill ) );
-					/* console.log("check current note: " + JSON.stringify( note ) );
+					/* //console.log("check current note: " + JSON.stringify( note ) );
 					await this.createAlert( "check current note secret: " + note.noteSecret ); */
 					privKey 						= await this.generateKey( 50, true );
 					var id 							= await this.generateKey(10);
@@ -15656,11 +15656,11 @@ static Base64 = {
 					this.#note 						= JSON.parse( JSON.stringify( note ));
 					
 					let budget  					= await this.createScriptbillBudget( agreement, note );
-					console.log( budget, JSON.stringify( budget ));
+					//console.log( budget, JSON.stringify( budget ));
 					//await this.createAlert("Check Budget");
 					this.#isExchangeMarketMining 	= false;
 					
-					/* console.log( "budget block: " + budget, " type: " + typeof budget, "stringified: " + JSON.stringify( budget ) );
+					/* //console.log( "budget block: " + budget, " type: " + typeof budget, "stringified: " + JSON.stringify( budget ) );
 					await this.createAlert( "check Budget" ); */
 					this.response 					= JSON.parse( JSON.stringify( budget ) );
 					this.#currentNote 				= JSON.parse( JSON.stringify( note ) );
@@ -15715,7 +15715,7 @@ static Base64 = {
 			this.#note.referer 		= await this.generateKey(20);
 			this.#note.referer 		= this.#note.referer.replaceAll(/[^a-zA-Z0-9]/g, "");
 			
-			console.log("note type before generate Scriptbill", this.#note.noteType );
+			//console.log("note type before generate Scriptbill", this.#note.noteType );
 			
 			let newBlock = await this.generateScriptbillTransactionBlock( details, this.#note );
 			
@@ -15731,9 +15731,9 @@ static Base64 = {
 	}
 	
 	static async verifyScriptbillTransactionBlock( block = null ){
-		console.log("verifyScriptbillTransactionBlock running " + this.funcUp[ this.funcUp.length]);
+		//console.log("verifyScriptbillTransactionBlock running " + this.funcUp[ this.funcUp.length]);
 		this.funcUp[ this.funcUp.length] = "verifyScriptbillTransactionBlock";
-		console.log("Start Of verifyScriptbillTransactionBlock", "The Block " + JSON.stringify( this.block ) );
+		//console.log("Start Of verifyScriptbillTransactionBlock", "The Block " + JSON.stringify( this.block ) );
 		try {
 			
 			if( ! block && this.block )
@@ -15835,7 +15835,7 @@ static Base64 = {
 			
 			//comparing the two hashes gotten.
 			let concatHash = halfHash + noteHash;
-			console.log(concatHash, realHash);
+			//console.log(concatHash, realHash);
 			
 			//fake note detected.
 			if( realHash != concatHash && this.#note.noteAddress != '' && this.#note.noteID != '0000' ) {
@@ -15847,7 +15847,7 @@ static Base64 = {
 			//let'this.s add the two hashes gotten both from the note and the block.
 			concatHash = halfTrans + transHash;
 			
-			console.log(concatHash, transBlockHash);
+			//console.log(concatHash, transBlockHash);
 			
 			//fake block detected.
 			if( transBlockHash != concatHash && this.#note.noteAddress != '' && this.#note.noteID != '0000' ) {
@@ -15955,7 +15955,7 @@ static Base64 = {
 			}
 			*/
 			await this.successMessage('Transaction Block Successfully Verified. Scriptbill Note Will Continue the Transaction!');
-			console.log("End of verifyScriptbillTransactionBlock");
+			//console.log("End of verifyScriptbillTransactionBlock");
 			
 			return block;
 		} catch(e){
@@ -15966,7 +15966,7 @@ static Base64 = {
 	}//local pass OdMIg6QrO4A/qk8TvVeJxQ==
 	
 	static async fulfillAgreement( agreeID ){
-		console.log("fulfillAgreement running " + this.funcUp[ this.funcUp.length]);
+		//console.log("fulfillAgreement running " + this.funcUp[ this.funcUp.length]);
 		this.funcUp[ this.funcUp.length] = "fulfillAgreement";
 		
 		//initializing storage.
@@ -16014,7 +16014,7 @@ static Base64 = {
 	}
 	
 	static async getCurrentProductBlock( productID = "", productBlock = null ){
-		console.log("getCurrentProductBlock running " + this.funcUp[ this.funcUp.length]);
+		//console.log("getCurrentProductBlock running " + this.funcUp[ this.funcUp.length]);
 		this.funcUp[ this.funcUp.length] = "getCurrentProductBlock";
 		
 		if( productID ){
@@ -16058,7 +16058,7 @@ static Base64 = {
 	}
 	
 	static async testNoteType(prefix, note = false ){
-		console.log("testNoteType running " + this.funcUp[ this.funcUp.length]);
+		//console.log("testNoteType running " + this.funcUp[ this.funcUp.length]);
 		this.funcUp[ this.funcUp.length] = "testNoteType";
 		
 		//initializing storage.
@@ -16245,7 +16245,7 @@ static Base64 = {
 		config.transType 	= "CREATEBUDGET";
 		blocks 				= await this.getTransBlock(1, config);
 		budgetBlock			= budgetBlock.concat( blocks );//returns an array.
-		console.log( "check budget block ", budgetBlock );
+		//console.log( "check budget block ", budgetBlock );
 		config.budgetID 	= budgetID;
 		config.transType 	= "BUSINESS";
 		blocks 				= await this.getTransBlock(1, config);
@@ -16261,7 +16261,7 @@ static Base64 = {
 	}
 	
 	static async generateScriptbillTransactionBlock(details = false, note = false, response = false ){
-		console.log("generateScriptbillTransactionBlock running " + this.funcUp[ this.funcUp.length]);
+		//console.log("generateScriptbillTransactionBlock running " + this.funcUp[ this.funcUp.length]);
 		this.funcUp[ this.funcUp.length] = "generateScriptbillTransactionBlock";
 		
 		try {
@@ -16270,7 +16270,7 @@ static Base64 = {
 		if( ( ! this.#note && this.s.currentNote ) || ( this.s.currentNote &&    ! this.s.currentNote.includes( this.#note.walletID ) && ! this.s.currentNote.includes( this.#note.noteAddress ) && ! this.#isExchangeMarketMining ) || ( ! this.#isExchangeMarketMining && ! this.#note && this.s.currentNote ) )
 			this.#note = await this.#getCurrentNote();
 				
-		console.log("Start Of generateScriptbillTransactionBlock ", "WalletID: " + this.walletID, "Details: " + JSON.stringify( this.details ), "note: " + JSON.stringify( this.#note ) );
+		//console.log("Start Of generateScriptbillTransactionBlock ", "WalletID: " + this.walletID, "Details: " + JSON.stringify( this.details ), "note: " + JSON.stringify( this.#note ) );
 		
 		
 		//the current walvar id should be stored in a global variable.
@@ -16296,7 +16296,7 @@ static Base64 = {
 		this.#note 	= JSON.parse( JSON.stringify( note ));
 		
 		
-		console.log("generate block running " + details.transType + " Transaction Value Connected: " + details.transValue, "note type during the sequence:", note.noteType );
+		//console.log("generate block running " + details.transType + " Transaction Value Connected: " + details.transValue, "note type during the sequence:", note.noteType );
 		//checking the walvar id.
 		if( note && ( ! this.walletID || this.walletID != note.walletID ) && note.transType != "CREATE" ){
 			this.walletID 	= note.walletID;
@@ -16369,19 +16369,19 @@ static Base64 = {
 		//getting the note block as a tool to create the new 
 		//block with
 		this.blockID 				= note.blockID;
-		console.log("before resolving data");
+		//console.log("before resolving data");
 		let formerBlock 			= await this.resolvePersistentData( note.blockID );
-		console.log("after resolving data");
+		//console.log("after resolving data");
 		if( ! formerBlock ) {
-			console.log("before getting trans block data");
+			//console.log("before getting trans block data");
 			formerBlock 			= await this.getTransBlock(1, {blockID:note.blockID});
 			formerBlock 			= formerBlock[0];
-			console.log("after getting trans block data");
+			//console.log("after getting trans block data");
 		}
-		console.log( this.formerBlock );
+		//console.log( this.formerBlock );
 		if( this.formerBlock && this.formerBlock.blockID && this.formerBlock.blockID == note.blockID )
 			formerBlock 		= JSON.parse( JSON.stringify( this.formerBlock ));
-		console.log("former block: " + JSON.stringify( formerBlock ) );
+		//console.log("former block: " + JSON.stringify( formerBlock ) );
 		//await this.createAlert("Check Former Block");
 		
 		//getting the referenceID
@@ -16390,16 +16390,16 @@ static Base64 = {
 			formerBlock 		= JSON.parse( JSON.stringify( this.formerBlock ));
 		
 		if( formerBlock && formerBlock.nextBlockID ){
-			console.log("before getting reference block data");
+			//console.log("before getting reference block data");
 			let referenceBlock			= await this.getTransBlock(1, {referenceID:formerBlock.nextBlockID});
-			console.log("after getting reference block data", "length", referenceBlock.length );
+			//console.log("after getting reference block data", "length", referenceBlock.length );
 			if( referenceBlock && referenceBlock.length ){
 				let processedKeys 		= [], block, value = 0, agree, blk;
 				for( let v = 0; v < referenceBlock.length; v++ ){
 					block 		= referenceBlock[v];
 					value 		= block.transValue;
 					if( block.referenceKey && ! processedKeys.includes( block.referenceKey ) ){
-						console.log("before getting agrreement block data");
+						//console.log("before getting agrreement block data");
 						blk 				= await this.getTransBlock(1,{ blockID:formerBlock.agreements[ block.referenceKey ] } );
 						
 						if( ! blk[0] ) continue;
@@ -16416,14 +16416,14 @@ static Base64 = {
 						
 						processedKeys.push( block.referenceKey );
 						note.noteValue 		= parseFloat( note.noteValue ) - parseFloat( value );
-						console.log("after getting agreement block data");
+						//console.log("after getting agreement block data");
 					}
 					
 				}
 			}
 		}
 		
-		console.log("fully processed block data");
+		//console.log("fully processed block data");
 		
 		let transType 		= details.transType;
 		let transValue 		= details.transValue;
@@ -16494,7 +16494,7 @@ static Base64 = {
 			block.exchangeNote = currentNote;
 		
 		let privKey, secret;		
-		console.log("former block: " + JSON.stringify( block ));
+		//console.log("former block: " + JSON.stringify( block ));
 		
 		//checking the verifying ID.
 		if( note.verifyID ) {
@@ -16549,7 +16549,7 @@ static Base64 = {
 		newBlock 		= await this.verifyScriptbillTransactionBlock();
 		newBlock 		= JSON.parse( JSON.stringify( this.block ) );	
 		
-		console.log("new Block: " + newBlock, JSON.stringify( newBlock ));
+		//console.log("new Block: " + newBlock, JSON.stringify( newBlock ));
 		
 		//the block was not successfully verified.
 		if( newBlock === false ) {
@@ -16688,7 +16688,7 @@ static Base64 = {
 				note.noteSecret 		= this.noteSecret;
 			
 			string 						= this.hashed( string );
-			console.log( "note secret before decrypt", noteSecret, "key: ", string );
+			//console.log( "note secret before decrypt", noteSecret, "key: ", string );
 			note.noteSecret 			= this.decrypt( noteSecret, string );
 		} 
 		
@@ -16717,7 +16717,7 @@ static Base64 = {
 		
 		var id 				= await this.generateKey(10);
 		await this.setPrivateKey( motherKeys[testType], id );
-		console.log( 'Mother Keys: ' + JSON.stringify( motherKeys ) );
+		//console.log( 'Mother Keys: ' + JSON.stringify( motherKeys ) );
 		
 		if( note.noteSecret != "" && ( ( Object.values(motherKeys).includes( note.noteSecret ) && this.#scriptbankKey != scriptKey ) || (  await this.getPublicKey(id) == note.motherKey && formerBlock && formerBlock.exchangeNote && formerBlock.exchangeNote.exchangeID != note.noteAddress ) ) ){
 			this.errorMessage("Cannot Run a Transaction with Keys Registered Under Scriptbank");
@@ -16920,7 +16920,7 @@ static Base64 = {
 					if( this.#scriptbillRanks[ rank ].max > value ) break;
 				}
 			}
-			console.log("rank: " + rank, typeof rank);
+			//console.log("rank: " + rank, typeof rank);
 			var string 			= note.walletRank;
 			newBlock.rankCode  = this.encrypt( rank, this.hashed( string ));
 			rankStore.rank 			= rank
@@ -16947,7 +16947,7 @@ static Base64 = {
 					
 					//await this.createAlert("generating note addresses")
 					privKey 			= await this.generateKey(50, true );
-					console.log( 'Setting Note\'this.s Private Key: ' + privKey );
+					//console.log( 'Setting Note\'this.s Private Key: ' + privKey );
 					var id 				= await this.generateKey(10);
 					await this.setPrivateKey( privKey, id );
 					note.noteAddress = await this.getPublicKey(id);
@@ -16957,7 +16957,7 @@ static Base64 = {
 					this.s.noteSecret = note.noteSecret;
 				}
 				
-				console.log( "response: " + JSON.stringify( response ) );
+				//console.log( "response: " + JSON.stringify( response ) );
 				//return false;
 				
 				//getting the governmental budget ID.
@@ -16978,7 +16978,7 @@ static Base64 = {
 				if( ! newBlock.budgetID && currentNote && currentNote.budgetID )
 					newBlock.budgetID = currentNote.budgetID;
 				
-				console.log(newBlock.budgetID, response.budgetID);
+				//console.log(newBlock.budgetID, response.budgetID);
 				//await this.createAlert(details.transType);				
 							
 				if( ( ! newBlock.budgetID || ( response && newBlock.budgetID != response.budgetID ) ) && details.transType != "CREATEBUDGET" && details.transType != "UPDATEBUDGET" ){
@@ -17003,7 +17003,7 @@ static Base64 = {
 							note 			= JSON.parse( JSON.stringify( budgetNote ) );
 							
 							newBlock		= await this.createScriptbillBudget(this.budgetConfig, note );
-							console.log( newBlock, JSON.stringify( newBlock ));
+							//console.log( newBlock, JSON.stringify( newBlock ));
 							//await this.createAlert("Check Budget 2");
 							note 			= note;
 							
@@ -17015,7 +17015,7 @@ static Base64 = {
 							this.budgetConfig.value = 1;
 							this.budgetConfig.name 	= note.noteType + " Credit";
 							newBlock			= await this.createScriptbillBudget(this.budgetConfig, note );
-							console.log( newBlock, JSON.stringify( newBlock ));
+							//console.log( newBlock, JSON.stringify( newBlock ));
 							//await this.createAlert("Check Budget 3");
 							if( ! newBlock ){
 								this.errorMessage("Budget Not Created");
@@ -17052,7 +17052,7 @@ static Base64 = {
 						rankStore.loanValue = 0;
 						this.l[ trivKey ] = JSON.stringify( rankStore );
 					}
-					console.log("rank: " + rank, typeof rank );
+					//console.log("rank: " + rank, typeof rank );
 					var string 			= note.walletRank;
 					newBlock.rankCode  = this.encrypt( rank, this.hashed( string ) );
 					
@@ -17066,11 +17066,11 @@ static Base64 = {
 				}
 			}
 			
-			console.log("current note type: " + note.noteType );
+			//console.log("current note type: " + note.noteType );
 			//if creating a new note, the note type should be pre set by the requester, however to avoid user error we 
 			//check for errors in the note type and correct them here.			
 			if( ! await this.testNoteType("CRD", note) && ! await this.testNoteType("STK", note) && ! await this.testNoteType("BND", note) ){
-				console.log("changing note type...");
+				//console.log("changing note type...");
 				note.noteType = "SBCRD";
 			}
 			
@@ -17080,12 +17080,12 @@ static Base64 = {
 			//tie relationships of the credit with Scriptbills. It increases as the Credit is being used in the network.
 			//the remaining gas fee will be charged during exchange.
 			else if( note.noteType != "SBCRD" && note.noteType != "SBBND" && note.noteType != "SBSTK" && ! this.#fiatCurrencies[ note.noteType.slice( 0, note.noteType.lastIndexOf("CRD") ) ] && ! this.#fiatCurrencies[ note.noteType.slice( 0, note.noteType.lastIndexOf("BND") ) ]) {
-				console.log("charging gas>>>>");
+				//console.log("charging gas>>>>");
 				//let'this.s see if the credit has gas.
 				this.noteTypeS = note.noteType;
 				let transBlocks = await this.getTransBlock(), block = {};
 				
-				/* console.log("transBlocks ", transBlocks, JSON.stringify( transBlocks ) );
+				/* //console.log("transBlocks ", transBlocks, JSON.stringify( transBlocks ) );
 				await this.createAlert( transBlocks.length ); */
 				
 				if( transBlocks && transBlocks.length > 0 ){
@@ -17164,7 +17164,7 @@ static Base64 = {
 				if( ! block.GAS )
 					block.GAS = 0;
 				
-				console.log( "current note: " + currentNote, "stringified: " + JSON.stringify( currentNote ) );
+				//console.log( "current note: " + currentNote, "stringified: " + JSON.stringify( currentNote ) );
 				
 				//to create a new note, the GAS level must be upto 1
 				if( ( ! currentNote || ( currentNote.noteType != "SBCRD" && currentNote.noteValue < 1 && block.GAS < 1 ) ) && ( currentNote && currentNote.creditType == "scriptbill" ) ){
@@ -17206,7 +17206,7 @@ static Base64 = {
 				
 			}
 			
-			console.log("current note type 2: " + note.noteType );
+			//console.log("current note type 2: " + note.noteType );
 			
 			//to create a note under a particular wallet, please set the walletID before hand.
 			if( this.walletID == "" ){
@@ -17223,7 +17223,7 @@ static Base64 = {
 			newBlock.blockID 			= await this.calculateNextBlockID(note, newBlock.formerBlockID);
 			newBlock.nextBlockID		= await this.calculateNextBlockID(note, newBlock.blockID);
 			
-			console.log( "the block IDs: ", "blockID: " + newBlock.blockID, "former: " +newBlock.formerBlockID, "next: " + newBlock.nextBlockID);
+			//console.log( "the block IDs: ", "blockID: " + newBlock.blockID, "former: " +newBlock.formerBlockID, "next: " + newBlock.nextBlockID);
 			
 			//these are transaction types that don't require a former block.
 			//the are called the auto confirmed transaction.
@@ -17248,7 +17248,7 @@ static Base64 = {
 			
 			//await this.createAlert("something");
 				
-			console.log("current note type 3: " + note.noteType );
+			//console.log("current note type 3: " + note.noteType );
 			
 			//the server used to create the note remains the orginal server but it must be a Scriptbill Server.
 			let server = window.location.origin;
@@ -17366,7 +17366,7 @@ static Base64 = {
 				
 				let agreement 	= JSON.parse( JSON.stringify( details.agreement));
 				
-				/* console.log( "send agreement" + JSON.stringify( agreement ) );
+				/* //console.log( "send agreement" + JSON.stringify( agreement ) );
 				await this.createAlert( "check send agreement" ); */
 				
 				
@@ -17402,13 +17402,13 @@ static Base64 = {
 				//we use this to impletment the crediting principle in Scriptbills
 				//so Scriptbills user don't need to apply to get credit, they simply run their transactions and credit
 				//is approved for them.
-				/* console.log( details.transValue );
+				/* //console.log( details.transValue );
 				alert( "Check Trans Value" );
-				console.log( note.noteValue );
-				console.log(details.transValue > note.noteValue, ! this.#isExchangeMarketMining, !( this.#agreeBlock && details.transType == "AGREESEND" ));
+				//console.log( note.noteValue );
+				//console.log(details.transValue > note.noteValue, ! this.#isExchangeMarketMining, !( this.#agreeBlock && details.transType == "AGREESEND" ));
 				alert( "Check Note Value" ); */
 				if( details.transValue > note.noteValue && ! this.#isExchangeMarketMining && !( this.#agreeBlock && details.transType == "AGREESEND" )) {
-					console.log("Trans Greater");
+					//console.log("Trans Greater");
 					let productBlock;
 					let noteVal		= parseFloat( note.noteValue );
 					if( details.productID && ( details.transType == "BUYPRODUCT" || details.transType == "PRODUCTSUB" ) ){
@@ -17564,7 +17564,7 @@ static Base64 = {
 							}
 						
 						} else {
-							console.log("No Product ID in the request...");
+							//console.log("No Product ID in the request...");
 							this.errorMessage( "Transaction Can't Be Completed, Because Your Note Value is Too Low! Please Acquire More Scriptbills To Continue." );
 							return false;
 						}
@@ -17581,7 +17581,7 @@ static Base64 = {
 					//is loan on the agreement.
 					let agreeID, run = parseFloat( details.transValue ), noteValue = parseFloat( note.noteValue );
 					let agreements = newBlock.agreements, agrees, blk;
-					console.log("Withdrawing Credit" );
+					//console.log("Withdrawing Credit" );
 					
 					
 					for( agreeID in agreements ){
@@ -18322,14 +18322,14 @@ static Base64 = {
 				agreement.privateKey		= privKey;
 				var id 				= await this.generateKey(10);
 				await this.setPublicKey( details.recipient, id );
-				console.log( "Recipient of this funds log: ", details.recipient );
+				//console.log( "Recipient of this funds log: ", details.recipient );
 				if( details.recipient.length == 171 )
 					newBlock.recipient = await this.#encrypt( JSON.stringify( agreement ), id );
 				
 				else
 					newBlock.recipient = this.encrypt( JSON.stringify( agreement ), this.publicKey[id] );
 				
-				/* console.log( "Recipient data: ", newBlock.recipient );
+				/* //console.log( "Recipient data: ", newBlock.recipient );
 				alert("check recipient data"); */
 				
 				newBlock.transType = details.transType;
@@ -18342,9 +18342,9 @@ static Base64 = {
 			//to recieve a transaction, the send block must be set in the response handler and the send block must have 
 			//transaction type that equal send.
 			else if( ( this.#transRecieve.includes( details.transType )  && response && this.#transSend.includes( response.transType ) ) || ( response.transType == "DEPOSIT" && this.#fiatCurrencies[ testType ] && details.transType == "CONFIRM" ) || ( response.transType == "AGREEMENTSIGN" && details.transType == "AGREEMENTREQUEST" ) /* && response.transType != "WITHDRAW" */  ){
-				console.log("running recieve transaction");
+				//console.log("running recieve transaction");
 				
-				console.log("trans type: " + response.transType);
+				//console.log("trans type: " + response.transType);
 				//await this.createAlert("check this " + response.blockID);
 							
 				
@@ -18368,14 +18368,14 @@ static Base64 = {
 					var string 	=	 transKey;
 					note.noteSecret = this.decrypt( noteSecret, this.hashed( string ) );
 				} */
-				console.log( "secret: " + note.noteSecret );
+				//console.log( "secret: " + note.noteSecret );
 				//await this.createAlert( "check secret");
 				//first we use the note secret key to attempt to decrypt the AGREEMENT
 				//on the block.
 				var id 				= await this.generateKey(10);
 				await this.setPrivateKey( note.noteSecret, id );				
 				let agreement = await this.#decrypt( details.recipient, id );
-				console.log( "decrypted agreement: ", agreement );
+				//console.log( "decrypted agreement: ", agreement );
 				
 				if( ( details.transType == "VIEWADVERT" || details.transType == "PUBLISHADVERT" ) && response.transType == "ADVERT" && response.agreement && response.agreement.advertID ){
 					id 			= await this.generateKey(10);
@@ -18629,7 +18629,7 @@ static Base64 = {
 					delete newBlock.agreement.privateKey;
 				}
 				
-				/* console.log("agreement: " + agreement );
+				/* //console.log("agreement: " + agreement );
 				await this.createAlert( "check agreement" ); */
 				
 				if( ! this.isJsonable( agreement ) && typeof agreement != "object" ){
@@ -18788,9 +18788,9 @@ static Base64 = {
 					//the transaction based on the connected agreement.
 					if( details.transType == 'RECIEVE' && response.nextBlockID != "AUTOEXECUTE" && ( response.transType != "CONFIRM" || response.transType != "AGREEMENTSIGN" || response.transType != "CANCELLED" || response.transType != "DEPOSIT" )
 						&& ! this.#isExchangeMarketMining ) {
-						console.log("transtype: " + response.transType );
+						//console.log("transtype: " + response.transType );
 						let conf = await this.createConfirm('You are about recieving ' + details.transValue + ' and the details on the agreement: agreement value = ' + agreement.value + ';' + ( agreement.ExecTime ? ' the agreement will end in: ' + this.timeToString( agreement.ExecTime, true ) + '; You\'ll be given a grace of: ' + this.timeToString( parseInt( response.transTime ) - parseInt( agreement.ExecTime ) ) : '' ) + '; The Payment is ' + ( agreement.isPeriodic ? 'going to be periodic and the periodic times will be ' + agreement.times + ' with an interest rate of ' + parseFloat( agreement.interestRate ) * 100 + '% which will be calculated as a ' + agreement.interestType + ' interest and would be calculated every ' + agreement.interestSpread : 'not going to be periodic' ) +  '. Do you which to continue recieving Scriptbill transaction or click cancel to cancel the transaction? ' );
-						console.log("continuing " + conf );
+						//console.log("continuing " + conf );
 							
 						if( ! conf ){ 
 							this.errorMessage( response.blockID + " Recieved Transaction Now Being Cancelled!!!");
@@ -18968,14 +18968,14 @@ static Base64 = {
 					}			
 					
 				}
-				console.log("continue recieving 2");
+				//console.log("continue recieving 2");
 				
 				//we can stop recieveing if the agreement was not propely decrypted.
 				if( typeof agreement != "object" || ! privateKey ){
 					newBlock = undefined;
 					return false;
 				}
-				console.log("continue recieving 3");
+				//console.log("continue recieving 3");
 				//this point we are confidence the note is actually recieving the transaction block
 				//once the agreement is successfully decrypted, the note can now recieve the block convienently.
 				note.recievedBlockID = response.blockID;
@@ -19052,13 +19052,13 @@ static Base64 = {
 					}
 				}
 				
-				console.log("continue recieving 5");
+				//console.log("continue recieving 5");
 				newBlock.referenceID 	= response.blockID;
 				newBlock.referenceKey 	= agreement.agreeID;
 				details.note 			= response.transNote;
 				
 				if( details.transType != 'STOCKRECIEVE' || details.transType != 'BONDRECIEVE' ){
-					console.log("continue recieving adding value to note");
+					//console.log("continue recieving adding value to note");
 					note.noteValue 		= parseFloat( note.noteValue ) + parseFloat( details.transValue );
 					newBlock.transType 	= details.transType;
 						
@@ -19127,7 +19127,7 @@ static Base64 = {
 					let productKey 			= await this.generateKey( 20, true, true );
 					
 					if( this.productKey ){
-						console.log( "product key set: " + this.productKey );
+						//console.log( "product key set: " + this.productKey );
 						productKey = this.productKey;
 					}
 					var id 				= await this.generateKey(10);
@@ -19285,7 +19285,7 @@ static Base64 = {
 				}
 				//create product transaction.
 				else if( details.transType == "CREATEBUDGET" ){
-					console.log( "budgets: " + note.noteBudgets );
+					//console.log( "budgets: " + note.noteBudgets );
 					let exchangeNote 			= newBlock.exchangeNote;
 					let productNote				= newBlock.productNote;
 					
@@ -19465,7 +19465,7 @@ static Base64 = {
 						note.noteBudgets 		= [];
 					
 					note.noteBudgets.push( this.#budgetSecret );
-					console.log("Exchange Note ID: " + newBlock.exchangeNote.exchangeID, "Block ID: " + newBlock.blockID );
+					//console.log("Exchange Note ID: " + newBlock.exchangeNote.exchangeID, "Block ID: " + newBlock.blockID );
 					//await this.createAlert("Check exchange note and block id");
 				}
 				else if( details.transType == "BUSINESS" && note.BMKey && response && response.agreement && response.agreement.budgetType == "business" && this.#budgetTrans.includes( response.transType ) && note.rankPref == "businessManager" ){
@@ -20098,7 +20098,7 @@ static Base64 = {
 										
 				} else if( details.transType == "EXCHANGE" && ( response && this.#transSend.includes(  response.transType ) ) ) {
 				
-					console.log("Inside Exchange");
+					//console.log("Inside Exchange");
 						
 					let blockID 				= newBlock.blockID;
 					let formerBlockID 			= newBlock.formerBlockID;
@@ -20335,7 +20335,7 @@ static Base64 = {
 					newBlock.agreements 	= agreements;
 					newBlock.exchangeNote 	= exNote; */
 					
-					console.log("newblock deposit: " + JSON.stringify( newBlock ));
+					//console.log("newblock deposit: " + JSON.stringify( newBlock ));
 					this.#note 		= JSON.parse( JSON.stringify( note ));
 					this.details 	= JSON.parse( JSON.stringify( details ));
 					note 			= await this.#updateNote( note, details );
@@ -20369,14 +20369,14 @@ static Base64 = {
 							if( typeof note.agreements != "object" )
 								note.agreements 	= [];
 							
-							console.log( "Deposit trans value: " + details.transValue );
-							console.log( "Deposit note value 3: " + note.noteValue );			
+							//console.log( "Deposit trans value: " + details.transValue );
+							//console.log( "Deposit note value 3: " + note.noteValue );			
 							
-							console.log("newBlock Deposit Agreement: " + JSON.stringify( newBlock ), " The Agreement if found: " + JSON.stringify( details.agreement ));
+							//console.log("newBlock Deposit Agreement: " + JSON.stringify( newBlock ), " The Agreement if found: " + JSON.stringify( details.agreement ));
 							
 							if( ! this.#isExchangeDeposit && response && response.transType == "WITHDRAW" ){								
 													
-								console.log("response withdraw");
+								//console.log("response withdraw");
 
 								newBlock.transValue 	= details.transValue;
 								let exNote 				= await this.getCurrentExchangeNote( note.noteType );
@@ -20401,7 +20401,7 @@ static Base64 = {
 									}
 									
 									if( ! details.agreement.ExecTime ) {
-										console.log( details.agreeement );
+										//console.log( details.agreeement );
 										details.agreement.ExecTime 	= parseInt( this.currentTime() ) + parseInt( this.calculateTime( "3 Days" ) );
 									}
 									
@@ -20456,7 +20456,7 @@ static Base64 = {
 								}
 								newBlock.isExchangeMarketMining		= 0;
 							} else {
-								console.log("Response Exchange");
+								//console.log("Response Exchange");
 								if( ! this.#currentNote ){
 									this.#currentNote 	= await this.getCurrentExchangeNote( note.noteType );
 								}
@@ -20552,12 +20552,12 @@ static Base64 = {
 									newBlock.isExchangeMarketMining		= 1;
 								} else {
 									this.errorMessage("Can't create deposit without a valid exchange key " );
-									console.log("key not present");
+									//console.log("key not present");
 									return false;
 								}
 							}
-							console.log( "Deposit trans value 2: " + details.transValue );
-							console.log( "Deposit note value 3: " + note.noteValue );
+							//console.log( "Deposit trans value 2: " + details.transValue );
+							//console.log( "Deposit note value 3: " + note.noteValue );
 							note.noteValue				= parseFloat( note.noteValue ) + parseFloat( details.transValue );
 							newBlock.transValue 		= details.transValue;
 							
@@ -22033,9 +22033,9 @@ static Base64 = {
 							this.errorMessage("No Password to decrypt the agreement. Use the set_pass property to import password into Scriptbill");
 							return false;
 						} else {
-							console.log('block: ', this.block, JSON.stringify( this.block ));
+							//console.log('block: ', this.block, JSON.stringify( this.block ));
 							let agreedment 	= this.decrypt( this.block.recipient, this.#set_pass );
-							console.log("agreement: ", agreedment, JSON.stringify( agreedment ));
+							//console.log("agreement: ", agreedment, JSON.stringify( agreedment ));
 							//await this.createAlert("check agreement");
 							
 							if( ! this.isJsonable( agreedment ) ){
@@ -22158,7 +22158,7 @@ static Base64 = {
 			
 			note.noteValue 	+= parseFloat( details.transValue );
 			newBlock.transType = details.transType;
-			console.log("inner new block: ", newBlock, JSON.stringify( newBlock ));
+			//console.log("inner new block: ", newBlock, JSON.stringify( newBlock ));
 			//await this.createAlert( "Merging note 5: " + details.transType );
 			//await this.createAlert( "Check inner new block - tansType: " + newBlock.transType );
 		}
@@ -22708,7 +22708,7 @@ static Base64 = {
 			newBlock.transValue = details.transValue;
 		
 		
-		console.log( "checking transValue: ", newBlock.transValue );
+		//console.log( "checking transValue: ", newBlock.transValue );
 		if( details.transType == "DEPOSIT" && newBlock.transValue == 0 ) return;
 		//await this.createAlert( "Merging note 6: " + newBlock.transType );
 		//this will ensure that the block carries the right note or credit type information about the current note
@@ -22729,7 +22729,7 @@ static Base64 = {
 		
 		//if( ! this.#isExchangeMarketMining )
 		string 					= this.hashed( string );
-		console.log( "note secret before encrypt: ", note.noteSecret, " key: ", string );
+		//console.log( "note secret before encrypt: ", note.noteSecret, " key: ", string );
 		note.noteSecret 		= this.encrypt( note.noteSecret, string ); 
 	
 		await this.createAlert( "Note Secret Length 4: " + note.noteSecret.length );	
@@ -22803,9 +22803,9 @@ static Base64 = {
 		note.noteSign 				= await this.Sign(note.blockKey, this.hashed( string ));
 		//from this point forward, nothing else should be added to the note.
 		//this may make the note invalid.
-		console.log( "Create Product ID " + newBlock.productID );
+		//console.log( "Create Product ID " + newBlock.productID );
 		
-		console.log('Current Note: ' + JSON.stringify(note));
+		//console.log('Current Note: ' + JSON.stringify(note));
 		//await this.createAlert( "Note Secret Length 3: " + note.noteSecret.length );
 		
 		if( this.#isExchangeMarketMining && newBlock.exchangeNote && newBlock.exchangeNote.exchangeID == note.noteAddress && newBlock.exchangeNote.noteType == note.NoteType && this.#transRecieve.includes( details.transType ) ){
@@ -22821,7 +22821,7 @@ static Base64 = {
 		
 		this.successMessage( "Transaction Created. Checking Trans Type: " +newBlock.transType );
 		
-		console.log('Current Block: ' + JSON.stringify( newBlock ) );
+		//console.log('Current Block: ' + JSON.stringify( newBlock ) );
 		//save the current block		
 		
 		//this shows that the product note is the one recieving a transaction from
@@ -22842,7 +22842,7 @@ static Base64 = {
 			var string 		= this.#password;
 			note 				= JSON.stringify( currentNote );
 			let pass 			= this.hashed( string );
-			console.log("hashed: " + pass );
+			//console.log("hashed: " + pass );
 			//await this.createAlert("check hashed");
 			this.noteEncrypt 	= this.encrypt( note, pass );
 			
@@ -22881,14 +22881,14 @@ static Base64 = {
 			this.response 						= JSON.parse( JSON.stringify( newBlock ) );
 			this.#noVerify 						= false;
 			return await this.storeBlock( newBlock, note ).then( async store =>{
-				console.log('stored 1: ' + store );
+				//console.log('stored 1: ' + store );
 				//await this.createAlert('stored 1: ' );
 				this.returnBlock 		= JSON.parse( JSON.stringify( newBlock ) );
 				this.l[ newBlock.blockID ] = JSON.stringify( newBlock );
 				if( store ){
 					await this.saveNote(note);					
 					//this.shareData(false, newBlock);
-					console.log( "data gotten: " + getData, " Stringified: " + JSON.stringify( getData ) );
+					//console.log( "data gotten: " + getData, " Stringified: " + JSON.stringify( getData ) );
 					
 					
 					return await this.#profitSharing( newBlock, note, BLOCK, this.response );
@@ -22925,7 +22925,7 @@ static Base64 = {
 			this.response 		= JSON.parse( JSON.stringify( newBlock ) );
 			this.#noVerify		= false;
 			return await this.storeBlock( newBlock, note ).then( async store =>{
-				console.log('stored 2: ' + stored );
+				//console.log('stored 2: ' + stored );
 				//await this.createAlert('stored 2: ');
 				this.returnBlock 		= JSON.parse( JSON.stringify( newBlock ) );
 				this.returnNote 		= JSON.parse( JSON.stringify( note ) );
@@ -22962,7 +22962,7 @@ static Base64 = {
 			this.successMessage("Auto Transaction Now Running. Block Transaction Type " + newBlock.transType );
 			
 			let saveCurrentNote = JSON.parse( JSON.stringify( this.#note ) );
-			console.log("running auto recieve transaction for the exchange market with id: " + currentNote.noteAddress );
+			//console.log("running auto recieve transaction for the exchange market with id: " + currentNote.noteAddress );
 			
 			this.response = JSON.parse( JSON.stringify( newBlock ) );
 			this.details  = JSON.parse( JSON.stringify( newBlock ) );
@@ -22990,7 +22990,7 @@ static Base64 = {
 			}
 			this.#noVerify		= false;
 			return await this.storeBlock( newBlock, note ).then( async store =>{
-				console.log('stored 3: ' + store );
+				//console.log('stored 3: ' + store );
 				//await this.createAlert('stored 3: ' );
 				this.returnBlock 		= JSON.parse( JSON.stringify( newBlock ) );
 				this.returnNote = JSON.parse( JSON.stringify( this.#note ));
@@ -23001,7 +23001,7 @@ static Base64 = {
 					this.#note 		= JSON.parse( JSON.stringify( this.#currentNote ) );
 					
 					this.shareData( false, newBlock );
-					console.log( "data gotten: " + getData, " Stringified: " + JSON.stringify( getData ) );
+					//console.log( "data gotten: " + getData, " Stringified: " + JSON.stringify( getData ) );
 					
 					if( currentNote.exchangeID && newBlock.exchangeNote.exchangeID == currentNote.exchangeID )
 						this.#isExchangeMarketMining = true;
@@ -23009,7 +23009,7 @@ static Base64 = {
 					if( ! this.#note.accountData )
 						this.#note.accountData 			= {};
 					
-					console.log("running auto transaction, trans Type: ", this.details.transType );
+					//console.log("running auto transaction, trans Type: ", this.details.transType );
 					return await this.generateScriptbillTransactionBlock(this.details, this.#note).then( block =>{
 						this.#isExchangeMarketMining = false;
 						this.#currentNote = JSON.parse( JSON.stringify( this.#note ) );
@@ -23018,7 +23018,7 @@ static Base64 = {
 						return block;
 					});
 				} else {
-					/* console.log( "store: " + store, "Stringified: " + JSON.stringify( store ) );
+					/* //console.log( "store: " + store, "Stringified: " + JSON.stringify( store ) );
 					await this.createAlert("Not Stored! "  ); */
 					try {
 						this.l[ newBlock.blockID ] = JSON.stringify( newBlock );
@@ -23067,11 +23067,11 @@ static Base64 = {
 				}
 			}
 		}		
-		/* console.log( newBlock.agreement );
+		/* //console.log( newBlock.agreement );
 		await this.createAlert( newBlock.agreement ); */
 		this.#noVerify			= false;
 		return await this.storeBlock( newBlock, note ).then( async store =>{
-			console.log( 'store: ', store );
+			//console.log( 'store: ', store );
 			//alert('stored last: ' + store );
 			//await this.createAlert('stored last: ' );
 			this.returnBlock 		= JSON.parse( JSON.stringify( newBlock ) );
@@ -23097,7 +23097,7 @@ static Base64 = {
 				
 				
 				this.shareData( false, newBlock );
-				console.log( "data gotten: " + getData, " Stringified: " + JSON.stringify( getData ) );
+				//console.log( "data gotten: " + getData, " Stringified: " + JSON.stringify( getData ) );
 				return newBlock;
 			} else {
 				try {
@@ -23410,7 +23410,7 @@ static Base64 = {
 	}
 	
 	static async getCurrentExchangeBlock( exchangeBlock = null ){
-		console.log("getCurrentExchangeBlock running " + this.funcUp[ this.funcUp.length]);
+		//console.log("getCurrentExchangeBlock running " + this.funcUp[ this.funcUp.length]);
 		this.funcUp[ this.funcUp.length] = "getCurrentExchangeBlock";
 		
 		if( ( ! exchangeBlock || ! exchangeBlock.blockID ) && ( ! this.exchangeBlocks  || ! this.exchangeBlocks.length || typeof this.exchangeBlocks == "object" ) ) return;
@@ -23434,7 +23434,7 @@ static Base64 = {
 			return exchangeBlock;
 		
 		let nextBlock 		= await this.getTransBlock(1, {	exBlockID });
-		console.log( nextBlock );
+		//console.log( nextBlock );
 		
 		if( ! nextBlock || ! nextBlock.length || ! nextBlock[0].blockID )
 			return exchangeBlock;
@@ -23446,7 +23446,7 @@ static Base64 = {
 	}
 	
 	static async recieveAutoExecute(){
-		console.log("recieveAutoExecute running " + this.funcUp[ this.funcUp.length]);
+		//console.log("recieveAutoExecute running " + this.funcUp[ this.funcUp.length]);
 		this.funcUp[ this.funcUp.length] = "recieveAutoExecute";
 		if( ! this.response || this.response.nextBlockID != "AUTOEXECUTE"  )
 			return;
@@ -23495,7 +23495,7 @@ static Base64 = {
 	}
 	
 	static async chargeGasFee(){
-		console.log("chargeGasFee running " + this.funcUp[ this.funcUp.length]);
+		//console.log("chargeGasFee running " + this.funcUp[ this.funcUp.length]);
 		this.funcUp[ this.funcUp.length] = "chargeGasFee";
 		if( ! this.newBlock || this.newBlock.noteType == "SBCRD" || this.newBlock.noteType == "SBSTK" || this.newBlock.noteType == "SBBND") return this.newBlock;
 		try {
@@ -23519,7 +23519,7 @@ static Base64 = {
 	}
 	
 	static async getCurrentBlock( blocks ){
-		console.log("getCurrentBlock running " + this.funcUp[ this.funcUp.length]);
+		//console.log("getCurrentBlock running " + this.funcUp[ this.funcUp.length]);
 		this.funcUp[ this.funcUp.length] = "getCurrentBlock";
 		
 		let realBlock, y, block;
@@ -23602,7 +23602,7 @@ static Base64 = {
 	}
 	
 	static async calculateInterestRate( interestType, interestRate ){
-		console.log("calculateInterestRate running " + this.funcUp[ this.funcUp.length]);
+		//console.log("calculateInterestRate running " + this.funcUp[ this.funcUp.length]);
 		this.funcUp[ this.funcUp.length] = "calculateInterestRate";
 		switch( interestType ){
 			case "PT":
@@ -23849,7 +23849,7 @@ static Base64 = {
 	}
 	
 	static async calculateInterestType( rank = false ){
-		console.log("calculateInterestType running " + this.funcUp[ this.funcUp.length]);
+		//console.log("calculateInterestType running " + this.funcUp[ this.funcUp.length]);
 		this.funcUp[ this.funcUp.length] = "calculateInterestType";
 		if( ! rank ) {
 			rank = this.#scriptbillRanks[Object.keys( this.#scriptbillRanks )[0]];
@@ -24016,18 +24016,18 @@ static Base64 = {
 	
 	
 	static async getObjKey(obj, value) {
-		console.log("getObjKey running " + this.funcUp[ this.funcUp.length]);
+		//console.log("getObjKey running " + this.funcUp[ this.funcUp.length]);
 		this.funcUp[ this.funcUp.length] = "getObjKey";
 	  return Object.keys(obj).find(key => obj[key] === value);
 	}
 	static async getObjKeys(obj, value) {
-		console.log("getObjKeys running " + this.funcUp[ this.funcUp.length]);
+		//console.log("getObjKeys running " + this.funcUp[ this.funcUp.length]);
 		this.funcUp[ this.funcUp.length] = "getObjKeys";
 	  return Object.keys(obj).filter(key => obj[key] === value);
 	}
 	
 	static async parseArgs( array1, array2 ){
-		console.log("parseArgs running " + this.funcUp[ this.funcUp.length]);
+		//console.log("parseArgs running " + this.funcUp[ this.funcUp.length]);
 		this.funcUp[ this.funcUp.length] = "parseArgs";
 		try {
 			let arrKeys1 = Object.keys( array1 );
@@ -24057,7 +24057,7 @@ static Base64 = {
 	}
 	
 	static async getCurrentWalletBlock( referenceBlock ){
-		console.log("getCurrentWalletBlock running " + this.funcUp[ this.funcUp.length]);
+		//console.log("getCurrentWalletBlock running " + this.funcUp[ this.funcUp.length]);
 		this.funcUp[ this.funcUp.length] = "getCurrentWalletBlock";
 		//the current note must have a walvar id and a reference block with the tight wallet hashes to get the wallet blocks
 		if( ! referenceBlock || ! this.walletID || ! referenceBlock.nextWalletHASH ) return referenceBlock;
@@ -24080,7 +24080,7 @@ static Base64 = {
 	}
 	
 	static async traceBlockIDFromWalletID( walletID = "" ){
-		console.log("traceBlockIDFromWalletID running " + this.funcUp[ this.funcUp.length]);
+		//console.log("traceBlockIDFromWalletID running " + this.funcUp[ this.funcUp.length]);
 		this.funcUp[ this.funcUp.length] = "traceBlockIDFromWalletID";
 		if( ! walletID && ( this.walletID || this.#note.walletID ) ){
 			if( this.walletID ){
@@ -24114,7 +24114,7 @@ static Base64 = {
 	}
 	
 	static async Sign(key = false, text = false){
-		console.log("Sign running " + this.funcUp[ this.funcUp.length]);
+		//console.log("Sign running " + this.funcUp[ this.funcUp.length]);
 		this.funcUp[ this.funcUp.length] = "Sign";
 		try {
 			if( CryptoJS && CryptoJS.SHA256 ){
@@ -24172,7 +24172,7 @@ static Base64 = {
 	}
 
 	static async Verify( signature, key, text ){
-		console.log("Verify running " + this.funcUp[ this.funcUp.length]);
+		//console.log("Verify running " + this.funcUp[ this.funcUp.length]);
 		this.funcUp[ this.funcUp.length] = "Verify";
 		try {
 			if( CryptoJS && CryptoJS.SHA256 ) {
@@ -24181,7 +24181,7 @@ static Base64 = {
 					
 					
 					if( text && key && key.length == 128 && signature ){
-						console.log("VerifyText: " + this.VerifyText, "Sign Key: " + this.VerifyKey, "signature: " + this.signature );
+						//console.log("VerifyText: " + this.VerifyText, "Sign Key: " + this.VerifyKey, "signature: " + this.signature );
 						let keyObj 		= {
 							"crv": "P-384",
 							"ext": true,
@@ -24198,7 +24198,7 @@ static Base64 = {
 						let encoder 			= new TextEncoder();
 						let encoded 			= encoder.encode( text );
 						let sign 				= this.str2ab( this.Base64.decode( signature ) );
-						console.log("verifying...");
+						//console.log("verifying...");
 						return await window.crypto.subtle.verify(
 							{
 							  name: "ECDSA",
@@ -24210,12 +24210,12 @@ static Base64 = {
 						  );
 					}
 					else {
-						console.log("not verified ");
+						//console.log("not verified ");
 						return false;
 					}
 				}
 				catch (ex){
-					console.log( "verify error: " + ex );
+					//console.log( "verify error: " + ex );
 					return false;
 				}
 			}
@@ -24230,7 +24230,7 @@ static Base64 = {
 	}
 	//Scriptbill function can help us trace the blocks that belong to a particular note
 	static async calculateNextBlockID( note = false, seed = false, depth = 1, walletID = false, run = 1 ){
-		console.log("calculateNextBlockID running " + this.funcUp[ this.funcUp.length]);
+		//console.log("calculateNextBlockID running " + this.funcUp[ this.funcUp.length]);
 		this.funcUp[ this.funcUp.length] = "calculateNextBlockID";
 		if( ! this.runned )
 			this.runned = 0;
@@ -24258,7 +24258,7 @@ static Base64 = {
 				var id 				= await this.generateKey(10);
 				await this.setPrivateKey( note.noteSecret ? note.noteSecret : note.exchangeKey, id );
 				
-				console.log( "FUNC: calculateNextBlockID: Params: noteSecret: " + note.noteSecret + " seed: " + this.seed + " runned: " + ++this.runned );
+				//console.log( "FUNC: calculateNextBlockID: Params: noteSecret: " + note.noteSecret + " seed: " + this.seed + " runned: " + ++this.runned );
 				
 				if( run >= depth ) {
 					let key 	= walletID ? note.walletID : await this.getPublicKey(id);
@@ -24284,7 +24284,7 @@ static Base64 = {
 	}
 	
 	static async calculateFormerBlockID( note = false, seed = false, depth = 1, walletID = false, run = 1 ){
-		console.log("calculateFormerBlockID running " + this.funcUp[ this.funcUp.length] );
+		//console.log("calculateFormerBlockID running " + this.funcUp[ this.funcUp.length] );
 		this.funcUp[ this.funcUp.length] = "calculateFormerBlockID";
 		if( ! this.frunned )
 			this.frunned = 0;
@@ -24311,7 +24311,7 @@ static Base64 = {
 			var id 				= await this.generateKey(10);
 			await this.setPrivateKey( note.noteSecret, id );
 			
-			console.log( "FUNC: calculateFormerBlockID: Params: noteKey: " + this.#note.noteKey + " seed: " + this.seed + " runned: " + ++this.frunned );
+			//console.log( "FUNC: calculateFormerBlockID: Params: noteKey: " + this.#note.noteKey + " seed: " + this.seed + " runned: " + ++this.frunned );
 			let key 	= walletID ? note.walletID : await this.getPublicKey(id);
 			if( run == depth ) {
 				let value = this.decrypt( seed, key );
@@ -24333,7 +24333,7 @@ static Base64 = {
 	}
 	
 	static async traceBlockIDFromAddress( address = undefined ){
-		console.log("traceBlockIDFromAddress running " + this.funcUp[ this.funcUp.length] );
+		//console.log("traceBlockIDFromAddress running " + this.funcUp[ this.funcUp.length] );
 		this.funcUp[ this.funcUp.length] = "traceBlockIDFromAddress";
 		
 		//initializing storage.
@@ -24352,7 +24352,7 @@ static Base64 = {
 		}
 		
 		this.getTransactions(function(block, key, scriptbill ){
-			console.log("the blocks: " + JSON.stringify( block ), "type: " + typeof block, " loop key: " + key );
+			//console.log("the blocks: " + JSON.stringify( block ), "type: " + typeof block, " loop key: " + key );
 			//to test if the current block belongs to the current address we encrypt the blockID 
 			//to see if it would return the next Block ID.
 			//we'll test if the runner wants to search using walvar id
@@ -24395,7 +24395,7 @@ static Base64 = {
 	}
 	
 	static async compare(array1, array2, type = 'merge'){
-		console.log("compare running " + this.funcUp[ this.funcUp.length] );
+		//console.log("compare running " + this.funcUp[ this.funcUp.length] );
 		this.funcUp[ this.funcUp.length] = "compare";
 		
 		try {
@@ -24495,7 +24495,7 @@ static Base64 = {
 	}
 	
 	static async getData( key, data, url = "", type = "GET" ){
-		console.log("getData running " + this.funcUp[ this.funcUp.length] );
+		//console.log("getData running " + this.funcUp[ this.funcUp.length] );
 		let funcUp  = this.funcUp[ this.funcUp.length];
 		this.funcUp[ this.funcUp.length] = "getData";
 		let note 	= this.#note;
@@ -24514,7 +24514,7 @@ static Base64 = {
 					url 	= this.#note.noteServer;
 				}
 			}
-			console.log("url setting: " + url);
+			//console.log("url setting: " + url);
 			this.url 	= new URL( url );
 			
 			if( type == "GET" ){
@@ -24598,13 +24598,13 @@ static Base64 = {
 	//Scriptbill function is recursive, ensures that the block is gotten, even though it'this.s not stored on the server.
 	//Scriptbill way, the function allows the note to get data from the server that holds it.
 	static async getTransBlock( limit = 500, config = {} ){
-		console.log("getTransBlock running " + this.funcUp[ this.funcUp.length - 1], config );
+		//console.log("getTransBlock running " + this.funcUp[ this.funcUp.length - 1], config );
 		this.funcUp[ this.funcUp.length] = "getTransBlock";
 
-		console.log("Used variables: this.blockID " + this.blockID + " " + typeof this.blockID," this.productBlockID: " +  this.productBlockID  + " " + typeof this.productBlockID, " this.walletHASH: " +  this.walletHASH  + " " + typeof this.walletHASH, " this.transType: " +  this.transType  + " " + typeof this.transType, " this.noteTypeS: " +  this.noteTypeS  + " " + typeof this.noteTypeS," this.productID: " +  this.productID  + " " + typeof this.productID , " this.sellCredit: " +  this.sellCredit  + " " + typeof this.sellCredit , " this.buyCredit: " +  this.buyCredit  + " " + typeof this.buyCredit, " this.budgetID: " +  this.budgetID  + " " + typeof this.budgetID , " this.blockRef: " +  this.blockRef  + " " + typeof this.blockRef , " this.exBlockID: " +  this.exBlockID  + " " + typeof this.exBlockID );		
+		//console.log("Used variables: this.blockID " + this.blockID + " " + typeof this.blockID," this.productBlockID: " +  this.productBlockID  + " " + typeof this.productBlockID, " this.walletHASH: " +  this.walletHASH  + " " + typeof this.walletHASH, " this.transType: " +  this.transType  + " " + typeof this.transType, " this.noteTypeS: " +  this.noteTypeS  + " " + typeof this.noteTypeS," this.productID: " +  this.productID  + " " + typeof this.productID , " this.sellCredit: " +  this.sellCredit  + " " + typeof this.sellCredit , " this.buyCredit: " +  this.buyCredit  + " " + typeof this.buyCredit, " this.budgetID: " +  this.budgetID  + " " + typeof this.budgetID , " this.blockRef: " +  this.blockRef  + " " + typeof this.blockRef , " this.exBlockID: " +  this.exBlockID  + " " + typeof this.exBlockID );		
 			
 						
-		console.log( JSON.stringify( this.#note ), "note as note" );
+		//console.log( JSON.stringify( this.#note ), "note as note" );
 				
 		/* if( ! this.#note || ! this.blockID || ! this.productBlockID || ! this.walletHASH || ! this.transType || ! this.noteTypeS || ! this.productID || ! this.sellCredit || ! this.buyCredit || ! this.budgetID || ! this.blockRef || ! this.exBlockID ) return false; */
 		
@@ -24626,7 +24626,7 @@ static Base64 = {
 						delete this.server;
 					}
 				} catch( e ){
-					console.log("this.server: " + e);
+					//console.log("this.server: " + e);
 					delete this.server;
 				}
 			}
@@ -24700,7 +24700,7 @@ static Base64 = {
 						
 					}
 				} else {
-					console.log("Note Typing...");
+					//console.log("Note Typing...");
 					blocks 		= new Promise( (resolve, reject)=>{
 						this.getDataPersistently('noteType', config.noteType ).then( blocks =>{
 							setTimeout(()=>{
@@ -24742,7 +24742,7 @@ static Base64 = {
 					}
 				}
 				
-				/* console.log( "block IDs: " + JSON.stringify( this.blockIDs ) );
+				/* //console.log( "block IDs: " + JSON.stringify( this.blockIDs ) );
 				await this.createAlert("check Block IDs" ); */
 							
 				delete this.noteTypeS;
@@ -24774,9 +24774,9 @@ static Base64 = {
 				} else {
 					blocks 		= new Promise( (resolve, reject)=>{
 						this.getDataPersistently('transType', config.transType ).then( blocks =>{
-							console.log("blocks",blocks);
+							//console.log("blocks",blocks);
 							setTimeout(()=>{
-								console.log("blocks 2",blocks, config.transType);
+								//console.log("blocks 2",blocks, config.transType);
 								resolve(blocks);
 							},1000);
 						});
@@ -24792,11 +24792,11 @@ static Base64 = {
 							});
 						}
 					}
-					console.log( "check blocks", blocks );
+					//console.log( "check blocks", blocks );
 					if( this.blocks.length < limit ){ 
 					
 						blocks 	= await this.getData("transType", config.transType, this.server ? this.server : "");
-						console.log( "check blocks", blocks );
+						//console.log( "check blocks", blocks );
 						if( blocks && blocks.length && typeof blocks == "object" ){
 							blocks.forEach( block =>{
 								if( ! blockIDs.includes( block.blockID )){
@@ -24815,7 +24815,7 @@ static Base64 = {
 					}
 				}
 				
-				/* console.log( "block IDs: " + JSON.stringify( this.blockIDs ) );	
+				/* //console.log( "block IDs: " + JSON.stringify( this.blockIDs ) );	
 				await this.createAlert("check Block IDs" ); */
 							
 				delete this.transType;
@@ -25452,7 +25452,7 @@ static Base64 = {
 						if( typeof config.budgetID != "object" )
 							config.budgetID 	= [ config.budgetID ];
 						
-						console.log( "check this block ", this.blocks );
+						//console.log( "check this block ", this.blocks );
 						
 						config.budgetID.forEach( (budgetID)=>{
 							this.blocks = this.blocks.filter( (block)=>{
@@ -25466,7 +25466,7 @@ static Base64 = {
 							});
 						});
 						
-						console.log( "check this block after ", this.blocks );
+						//console.log( "check this block after ", this.blocks );
 						
 					}
 				} else {
@@ -25988,7 +25988,7 @@ static Base64 = {
 			}
 			
 			if( this.blocks.length == 0 && searched.length < 1 ){
-				console.log( "test blocks", this.blocks );
+				//console.log( "test blocks", this.blocks );
 				if( this.#note && ! this.blockID )
 					this.blockID = this.#note.blockID;
 			}
@@ -26019,7 +26019,7 @@ static Base64 = {
 						
 					}
 				} else {
-					console.log( typeof config.blockID, "transblock getting" );
+					//console.log( typeof config.blockID, "transblock getting" );
 					
 					if( typeof config.blockID == "string" )
 						blocks 		= await this.resolvePersistentData( config.blockID );
@@ -26034,7 +26034,7 @@ static Base64 = {
 							}
 						}
 					}
-					// console.log("blocks: " + blocks);
+					// //console.log("blocks: " + blocks);
 					// await this.createAlert("blocking");
 					if( this.blocks.length < limit && blocks )
 						this.blocks = this.blocks.concat( blocks );
@@ -26094,7 +26094,7 @@ static Base64 = {
 
 		
 	static async getTransactions( callback ){
-		console.log("getTransactions running " + this.funcUp[ this.funcUp.length] );
+		//console.log("getTransactions running " + this.funcUp[ this.funcUp.length] );
 		this.funcUp[ this.funcUp.length] = "getTransactions";
 		if( this.key == undefined )
 			this.key = 0;
@@ -26107,7 +26107,7 @@ static Base64 = {
 		
 		if( key == undefined ) return;
 		
-		console.log( 'blcokkey: ' + key );
+		//console.log( 'blcokkey: ' + key );
 		//10000 * 10000 means an 100 million maximum loop
 		for( x = 0; x < 10000; x++ ) {
 
@@ -26145,7 +26145,7 @@ static Base64 = {
 	
 	//this function is expected to run with a user Inputed password.
 	static async changeLoginPassword( newPassword, oldPassword ){
-		console.log("changeLoginPassword running " + this.funcUp[ this.funcUp.length] );
+		//console.log("changeLoginPassword running " + this.funcUp[ this.funcUp.length] );
 		this.funcUp[ this.funcUp.length] = "changeLoginPassword";
 		this.#password = await this.#getPassword( oldPassword );
 		
@@ -26180,9 +26180,9 @@ static Base64 = {
 	
 	//creating a product is just simply creating a transaction block optimized for product creation. For now we are not creating budgets
 	static async create_product(){
-		console.log("create_product running " + this.funcUp[ this.funcUp.length] );
+		//console.log("create_product running " + this.funcUp[ this.funcUp.length] );
 		this.funcUp[ this.funcUp.length] = "create_product";
-		console.log( "product Config: " + JSON.stringify( this.productConfig ) );
+		//console.log( "product Config: " + JSON.stringify( this.productConfig ) );
 		
 		//initializing storage.
 		
@@ -26270,7 +26270,7 @@ static Base64 = {
 	}
 	
 	static async buy_product( productID, value = 0 ){
-		console.log("buy_product running " + this.funcUp[ this.funcUp.length] );
+		//console.log("buy_product running " + this.funcUp[ this.funcUp.length] );
 		this.funcUp[ this.funcUp.length] = "buy_product";
 		//first look for the product on the Scriptbill database.
 		this.productID = productID;
@@ -26284,9 +26284,9 @@ static Base64 = {
 			}		
 			
 			block = block[0];
-			console.log("the block: " + block, "stringified: " + JSON.stringify( block ) );
+			//console.log("the block: " + block, "stringified: " + JSON.stringify( block ) );
 			this.productBlock = JSON.parse( JSON.stringify( block ));
-			console.log( "block found " + block, "stringified " + JSON.stringify( block ) );
+			//console.log( "block found " + block, "stringified " + JSON.stringify( block ) );
 			let prodValue = 0;
 			
 					
@@ -26364,7 +26364,7 @@ static Base64 = {
 	}
 	
 	static async #profitSharing( shareBlock, note, BLOCK, response = null ){
-		console.log("profitSharing running " + this.funcUp[ this.funcUp.length] );
+		//console.log("profitSharing running " + this.funcUp[ this.funcUp.length] );
 		this.funcUp[ this.funcUp.length] = "profitSharing";
 		//the block must be configured as an object for the function to work and not an array.
 		if( typeof BLOCK != 'object' || BLOCK.length ) return;
@@ -26463,7 +26463,7 @@ static Base64 = {
 		on the app. 
 	*/
 	static async loginUserDetails(){
-		console.log("loginUserDetails running " + this.funcUp[ this.funcUp.length]);
+		//console.log("loginUserDetails running " + this.funcUp[ this.funcUp.length]);
 		this.funcUp[ this.funcUp.length] = "loginUserDetails";
 		
 		try {		
@@ -26483,7 +26483,7 @@ static Base64 = {
 				return null;
 			}
 			
-			//console.log( "personal: " + this.l.personal, "string: " + var string, "hash: " + this.hashed( string ) );
+			////console.log( "personal: " + this.l.personal, "string: " + var string, "hash: " + this.hashed( string ) );
 			if( this.l.personal ){
 				let local = JSON.parse( this.isJsonable( this.l.personal ) ? this.l.personal : '{}' );
 				let blockID, note, noteBlock, noteHash;
@@ -26590,7 +26590,7 @@ static Base64 = {
 	//this will avoid it being expired after a long time as long as the stocks are being 
 	//traded, the transaction block or the budget will remain active in the database.
 	static async invest( budgetID, value ){
-		console.log("invest running " + this.funcUp[ this.funcUp.length] );
+		//console.log("invest running " + this.funcUp[ this.funcUp.length] );
 		this.funcUp[ this.funcUp.length] = "invest";
 		try {
 			this.noteTypeS 			= this.#note.noteType;
@@ -26709,7 +26709,7 @@ static Base64 = {
 	//this function allows a user to employ a Scriptbill worker to his own company. This will allow the user buy 
 	//stocks from the company with special priviledges.
 	static async employScriptbillWorker( budgetID, workerNote ){
-		console.log("employScriptbillWorker running " + this.funcUp[ this.funcUp.length] );
+		//console.log("employScriptbillWorker running " + this.funcUp[ this.funcUp.length] );
 		this.funcUp[ this.funcUp.length] = "employScriptbillWorker";
 		if( ! this.#note || ! this.#note.noteBugdets  || ! this.#note.noteBudgets.length || ! this.#note.noteBudgets.includes( budgetID ) ) return false;
 		
@@ -26738,7 +26738,7 @@ static Base64 = {
 	}
 	
 	static async createScriptbillBudgetItem( budgetID ){
-		console.log("createScriptbillBudgetItem running " + this.funcUp[ this.funcUp.length] );
+		//console.log("createScriptbillBudgetItem running " + this.funcUp[ this.funcUp.length] );
 		this.funcUp[ this.funcUp.length] = "createScriptbillBudgetItem";
 				
 		if( !this.#note && this.s.currentNote )
@@ -26990,7 +26990,7 @@ static Base64 = {
 	
 	//before calling this function please set the budget Config variable to your desired value
 	static async createScriptbillBudget( config = false, note = false ){
-		console.log("createScriptbillBudget running " + this.funcUp[ this.funcUp.length] );
+		//console.log("createScriptbillBudget running " + this.funcUp[ this.funcUp.length] );
 		this.funcUp[ this.funcUp.length] = "createScriptbillBudget";
 		
 		try {
@@ -27150,7 +27150,7 @@ static Base64 = {
 			}
 			
 			let productNote 		= await this.getCurrentExchangeNote( budgetConfig.stockID );
-			console.log("prodNote: ", productNote, "budCon: ", budgetConfig);
+			//console.log("prodNote: ", productNote, "budCon: ", budgetConfig);
 			if( productNote && productNote.exchangeID && productNote.budgetID ){
 				if( ! note.budgetID ){					
 					this.errorMessage("Budget already created by another user. ");
@@ -27172,7 +27172,7 @@ static Base64 = {
 			if( typeof budgetConfig.budgetItems != 'object' || ! budgetConfig.budgetItems.length )
 				budgetConfig.budgetItems = [];
 			
-			console.log("note: " + JSON.stringify( note ) );
+			//console.log("note: " + JSON.stringify( note ) );
 			
 			details.agreement 		= JSON.parse( JSON.stringify( budgetConfig));
 			details.recipient 		= budgetConfig.budgetID;
@@ -27205,7 +27205,7 @@ static Base64 = {
 			
 		} catch( e ){
 			this.errorMessage( e.toString() );
-			console.log('na error be this', e);
+			//console.log('na error be this', e);
 			return false;
 		}
 	}
@@ -27213,7 +27213,7 @@ static Base64 = {
 	//to run auto investment. we run it locally on the server first and the network gets to know based on the 
 	//transactional data sent afterwards
 	static async autoInvestScriptbillBudget(){
-		console.log("autoInvestScriptbillBudget running " + this.funcUp[ this.funcUp.length] );
+		//console.log("autoInvestScriptbillBudget running " + this.funcUp[ this.funcUp.length] );
 		this.funcUp[ this.funcUp.length] = "autoInvestScriptbillBudget";
 		
 		//if( ! this.#isExchangeMarketMining ) return;
@@ -27331,7 +27331,7 @@ static Base64 = {
 	}
 	
 	static async getBudgetBlocks(){
-		console.log("getBudgetBlocks running " + this.funcUp[ this.funcUp.length] );
+		//console.log("getBudgetBlocks running " + this.funcUp[ this.funcUp.length] );
 		this.funcUp[ this.funcUp.length] = "getBudgetBlocks";
 		
 		//initializing storage
@@ -27355,7 +27355,7 @@ static Base64 = {
 	}
 	
 	static async monitorScriptbillStock(){
-		console.log("monitorScriptbillStock running " + this.funcUp[ this.funcUp.length] );
+		//console.log("monitorScriptbillStock running " + this.funcUp[ this.funcUp.length] );
 		this.funcUp[ this.funcUp.length] = "monitorScriptbillStock";
 		if( ( ! this.response || ! this.response.blockID ) && ( ! this.#note || ! this.#note.noteType.includes("STK") && ! this.response.productID ) ) return false;
 		
@@ -27438,7 +27438,7 @@ static Base64 = {
 	//the noteAddress if the stock will be bought from a stock note holder. the note address should be the 
 	//note address of the recipient stock. the recipient mother key will be used to recieve the funding.
 	static async buyScriptbillStocks( stockID, value ){
-		console.log("buyScriptbillStocks running " + this.funcUp[ this.funcUp.length] );
+		//console.log("buyScriptbillStocks running " + this.funcUp[ this.funcUp.length] );
 		this.funcUp[ this.funcUp.length] = "buyScriptbillStocks";
 		if( this.#note.noteType.includes("STK") || this.#note.noteType.includes("BND") ){
 			this.errorMessage("You Can't Use A Stock or Bond Note To Purchase a Scriptbill Stock! Please Try Again With a Valid Credit Note.");
@@ -27503,7 +27503,7 @@ static Base64 = {
 	//stock you have tjat you want sold. If your stock rate is 1, this means you want the 
 	//whole of your stock sold.
 	static async sellScriptbillStocks( stockRate ){
-		console.log("sellScriptbillStocks running " + this.funcUp[ this.funcUp.length] );
+		//console.log("sellScriptbillStocks running " + this.funcUp[ this.funcUp.length] );
 		this.funcUp[ this.funcUp.length] = "sellScriptbillStocks";
 		
 		//initializing storage.
@@ -27606,7 +27606,7 @@ static Base64 = {
 	}
 	
 	static async buyScriptbillBonds( value ){
-		console.log("buyScriptbillBonds running " + this.funcUp[ this.funcUp.length] );
+		//console.log("buyScriptbillBonds running " + this.funcUp[ this.funcUp.length] );
 		this.funcUp[ this.funcUp.length] = "buyScriptbillBonds";
 		
 		//initializing storage.
@@ -27736,7 +27736,7 @@ static Base64 = {
 	}
 	
 	static async sellScriptbillBonds( bondValue ){
-		console.log("sellScriptbillBonds running " + this.funcUp[ this.funcUp.length] );
+		//console.log("sellScriptbillBonds running " + this.funcUp[ this.funcUp.length] );
 		this.funcUp[ this.funcUp.length] = "sellScriptbillBonds";
 		
 		//initializing storage.
@@ -27814,7 +27814,7 @@ static Base64 = {
 	/*
 	*/
 	static async monitorScriptbillBudget(){
-		console.log("monitorScriptbillBudget running " + this.funcUp[ this.funcUp.length] );
+		//console.log("monitorScriptbillBudget running " + this.funcUp[ this.funcUp.length] );
 		this.funcUp[ this.funcUp.length] = "monitorScriptbillBudget";
 		
 		//initializing storage.
@@ -28045,7 +28045,7 @@ static Base64 = {
 	}
 	
 	static async secureSend( data ){
-		console.log("secureSend running " + this.funcUp[ this.funcUp.length] );
+		//console.log("secureSend running " + this.funcUp[ this.funcUp.length] );
 		this.funcUp[ this.funcUp.length] = "secureSend";
 		
 		//initializing storage.
@@ -28106,7 +28106,7 @@ static Base64 = {
 		This function should be runned in a mood where all blocks are accessed.
 	*/
 	static async monitorScriptbillCredit(){
-		console.log("monitorScriptbillCredit running " + this.funcUp[ this.funcUp.length] );
+		//console.log("monitorScriptbillCredit running " + this.funcUp[ this.funcUp.length] );
 		this.funcUp[ this.funcUp.length] = "monitorScriptbillCredit";
 		
 		//initializing storage.
@@ -28187,7 +28187,7 @@ static Base64 = {
 	//demand comes for the exchange market using stock market sale and supply when purchasing
 	//stocks.
 	static async monitorScriptbillExchanges(){
-		console.log("monitorScriptbillExchanges running " + this.funcUp[ this.funcUp.length] );
+		//console.log("monitorScriptbillExchanges running " + this.funcUp[ this.funcUp.length] );
 		this.funcUp[ this.funcUp.length] = "monitorScriptbillExchanges";
 		if( ! this.response || this.response.transType != "EXCHANGE" || ! this.#note.budgetID || this.#note.noteType != this.response.buyCredit || this.#note.noteType != this.response.sellCredit ) return;
 		
@@ -28320,7 +28320,7 @@ static Base64 = {
 	//this function will only run when the this.block handler is there. 
 	//we will only check the block that has productsub as a transaction type.
 	static async handleSubscriptions(){
-		console.log("handleSubscriptions running " + this.funcUp[ this.funcUp.length] );
+		//console.log("handleSubscriptions running " + this.funcUp[ this.funcUp.length] );
 		this.funcUp[ this.funcUp.length] = "handleSubscriptions";
 		if(  ( ! this.block || ! this.block.blockID || this.block.transType != "PRODUCTSUB" || ! this.block.agreement || ! this.block.agreement.subUnit ) || ! this.#note ){
 			return false;
