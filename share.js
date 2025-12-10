@@ -269,7 +269,6 @@ self.onmessage = async (event) => {
 			servers.forEach( async server =>{
 				console.log( "Check Data Server: ", server );
 				let data = chunk_data( JSON.stringify( response ) );
-				setTimeout( async ()=>{
 					try {
 						
 						if( ! limit || ! navigator.onLine ) return;
@@ -366,7 +365,7 @@ self.onmessage = async (event) => {
 						console.log( "no data gotten " + e );
 						return false;
 					}
-				}, 10000 * i * data.length, server, limit, data );
+				
 				i++;
 				limit--;
 			});
