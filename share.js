@@ -229,22 +229,18 @@ self.onmessage = async (event) => {
 		 
 
           runWebsocket(response, url.href)
+            await Promise.all(
+              datas.map((data, x) => {              
+                  return returnData(data, x, datas, streamKey, serverKey, url)             
+              })
+            )
           
-            datas.forEach((data, x) => {
-              setTimeout(()=>{
-                return returnData(data, x, datas, streamKey, serverKey, url)
-              }, (1000 *(x + 1)), data, x, datas, streamKey, serverKey, url);          
-              
-            })
-          
-          setTimeout(async ()=>{
-            ret = await getData(
+          ret = await getData(
             ["streamKey", "blockData", "serverKey", "currentBlock"],
             [streamKey, "STOP", serverKey, note.blockID],
             url.href,
           )
-          console.log("note server self stopping: " + response.blockID, JSON.stringify(ret))
-          },  (1000 * (datas.length + 1)))          
+          console.log("note server self stopping: " + response.blockID, JSON.stringify(ret))         
           
 
           if (!ret.isGet) {
@@ -289,12 +285,10 @@ self.onmessage = async (event) => {
               if (serverKey && !serverKey.includes("/")) {
                 let ret
 
-                datas.forEach((data, x) => {
-                  setTimeout(()=>{
-                    return returnData(data, x, datas, streamKey, serverKey, url)
-                  }, (1000 *(x + 1)), data, x, datas, streamKey, serverKey, url);          
+                await Promise.all(datas.map((data, x) => {
+                  return returnData(data, x, datas, streamKey, serverKey, url)  
                   
-                })
+                }))
 
                 /*for (let x = 0, y = 0; x < data.length; x++) {
                   if (x < 0) x = 0
@@ -321,13 +315,11 @@ self.onmessage = async (event) => {
                   }
                 } */
 
-                  setTimeout( async ()=>{
-                    ret = await getData(["streamKey", "blockData", "serverKey"], [streamKey, "STOP", serverKey], url.href)
+                  ret = await getData(["streamKey", "blockData", "serverKey"], [streamKey, "STOP", serverKey], url.href)
                   console.log("note server stopping: " + response.blockID, JSON.stringify(ret))
                   if (ret.agreeSign) {
                     self.postMessage({ createAgreementReq: true, blockID: ret.block.blockID, password: ret.password })
                   }
-                  }, (1000 * (datas.length + 1)))
 
                 
               } else {
