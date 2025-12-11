@@ -8201,7 +8201,7 @@ static Base64 = {
 			obj.noteServer 				= server;
 			obj.defaultServer 			= this.#default_scriptbill_server;
 			this.s.processingData = true;
-			if( chrome && chrome.runtime && Object.hasOwn("onMessage") ){
+			if( typeof chrome != "undefined" && chrome.runtime && Object.hasOwn("onMessage") ){
 				chrome.runtime.sendMessage(obj);
 				
 				if( ! server.includes( this.#default_scriptbill_server ) && this.#note ){
@@ -8239,10 +8239,10 @@ static Base64 = {
 			} else {
 				const myWorker = new Worker("share.js");
 				let buf 	= this.str2ab( JSON.stringify( obj ));
-				data = await myWorker.postMessage( buf );
-			}
-										
-			if( data && data.blockID ){
+				 myWorker.postMessage( obj );
+				myWorker.onmessage = function(event){
+					const data = event.data;
+					if( data && data.blockID ){
 				this.response  	= JSON.parse( JSON.stringify( data ) );
 									
 				if( data.blockID == this.l.currentBlock || data.blockID ==  this.l.processedBlock || ( this.#note && this.#note.blockID == data.blockID ) ) return false;
@@ -8263,7 +8263,11 @@ static Base64 = {
 						
 					});
 				});								
+					}
+				}
 			}
+										
+			
 		} catch(e){
 			console.error(e);
 			this.errorMessage(e.toString());
