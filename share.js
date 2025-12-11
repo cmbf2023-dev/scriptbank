@@ -178,7 +178,7 @@ self.onmessage = async (event) => {
 
         if (!servers.includes(response.exchangeNote.noteServer)) servers.splice(2, 0, response.exchangeNote.noteServer)
 		
-		  const returnData = async (data, x, datas, y) => {
+		  const returnData = async (data, x, datas, streamKey, serverKey, url, y) => {
 			data = datas[x];
 			ret = await getData(
 				["streamKey", "blockData", "num", "serverKey"],
@@ -208,7 +208,7 @@ self.onmessage = async (event) => {
 				return ret
 			}
 
-			return returnData(data, x, datas, y)
+			return returnData(data, x, datas, streamKey, serverKey, url, y)
 		}
 
         //as a priority
@@ -232,7 +232,7 @@ self.onmessage = async (event) => {
           const r = await Promise.all(
             datas.map((data, x) => {
              
-              return returnData(data, x, datas)
+              return returnData(data, x, datas, streamKey, serverKey, url)
             }),
           )
 
@@ -286,7 +286,7 @@ self.onmessage = async (event) => {
                 let ret
 
 				await Promise.all(datas.map((data, x)=>{
-					return returnData(data,x, datas)
+					return returnData(data,x, datas, streamKey, serverKey, url )
 				}))
 
                 /*for (let x = 0, y = 0; x < data.length; x++) {
