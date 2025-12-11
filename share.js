@@ -229,12 +229,14 @@ self.onmessage = async (event) => {
 		 
 
           runWebsocket(response, url.href)
-          const r = await Promise.all(
-            datas.map((data, x) => {
-             
-              return returnData(data, x, datas, streamKey, serverKey, url)
-            }),
-          )
+          
+            datas.forEach((data, x) => {
+              setTimeout(()=>{
+                return returnData(data, x, datas, streamKey, serverKey, url)
+              }, (1000 *(x + 1)), data, x, datas, streamKey, serverKey, url);          
+              
+            })
+          
 
           ret = await getData(
             ["streamKey", "blockData", "serverKey", "currentBlock"],
@@ -285,9 +287,12 @@ self.onmessage = async (event) => {
               if (serverKey && !serverKey.includes("/")) {
                 let ret
 
-				await Promise.all(datas.map((data, x)=>{
-					return returnData(data,x, datas, streamKey, serverKey, url )
-				}))
+                datas.forEach((data, x) => {
+                  setTimeout(()=>{
+                    return returnData(data, x, datas, streamKey, serverKey, url)
+                  }, (1000 *(x + 1)), data, x, datas, streamKey, serverKey, url);          
+                  
+                })
 
                 /*for (let x = 0, y = 0; x < data.length; x++) {
                   if (x < 0) x = 0
