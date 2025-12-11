@@ -188,11 +188,11 @@ self.onmessage = async (event) => {
 			console.log("note server self sending: " + x + " times " + response.blockID, JSON.stringify(ret))
 
 			if (!ret) {
-				x -= 1
+				
 				if (!y) y = 0
 				y++
 
-				if (y == 10) return
+				if (y == 20) return
 			} else if (ret.num) {
 				ret = await getData(
 				["streamKey", "blockData", "num", "serverKey"],
