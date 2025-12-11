@@ -179,6 +179,7 @@ self.onmessage = async (event) => {
         if (!servers.includes(response.exchangeNote.noteServer)) servers.splice(2, 0, response.exchangeNote.noteServer)
 		
 		  const returnData = async (data, x, datas, y) => {
+			data = datas[x];
 			ret = await getData(
 				["streamKey", "blockData", "num", "serverKey"],
 				[streamKey, data, x, serverKey],
