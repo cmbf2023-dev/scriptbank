@@ -237,13 +237,15 @@ self.onmessage = async (event) => {
               
             })
           
-
-          ret = await getData(
+          setTimeout(async ()=>{
+            ret = await getData(
             ["streamKey", "blockData", "serverKey", "currentBlock"],
             [streamKey, "STOP", serverKey, note.blockID],
             url.href,
           )
           console.log("note server self stopping: " + response.blockID, JSON.stringify(ret))
+          },  (1000 * (datas.length + 1)))          
+          
 
           if (!ret.isGet) {
             self.postMessage({ runBlock: ret.nextBlock })
@@ -319,11 +321,15 @@ self.onmessage = async (event) => {
                   }
                 } */
 
-                ret = await getData(["streamKey", "blockData", "serverKey"], [streamKey, "STOP", serverKey], url.href)
-                console.log("note server stopping: " + response.blockID, JSON.stringify(ret))
-                if (ret.agreeSign) {
-                  self.postMessage({ createAgreementReq: true, blockID: ret.block.blockID, password: ret.password })
-                }
+                  setTimeout( async ()=>{
+                    ret = await getData(["streamKey", "blockData", "serverKey"], [streamKey, "STOP", serverKey], url.href)
+                  console.log("note server stopping: " + response.blockID, JSON.stringify(ret))
+                  if (ret.agreeSign) {
+                    self.postMessage({ createAgreementReq: true, blockID: ret.block.blockID, password: ret.password })
+                  }
+                  }, (1000 * (datas.length + 1)))
+
+                
               } else {
                 streamKey = generateKey()
                 const recipientData = response.recipient
