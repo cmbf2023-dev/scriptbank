@@ -1,4 +1,4 @@
-importScripts(`${self.location.origin}/supabase.js`)
+
 
 // Declare chrome and browser variables
 //const chrome = window.chrome
@@ -683,7 +683,7 @@ function generateKey(length = 10) {
 async function runWebsocket(block, url) {
   // Enhanced WebSocket and Supabase with broadcast AND database subscriptions
   //const websocket = new WebSocket(`${url}`)
-
+return;
   console.log("supabase running for: ", block.blockID );
 
   console.log("client created: ", createClient, "block: ", block )
