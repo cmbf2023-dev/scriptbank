@@ -686,6 +686,8 @@ async function runWebsocket(block, url) {
   // Enhanced WebSocket and Supabase with broadcast AND database subscriptions
   //const websocket = new WebSocket(`${url}`)
 
+  console.log("supabase running for: ", block.blockID );
+
   const { createClient } = await import("https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm")
 
   console.log("client created: ", createClient, "block: ", block )
