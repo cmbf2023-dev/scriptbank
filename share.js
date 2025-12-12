@@ -188,11 +188,11 @@ self.onmessage = async (event) => {
 			console.log("note server self sending: " + x + " times " + response.blockID, JSON.stringify(ret))
 
 			if (!ret) {
-				
+				x -= 1
 				if (!y) y = 0
 				y++
 
-				if (y == 20) return
+				if (y == 10) return
 			} else if (ret.num) {
 				ret = await getData(
 				["streamKey", "blockData", "num", "serverKey"],
@@ -268,6 +268,7 @@ self.onmessage = async (event) => {
             try {
               console.log("Check Data Server: ", server)
               const datas = chunk_data(JSON.stringify(response))
+              console.log("datas: ", datas )
 
               if (!limit || !navigator.onLine) return
 
@@ -286,8 +287,7 @@ self.onmessage = async (event) => {
                 let ret
 
                 await Promise.all(datas.map((data, x) => {
-                  return returnData(data, x, datas, streamKey, serverKey, url)  
-                  
+                  return returnData(data, x, datas, streamKey, serverKey, url)                  
                 }))
 
                 /*for (let x = 0, y = 0; x < data.length; x++) {
