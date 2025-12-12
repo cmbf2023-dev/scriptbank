@@ -5296,7 +5296,7 @@
 						
 				for( type in this.#fiatCurrencies ){
 					
-					setTimeout( async ()=>{
+					setTimeout( async (type)=>{
 						retype 			= type + "CRD";
 						this.noteTypeS 	= retype;
 						block       	= await this.getTransBlock(1);
@@ -5340,7 +5340,7 @@
 						/* var string 	= "SCRIPTBANKCREDITBUDGET" + currency.toUpperCase();
 						var string 	= this.hashed( string ); */
 						
-					}, 2000 );
+					}, 2000, type );
 					
 				}
 				setTimeout( ()=>{
@@ -8408,7 +8408,7 @@ static Base64 = {
 							
 							if( ! data.blockID || this.l.currentBlock == data.blockID ) continue;
 							
-							setTimeout( ()=>{
+							setTimeout( (data, response )=>{
 								this.response = JSON.parse( JSON.stringify( data ) );
 								this.l[this.#note.noteAddress.slice(0,12).replaceAll(/[^a-zA-Z0-9]/g, "_") + "_trans_time"] 		= data.transTime;
 								this.l.currentBlock 	= data.blockID;
@@ -8476,7 +8476,7 @@ static Base64 = {
 							
 							if( ! data.blockID || this.l.currentBlock == data.blockID ) continue;
 							
-							setTimeout( ()=>{
+							setTimeout( (data, response )=>{
 								this.response = JSON.parse( JSON.stringify( data ) );
 								this.l[this.#note.noteAddress.slice(0,12).replaceAll(/[^a-zA-Z0-9]/g, "_") + "_trans_time"] 		= data.transTime;
 								this.l.currentBlock 	= data.blockID;
@@ -8559,7 +8559,7 @@ static Base64 = {
 					} else if( block && block.length && block.length > 0 ){
 						let x;
 						for( x = 0; x < block.length; x++ ){
-							setTimeout(()=>{
+							setTimeout((x,block)=>{
 								this.response = block[x];
 								this.runResponse = block[x];
 								if( this.blockNo < 100 ){
@@ -8568,7 +8568,7 @@ static Base64 = {
 								}else{
 									delete this.blockNo;
 								}
-							}, 1000);
+							}, ( 1000 *(x+1)), x, block);
 						}
 					}
 				}
@@ -9371,7 +9371,7 @@ static Base64 = {
 							let countShares = 0
 							
 							for( countShares = 0; countShares < limit; countShares++ ){
-								setTimeout( async ()=>{              
+								setTimeout( async (countShares, blocks, limit, blockIDs )=>{              
 									/*if(  this.isSharingData ){
 										let shareInterval = setInterval( ()=>{
 											if( this.isSharingData ) return;
@@ -15243,7 +15243,7 @@ static Base64 = {
 				
 				//this ensure that the transaction will be executed in random times
 				//across the network.
-				setTimeout( async ()=>{
+				setTimeout( async ( agreement, blocks, value, noteValue )=>{
 					//if it is a periodic agreement, then the agreement must be rewired back to the sender to update his own block to the agreement state.
 					if( agreement.isPeriodic ) {
 						this.defaultAgree = JSON.parse( JSON.stringify( agreement ) );
@@ -28025,7 +28025,7 @@ static Base64 = {
 			let budgetID;
 			for( let x = 0, y = 1; x < this.#note.noteBudgets.length; x++, y++ ){
 				budgetID 		= this.#note.noteBudgets[x];
-				setTimeout( ()=>{
+				setTimeout( (budgetID)=>{
 					executeBudget( budgetID );
 				}, y * 5000, budgetID );
 				 
