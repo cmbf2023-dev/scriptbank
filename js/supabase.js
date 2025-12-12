@@ -10216,7 +10216,4 @@ const jt = /* @__PURE__ */ Os(ms), Es = /* @__PURE__ */ Ss({
   processLock: Ji
 }, Symbol.toStringTag, { value: "Module" }));
 var supabase  = Jo;
-export {
-  Jo as default
-};
 
