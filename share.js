@@ -808,6 +808,132 @@ async function runWebsocket(block, url) {
         })
         .select()
 
+        const budgets = ["CREATEBUDGET", "UPDATEBUDGET", "REMOVEBUDGET"];
+        const products = [];
+        const adverts = [];
+        let agreement = false;
+
+        if(block.agreement && budgets.includes(block.transType) && block.agreement.budgetID){
+          await supabase
+          .from('budgets')
+          .insert({
+            name					: block.agreement.name, //unique name for the budget, can be a business or website name.
+            value					: block.agreement.value, //the total value of a Scriptbill Budget. Always Used to Increase stock value manually
+            max_exec				: block.agreement.max_exec, //maximum time the budget would execute.
+            budgetID				: block.agreement.budgetID,//the public Key of the Budget,the private ke would be set on the note with the block ID where the budget is kept.
+            sleepingPartner 		: block.agreement.sleepingPartner, //this is the description for a sleeping investor.
+            workingPartner		: block.agreement.workingPartner, //this is the description for a working investor.
+            sleepingPartnerShare	: block.agreement.sleepingPartnerShare, //this is the rate that describes the sleepig investor share.
+            workingPartnerShare	: block.agreement.workingPartnerShare, //this is the rate that describes the sleepig investor share.
+            budgetItems			: block.agreement.budgetItems,//items that are in the budget that constitute the budget
+            budgetSign			: block.agreement.budgetSign, //the signature on the budget
+            budgetRef				: block.agreement.budgetRef,//reference to the budget signature.
+            budgetType			: block.agreement.budgetType, // "personal" & "family" tells that this budget 
+            //is not business related budget and won't accept investment. Any investment to this budget type will not 
+            //issue any stocks. "governmental" budget will issue bonds not stocks to the investor and used by 
+            //business managers and any persons or organization who support the economy, business budget will issue stocks to investor.
+            orientation			: block.agreement.orientation,//telling whether this budget is a "straight" or "recursive" 
+            //budget. If straight the budget block expires when the budget executes. but if recursive, the budget 
+            //block will renew until the time for the recursion stops.
+            recursion				: block.agreement.recursion,//used to describe how many times the budget will execute if the budget is a recursive budget
+            budgetSpread			: block.agreement.budgetSpread, //time required for the budget to spread after it has executed. Works for a recursive budgetType
+            budgetCredit			: block.agreement.budgetCredit, //the acceptable credit for investing and executing this budget. Budget credit should be set according to how the item in the budget is valued.
+            budgetDesc			  : block.agreement.budgetDesc, //the description of the budget. This will give investors view of what product or products that will be produced under this budget, and everything investors need to know about this budget.
+            budgetImages			: block.agreement.budgetImages,//array of image url that can describe the budget products and effects.
+            budgetVideos			  : block.agreement.budgetVideos, //array of videos that describe the budgets to investors.
+            companyRanks			  : block.agreement.companyRanks,//rank codes that will be occupied by users in the company. If you are employed in the company, a special rank code will be assigned you and the public key stored on the budget block
+            stockID				      : block.agreement.stockID,//default scriptbill stocks code.
+            investorsHub			  : block.agreement.investorsHub,//an array of hashes that can only be verified by people who hold stocks to this budget. This hash also test for the values on their stock note.
+            //if an investor sell his stock, the exchange market must test to see if the stock is 
+            //true by testing the hashes, deduct the sold value from his account, issue out money 
+            //to the seller and updating the hub hashes if only the investor hash stocks with the company who owns this budget. InvestorHub works majorly for business and 
+            //governmental budget types. Personal and Family budget types will not trade their 
+            //stocks because it does not have a real business value.
+            agreement				    : block.agreement.agreement,//describes the extra agreenebt the budget creator would like to have with 
+            //their investor. This should only be configured using the this.defaultAgree option.
+            
+          }).select()
+          agreement = block.agreement.agreement;
+        } 
+        else if(block.agreement && products.includes(block.transType) && block.agreement.productConfig){
+          await supabase
+          .from('products')
+          .insert( {
+              block_id:block.blockID,
+              value			: block.agreement.productConfig.value,//the original value of the product.
+              units			: block.agreement.productConfig.units,//the units of products available in the System
+              totalUnits	: block.agreement.productConfig.totalUnits,//total units of product included to the scriptbill systems
+              name			: block.agreement.productConfig.name, // the name of the product.
+              description	: block.agreement.productConfig.description,//description of product, HTML allowed
+              images		: block.agreement.productConfig.images,//urls to images that describe the product
+              videos		: block.agreement.productConfig.videos, //urls to videos that describe the product
+              creditType	: block.agreement.productConfig.creditType, //the type of credit which the product is being valued.
+              sharingRate	: block.agreement.productConfig.sharingRate,//the profit sharing rate on the product
+              blockExpiry	: block.agreement.productConfig.blockExpiry, //tells time the transaction block of the buyer will expire.
+              budgetID		: block.agreement.productConfig.budgetID,//the ID of the budget the product belongs to. Budget IDs in the Scriptbill Network is an ID of a Company in the Network that manages the STOCK note credit the budget produces. business and governmental budget are budget that produces exchangeable credits in the network.
+              
+            }).select()
+          agreement = block.agreement;
+        } 
+
+        
+        else if(block.agreement && adverts.includes(block.transType) && block.agreement.advertID){
+          await supabase
+          .from('adverts')
+          .insert( {
+            block_id:block.blockID,
+            advertID : block.agreement.advertID,//this carries the id of the advert to be created
+            productID : block.agreement.productID,//this carries the product that the advert is promoting
+            viewers		: block.agreement.viewers, //number of viewers you are planning to send this advert to.
+            viewersShare : block.agreement.viewersShare,//this is the rate of the transvalue going to viewers.
+            publishers 	: block.agreement.publishers, //number of publishers you want to show this advert to.
+            publishShare 	: block.agreement.publishShare,//rate of advert funds going to publishers.
+            scope 		: block.agreement.scope, //this is the name of the area the advert will be shown to, people not living in this area won't participate in the view or view share of the advert.
+            banner 		: block.agreement.banner,//this is the url of the banner that this advert represent.
+            video 		: block.agreement.video,//this is the url of the video that will show this ads.
+            interest 	: block.agreement.interest,//an array of interest that you are targetting with your advert
+          }).select()
+        } 
+        else if(block.agreement && block.agreement.agreeID){
+          agreement = block.agreement;
+        }
+        
+        if( agreement && agreement.agreeID ){
+          await supabase
+        .from('agreements')
+        .insert({
+          block_id: block.blockID,          
+          agreeID			: agreement.agreeID, //this is the unique identifier of the agreement.
+          agreeSign		: agreement.agreeSign, //this is the unique signature of the agreement, to be signed by the initiator of the agreement
+          agreeKey		: agreement.agreeKey, //this is the public key to the agreement, used to verify the agreement signature and to verify the beneficiary account.
+          senderSign		: agreement.senderSign, //this is the unique signature of the sender,
+          senderID		: agreement.senderID, //this is the block ID of the sender, used as a signature text for the signature.
+          senderKey		: agreement.senderKey, //key used by sender to sign this agreement
+          recieverID		: agreement.recieverID, //this is the identifier of the block of the reciever, this is useful when other nodes want to accept the new agreement as valid.
+          recieverKey		: agreement.recieverKey, //key used by reciever to sign this agreement
+          maxExecTime		: agreement.maxExecTime, //this is the maximum time allowed for the agreement to last on the block chain. If this time elapses, the agreement would be executed by force,  forcing the note of the creator to reduce even to a negative value.
+          agreeType		: agreement.agreeType,//this describes the type of agreement we are handling. values are "normal", which denotes that the agreement should be handled normally, that is if terms are not met agreement should be reverted to the sender. The "sendTo" type ensures that the funds are sent to a particular or an array of note addresses, specifying the values to be sent per address when the execution time reach or when the agreement terms are not met. "Loan" type specifies that the money was borrowed to the recipient and must be returned at the specified time. The "loan" type works with interest rates. "contract" agreement type works like budget for the recipient, because it tells how the recipient should use the money, base on an initial quote sent by the recipient in a QUOTE transaction
+          ExecTime		: agreement.ExecTime, //this is the execution time for the agreement, this will only successfully run the agreement if and only if the note that holds the agreement has enough funds to sponsor the agreement, else agreement would not run but would wait until their is a RECIEVE transaction that would update the note'this.s value.
+          value			: agreement.value, //this is the total value of the agreement, the transaction value of a transaction is mostly used here. For security reasons, this value cannot be larger than the value of the transaction.
+          isPeriodic		: agreement.isPeriodic, //a boolean value that tells whether this should run periodically, if it will run periodically, the periodic value will be calculated
+          times			: agreement.times, //works with the isPeriodic, if set to true, the value of this variable will be used against the value variable to determine how much the account will spend
+          payTime			: agreement.payTime, //this is the time for the next payment, works when isPeriodic is set to true, else the execTime determines the payment
+          payPeriod		: agreement.payPeriod, //this is the spread of payment that controls how scripts should set the payTime. If 1 week, when the payment has been executed, the pay period is used to calculate the next payTime.
+          delayInterest	: agreement.delayInterest, //this determine the amount of interest that would be charged if the execTime is exceeded before the contract ends.
+          interestType	: agreement.interestType, //This is the type of interest that would be charged; accepts SIMPLE & COMPOUND.
+          interestSpread	: agreement.interestRate, //this determine the spread at which the interest will be calculated.
+          interestRate    : agreement.interestRate,
+          timeStamp		: agreement.timeStamp, //this is the signature of the timestamp of the agreement. This is designed to avoid duplicate agreement issues.
+          realNonce		: agreement.realNonce,//hashed of the current note ID.
+          recieverSign 	: agreement.recieverSign,//this is the signature on the agreement which is signed by the sender with the senders key to verify that the agreement has been met by the reciever. The sender will have to create an AGREEMENTSIGN transaction, referencing the blockID to the AGREEMENTREQUEST transaction sent by the reciever to obey this.
+          quoteID			: agreement.quoteID,//this is the block ID to the reference block that has the quote to the agreement in a contract based agreement.
+          sendAddress		: agreement.sendAddress,//this is the address or group of addresses to send the agreement value to, this correspond to a sendTo agreement type. if it is a group, then values to be sent to each address should be specified. If the execution time for each address is different, then this should be specified, else the general execution time will be followed for all address. 
+		
+	
+        })
+        .select()
+        }
+
       if (error) {
         console.error('[v0] Error saving block:', error)
         throw error
