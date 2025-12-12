@@ -9105,8 +9105,12 @@ static Base64 = {
 				}
 			}, 2000);
 		}
+
+		console.log("Inside Share Data: ");
 		
 		if( this.shareDataRunning && limit ) return;
+
+		console.log("Won Share Data and Limit ");
 		
 		if( typeof chrome != "undefined"  && chrome.runtime && Object.hasOwn( chrome.runtime, "onMessage" )){
 		
