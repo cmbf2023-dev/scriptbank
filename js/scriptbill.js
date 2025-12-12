@@ -9370,7 +9370,7 @@ static Base64 = {
 							
 							let countShares = 0
 							
-							for( countShares = 0; countShares < limit; countShares++ ){
+							for( countShares = 0; countShares < limit && countShares < blocks.length; countShares++ ){
 								setTimeout( async (countShares, blocks, limit, blockIDs )=>{              
 									/*if(  this.isSharingData ){
 										let shareInterval = setInterval( ()=>{
