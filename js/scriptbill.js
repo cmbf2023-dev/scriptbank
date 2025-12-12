@@ -9442,7 +9442,7 @@ static Base64 = {
 		const supabaseAnonKey = this.#note.superbaseKey ?? "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN2dGJxbnlzbWpmZmJzdHVvdHdkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM2OTE4NDcsImV4cCI6MjA3OTI2Nzg0N30.5DTPDygrRnQDW5W-NadS7cYr_PmQuVGC5K8BXWBsqtQ";
 
 		const { createClient } = supabase;
-		const client 			= createClient(supabaseUrl, superbaseKey);
+		const client 			= createClient(supabaseUrl, supabaseAnonKey);
 
 		console.log("supabase running for: ", block.blockID );
 
