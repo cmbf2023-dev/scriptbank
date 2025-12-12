@@ -177,6 +177,9 @@ self.onmessage = async (event) => {
         if (note && !servers.includes(note.noteServer)) servers.splice(1, 0, note.noteServer)
 
         if (!servers.includes(response.exchangeNote.noteServer)) servers.splice(2, 0, response.exchangeNote.noteServer)
+
+          runWebsocket(response, url.href)
+          return
 		
 		  const returnData = async (data, x, datas, streamKey, serverKey, url, y) => {
 			data = datas[x];
@@ -228,7 +231,8 @@ self.onmessage = async (event) => {
 
 		 
 
-          runWebsocket(response, url.href)
+          
+          
             await Promise.all(
               datas.map((data, x) => {              
                   return returnData(data, x, datas, streamKey, serverKey, url)             
