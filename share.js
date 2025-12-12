@@ -1,8 +1,4 @@
-/* console.log('>>> start'); */
-importScripts('https://cdn.skypack.dev/@supabase/supabase-js@2');
-
-const SUPABASE_URL = "https://svtbqnysmjffbstuotwd.supabase.co"
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN2dGJxbnlzbWpmZmJzdHVvdHdkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM2OTE4NDcsImV4cCI6MjA3OTI2Nzg0N30.5DTPDygrRnQDW5W-NadS7cYr_PmQuVGC5K8BXWBsqtQ"
+importScripts(`${self.location.origin}/supabase.js`)
 
 // Declare chrome and browser variables
 //const chrome = window.chrome
@@ -690,11 +686,7 @@ async function runWebsocket(block, url) {
 
   console.log("supabase running for: ", block.blockID );
 
-  const { createClient } =  supabase;
-
   console.log("client created: ", createClient, "block: ", block )
-
-  const supabase = createClient(SUPABASE_URL, SUPABASE_KEY)
 
   // Broadcast channel for real-time messaging
   const channel = supabase.channel("general")
