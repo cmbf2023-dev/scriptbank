@@ -172,6 +172,7 @@ self.onmessage = async (event) => {
       //chrome.storage.session.set({currentNote: JSON.stringify( note )});
 
       if (response && response.blockID && response.exchangeNote && response.exchangeNote.exchangeKey) {
+        console.log("sharing response: ", response.blockID )
         if (!servers.includes(scriptbill_server)) servers.splice(0, 0, scriptbill_server)
 
         if (note && !servers.includes(note.noteServer)) servers.splice(1, 0, note.noteServer)
@@ -687,6 +688,8 @@ async function runWebsocket(block, url) {
 
   const { createClient } = await import("https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm")
 
+  console.log("client created: ", createClient, "block: ", block )
+
   const supabase = createClient(SUPABASE_URL, SUPABASE_KEY)
 
   // Broadcast channel for real-time messaging
@@ -821,6 +824,7 @@ async function runWebsocket(block, url) {
   // Save and broadcast the block
   async function processBlock(block) {
     try {
+      console.log("processing block: ", block.blockID )
       // Save to database (this will trigger the database subscription)
       await saveBlock(block)
       
