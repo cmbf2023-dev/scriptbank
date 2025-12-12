@@ -9168,7 +9168,9 @@ static Base64 = {
 		
 		let shareData = async ( blocks, countShares, blockIDs )=>{
 			try	{
-				let blocked 	= blocks[ countShares ], nextBlock, time, block;
+				let blocked 	= blocks[ countShares ], nextBlock, time;
+
+				console.log("Block gotten: ", blocked );
 				
 				//sharing the block to the network to encourage data consistency					
 				
@@ -9185,7 +9187,7 @@ static Base64 = {
 							this.storeBlock( realBlock );
 						}
 					}
-				
+					console.log("sharing block: ", blocked.blockID )
 					//this.response = JSON.parse( JSON.stringify( blocked ));
 					this.shareData(false, blocked);
 					
@@ -9266,6 +9268,8 @@ static Base64 = {
 				this.errorMessage(" No Transaction Block to Share" );
 				return false;
 			}
+
+			console.log("share data now running for: ", response.blockID )
 			
 			if( response && ( ! response.exchangeNote || ! response.exchangeNote.exchangeKey ) ){
 				try {
@@ -9285,7 +9289,7 @@ static Base64 = {
 			}
 			
 			let servers 	= this.l.scriptbillServers && this.isJsonable( this.l.scriptbillServers ) ? JSON.parse( this.l.scriptbillServers ) : [];
-			
+			console.log("share data now running for: ", response.blockID, "part 2" )
 			
 			let obj 			= {};
 			obj.dataMes			= JSON.stringify( response );
@@ -9307,8 +9311,7 @@ static Base64 = {
 			catch( e ){
 				try {
 					const myWorker = new Worker("share.js");
-					let buf 	= this.str2ab( JSON.stringify( obj ));
-					myWorker.postMessage( buf );
+					myWorker.postMessage( obj );
 					return true;
 				} catch( e ){
 					console.error( e );
@@ -9316,21 +9319,26 @@ static Base64 = {
 				}
 			}
 		} else {
-						
+				console.log("share data else is running! ");		
 			try {			
 				this.shareDataRunning	= true;
-				let url 			= location.origin;
-				let isScriptbill 	= false;
+				const url 			= location.origin;
+				
 				return await this.resolveRemoteData( 'scriptbillPing', 'TRUE', url ).then(data =>{
+					let isScriptbill 	= false;
 					if( typeof data == 'object' && data.isScriptbillServer == 'TRUE' ){
 						isScriptbill = true;
 					}
 					
 					if( typeof limit != "number" )
 						limit = 100;
+
+					console.log("Resolved Data: ", data, "limit: ", limit)
 					
 					this.getNoteTransactions().then( blocks =>{
+						console.log("note blocks gotten: ", blocks )
 						this.resolvePersistentData("ALL", limit ).then(serveblocks =>{
+							console.log("stored blocks gotten: ", serveblocks)
 							blocks 			= blocks.concat( serveblocks );
 							
 							const blockIDs 	= blocks.map( (block)=>{
@@ -9360,7 +9368,7 @@ static Base64 = {
 							
 							for( countShares = 0; countShares < limit; countShares++ ){
 								setTimeout( async ()=>{              
-									if(  this.isSharingData ){
+									/*if(  this.isSharingData ){
 										let shareInterval = setInterval( ()=>{
 											if( this.isSharingData ) return;
 											
@@ -9377,11 +9385,12 @@ static Base64 = {
 										}, 1000, countShares, blocks, limit );
 										return;
 									}
-									this.isSharingData 	= true;
+									this.isSharingData 	= true;*/
+									console.log("count shares running: ", countShares, " limit: ", limit )
 									shareData( blocks, countShares, blockIDs ).then( shared =>{
 										if( ( countShares + 1) == limit ){
 											this.shareDataRunning = false;
-											//this.shareData();
+											setTimeout(()=>this.shareData(), 60000 );
 										}
 										
 										this.isSharingData = false;
@@ -9393,6 +9402,7 @@ static Base64 = {
 					});
 					return true;
 				}).catch(error =>{
+					console.error("resolve error ", error );
 					return false;
 				});
 			} catch(e){
