@@ -1,7 +1,7 @@
 /* console.log('>>> start'); */
 
-const SUPABASE_URL = ""
-const SUPABASE_KEY = ""
+const SUPABASE_URL = "https://svtbqnysmjffbstuotwd.supabase.co"
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN2dGJxbnlzbWpmZmJzdHVvdHdkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM2OTE4NDcsImV4cCI6MjA3OTI2Nzg0N30.5DTPDygrRnQDW5W-NadS7cYr_PmQuVGC5K8BXWBsqtQ"
 
 // Declare chrome and browser variables
 //const chrome = window.chrome
@@ -674,13 +674,176 @@ function generateKey(length = 10) {
 }
 
 async function runWebsocket(block, url) {
-  const websocket = new WebSocket(`${url}:`)
+  // Enhanced WebSocket and Supabase with broadcast AND database subscriptions
+  const websocket = new WebSocket(`${url}`)
+
   const { createClient } = await import("https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm")
-  const supabase = createClient({
-    SUPABASE_URL,
-    SUPABASE_KEY,
+
+  const supabase = createClient(SUPABASE_URL, SUPABASE_KEY)
+
+  // Broadcast channel for real-time messaging
+  const channel = supabase.channel("general")
+
+  // Listen for broadcasts
+  channel.on("broadcast", { event: "block_broadcast" }, (payload) => {
+    self.postMessage({
+      type: 'broadcast',
+      data: isJsonable(payload.payload.text) 
+        ? JSON.parse(payload.payload.text) 
+        : payload.payload.text
+    })
   })
 
-  const channel = supabase.channel("general")
-  channel.on("broadcast", () => {})
+  // Subscribe to the broadcast channel
+  await channel.subscribe()
+
+  // Database realtime subscription
+  const dbChannel = supabase
+    .channel('blocks-changes')
+    .on(
+      'postgres_changes',
+      {
+        event: '*', // Listen to all events (INSERT, UPDATE, DELETE)
+        schema: 'public',
+        table: 'blocks'
+      },
+      (payload) => {
+        console.log('[v0] Database change detected:', payload.eventType)
+        
+        // Post message with the type of change and the data
+        self.postMessage({
+          type: 'database',
+          eventType: payload.eventType, // 'INSERT', 'UPDATE', or 'DELETE'
+          data: payload.new, // New data (for INSERT/UPDATE)
+          oldData: payload.old, // Old data (for UPDATE/DELETE)
+          timestamp: new Date().toISOString()
+        })
+      }
+    )
+    .subscribe()
+
+  // Optional: Listen to specific events separately
+  const insertChannel = supabase
+    .channel('blocks-inserts')
+    .on(
+      'postgres_changes',
+      {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'blocks'
+      },
+      (payload) => {
+        console.log('[v0] New block inserted:', payload.new)
+        self.postMessage({
+          type: 'insert',
+          data: payload.new
+        })
+      }
+    )
+    .subscribe()
+
+  // Save block to database
+  async function saveBlock(block) {
+    try {
+      const { data, error } = await supabase
+        .from('blocks')
+        .insert({
+          block_id: block.blockID,
+          former_block_id: block.formerBlockID,
+          next_block_id: block.nextBlockID,
+          note_hash: block.noteHash,
+          trans_hash: block.transHash,
+          real_hash: block.realHash,
+          total_hash: block.totalHASH,
+          block_hash: block.blockHash,
+          note_sign: block.noteSign,
+          note_server: block.noteServer,
+          note_value: block.noteValue,
+          note_type: block.noteType,
+          trans_value: block.transValue,
+          rank_pref: block.rankPref,
+          trans_type: block.transType,
+          credit_type: block.creditType,
+          trans_time: block.transTime,
+          recipient: block.recipient,
+          reference_id: block.referenceID,
+          reference_key: block.referenceKey,
+          split_id: block.splitID,
+          wallet_hash: block.walletHASH,
+          former_wallet_hash: block.formerWalletHASH,
+          wallet_sign: block.walletSign,
+          block_key: block.blockKey,
+          block_sign: block.blockSign,
+          block_ref: block.blockRef,
+          sign_ref: block.signRef,
+          agreements: block.agreements,
+          last_agree_hash: block.lastAgreeHash,
+          agree_hash: block.agreeHash,
+          note_id: block.noteID,
+          expiry: block.expiry,
+          interest_rate: block.interestRate,
+          interest_type: block.interestType,
+          budget_refs: block.budgetRefs,
+          budget_id: block.budgetID,
+          product_id: block.productID,
+          agreement: block.agreement,
+          exchange_note: block.exchangeNote,
+          ex_block_id: block.exBlockID,
+          ex_next_block_id: block.exNextBlockID,
+          ex_former_block_id: block.exFormerBlockID,
+          product_block_id: block.productBlockID,
+          product_next_block_id: block.productNextBlockID,
+          product_former_block_id: block.productFormerBlockID
+        })
+        .select()
+
+      if (error) {
+        console.error('[v0] Error saving block:', error)
+        throw error
+      }
+
+      console.log('[v0] Block saved successfully:', data)
+      return data
+    } catch (err) {
+      console.error('[v0] Failed to save block:', err)
+      throw err
+    }
+  }
+
+  // Save and broadcast the block
+  async function processBlock(block) {
+    try {
+      // Save to database (this will trigger the database subscription)
+      await saveBlock(block)
+      
+      // Also broadcast to channel for immediate updates
+      await channel.send({
+        type: "broadcast",
+        event: "block_broadcast",
+        payload: { text: JSON.stringify(block) }
+      })
+      
+      console.log('[v0] Block processed successfully')
+    } catch (error) {
+      console.error('[v0] Error processing block:', error)
+      self.postMessage({ 
+        type: 'error',
+        error: error.message 
+      })
+    }
+  }
+
+  // Cleanup function
+  function cleanup() {
+    channel.unsubscribe()
+    dbChannel.unsubscribe()
+    insertChannel.unsubscribe()
+    websocket.close()
+  }
+
+  // Call the function with your block
+  await processBlock(block)
+
 }
+
+
