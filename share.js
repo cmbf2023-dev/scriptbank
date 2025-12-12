@@ -683,7 +683,7 @@ function generateKey(length = 10) {
 
 async function runWebsocket(block, url) {
   // Enhanced WebSocket and Supabase with broadcast AND database subscriptions
-  const websocket = new WebSocket(`${url}`)
+  //const websocket = new WebSocket(`${url}`)
 
   const { createClient } = await import("https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm")
 
@@ -846,7 +846,7 @@ async function runWebsocket(block, url) {
     channel.unsubscribe()
     dbChannel.unsubscribe()
     insertChannel.unsubscribe()
-    websocket.close()
+    //websocket.close()
   }
 
   // Call the function with your block
