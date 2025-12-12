@@ -17,6 +17,8 @@
 	
 	//the private key of the current note.
 	static #noteSecret  = false;
+
+	static #channels = this.#subscribeChannels();
 	
 	//private key that holds the key of the creator of Scriptbill. This key can be used to 
 	//override so many thing in the Scriptbill network. It is harded for security and transparency.
@@ -4120,6 +4122,8 @@
 	static #budgetTrans  = ["ADDITEM", "UPDATEITEM", "CANCELITEM", "SUGGESTITEM", "CREATEBUDGET", "UPDATEBUDGET", "SUGGESTBUDGET", "BUSINESS", "EXECUTEBUDGET"];
 	
 	static #agreeTrans = ["AGREESEND", "AGREEMENTUPDATE", "AGREEMENTREQUEST", "AGREEMENTSIGN", "BARGAIN"];
+
+	static #Reipient    = false;
 	
 	//these are transactions that affects the exchange note on the Scriptbill block web
 	static #exchangeTrans = ["INVEST"/*Affects the exchange note because it indicate that the exchange note is investing in a budget*/, "INTERESTPAY"/*This is a transaction type that indicates the exchange note is receiving interest from loans*/, "BUYBOND"/*This indicate that the exchange note has been invested into*/, "BUYPRODUCT"/*This indicate a tithe has been paid*/, "PRODUCTSUB"/*Tithe has been paid during a product subscription*/, "LOAN"/*Indicate that the exchange note has released credit on loan*/, "CREATEBUDGET"/*Indicate that an exchange market is born*/, "BONDPAY"/*Indicate that the exchange note is paying out interest on bonds.*/, "DEPOSIT"/*Some deposit transaction that is directed to the exchange note*/, "WITHDRAW"/*This include some withdrawal transaction directed to the exchange note*/, "STOCKPAY"/*This indicate the exchange note has recieved dividend from the product exchange market.*/];
@@ -9427,33 +9431,64 @@ static Base64 = {
 		return false;
 	}
 
-	static async runSupabase(block) {
-		// Enhanced WebSocket and Supabase with broadcast AND database subscriptions
-		//const websocket = new WebSocket(`${url}`)
+	static async #subscribeChannels(){
+		//channel for specific block messages targetting the note
+		const  client = this.#createClient();
 
+		if(!client) return;
 
-		if( ! supabase ) return;
+		if(! this.#note){
+			this.#note = await this.#getCurrentNote();
+		}
+		const accountData = this.getAccountData();
+		let email,phone;
 
-		if(! this.#note )
-			this.#note =  await this.#getCurrentNote();
+		if(accountData.emails && accountData.emails.length && typeof accountData.emails == "object"){
+			email = accountData.emails[0]
+		}
+		else if(accountData[this.#note?.noteAddress].emails && accountData[this.#note?.noteAddress].emails.length && typeof accountData[this.#note?.noteAddress].emails == "object"){
+			email = accountData[this.#note?.noteAddress].emails[0];
+		}
 
-		
-		const supabaseUrl = this.#note.superbaseUrl ?? "https://svtbqnysmjffbstuotwd.supabase.co";
-		const supabaseAnonKey = this.#note.superbaseKey ?? "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN2dGJxbnlzbWpmZmJzdHVvdHdkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM2OTE4NDcsImV4cCI6MjA3OTI2Nzg0N30.5DTPDygrRnQDW5W-NadS7cYr_PmQuVGC5K8BXWBsqtQ";
+		if(accountData.phones && accountData.phones.length && typeof accountData.phones == "object"){
+			phone = accountData.phones[0]
+		}
+		else if(accountData[this.#note?.noteAddress].phones && accountData[this.#note?.noteAddress].phones.length && typeof accountData[this.#note?.noteAddress].phones == "object"){
+			phone = accountData[this.#note?.noteAddress].phones[0];
+		}
 
-		const { createClient } = supabase;
-		const client 			= createClient(supabaseUrl, supabaseAnonKey);
+		if(email){
+			const emalChannel = client.channel(email);
+			emalChannel.on("broadcast", {event: "transaction_update"}, (payload)=>{
+				this.recieveNewBlock(this.isJsonable( payload.payload.text ) ? JSON.parse(payload.payload.text) : payload.payload.text)
+			})
+			await emalChannel.subscribe();
+		}
+		if(phone){
+			const phoneChannel = client.channel(phone);
+			phoneChannel.on("broadcast", {event: "transaction_update"}, (payload)=>{
+				this.recieveNewBlock(this.isJsonable( payload.payload.text ) ? JSON.parse(payload.payload.text) : payload.payload.text)
+			})
+			await phoneChannel.subscribe()
+		}
+		const channel = client.channel("general");
+		const clientChannel = client.channel(this.#note?.noteAddress ?? "client-channel");
+		const walletChannel =  client.channel(this.#note?.walletID  ?? "wallet-channel");
 
-		console.log("supabase running for: ", block.blockID );
+		clientChannel.on("broadcast", {event: "transaction_update"}, (payload)=>{
+			this.recieveNewBlock(this.isJsonable( payload.payload.text ) ? JSON.parse(payload.payload.text) : payload.payload.text)
+		})
 
-		console.log("client created: ", createClient, "block: ", block )
+		walletChannel.on("broadcast", {event: "transaction_update"}, (payload)=>{
+			this.recieveNewBlock(this.isJsonable( payload.payload.text ) ? JSON.parse(payload.payload.text) : payload.payload.text)
+		})
 
-		// Broadcast channel for real-time messaging
-		const channel = client.channel("general")
+		await clientChannel.subscribe();
+		await  walletChannel.subscribe();
 
 		// Listen for broadcasts
 		channel.on("broadcast", { event: "block_broadcast" }, (payload) => {
-			this.recieveNewBlock(this.isJsonable( payload.payload.text ) ? JSON.parse(payload.payload.text) : {})
+			this.recieveNewBlock(this.isJsonable( payload.payload.text ) ? JSON.parse(payload.payload.text) : payload.payload.text)
 		})
 
 		// Subscribe to the broadcast channel
@@ -9494,6 +9529,39 @@ static Base64 = {
 			}
 			)
 			.subscribe()
+	}
+
+	static #createClient(){
+
+		if(! supabase )  return false;
+		const supabaseUrl = this.#note.superbaseUrl ?? "https://svtbqnysmjffbstuotwd.supabase.co";
+		const supabaseAnonKey = this.#note.superbaseKey ?? "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN2dGJxbnlzbWpmZmJzdHVvdHdkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM2OTE4NDcsImV4cCI6MjA3OTI2Nzg0N30.5DTPDygrRnQDW5W-NadS7cYr_PmQuVGC5K8BXWBsqtQ";
+
+		const { createClient } = supabase;
+		const client 			= createClient(supabaseUrl, supabaseAnonKey);
+		return  client;
+	}
+
+	static async runSupabase(block) {
+		// Enhanced WebSocket and Supabase with broadcast AND database subscriptions
+		//const websocket = new WebSocket(`${url}`)
+
+
+		if(! this.#note )
+			this.#note =  await this.#getCurrentNote();
+
+		
+		const  client = this.#createClient();
+
+		if(!client) return;
+
+		console.log("supabase running for: ", block.blockID );
+
+		console.log("client created: ", createClient, "block: ", block )
+
+		// Broadcast channel for real-time messaging
+		const channel = client.channel("general")
+		await channel.subscribe()
 
 		// Save block to database
 		async function saveBlock(block) {
@@ -9706,10 +9774,7 @@ static Base64 = {
 			console.log('[v0] Block processed successfully')
 			} catch (error) {
 			console.error('[v0] Error processing block:', error)
-			self.postMessage({ 
-				type: 'error',
-				error: error.message 
-			})
+			
 			}
 		}
 
@@ -9723,6 +9788,7 @@ static Base64 = {
 
 		// Call the function with your block
 		await processBlock(block)
+		//cleanup();
 
 	}
 	
@@ -13220,8 +13286,22 @@ static Base64 = {
 				delete response.agreement;
 			}
 			
-			let motherKeys 		= await this.#generateMotherKeys();
-			let testType 		= response.noteType.slice( 0, response.noteType.lastIndexOf("CRD") );		
+			if( this.#Reipient ){
+				const client  = this.#createClient();
+				if(client){
+					//this will send the block directly to  the recipient if online at an instant, else the recipient will be notified through other means
+					const channel = client.channel(this.#Reipient);
+					await channel.subscribe();
+					await channel.send({
+						type: "broadcast",
+						event: "transaction_update",
+						payload: { text: JSON.stringify(response) }
+				
+					})
+					await channel.unsubscribe();
+				}
+				
+			}
 			
 			if( response.exchangeNote && response.noteType &&response.exchangeNote.exchangeID ){
 				/* //console.log("Ex Note: " + JSON.stringify( response.exchangeNote ) );
@@ -16629,6 +16709,8 @@ static Base64 = {
 				return false;
 			}
 		}
+
+		
 		
 		//localizing the note and details variable.
 		note 		= JSON.parse( JSON.stringify( note ? note : this.#note ));
@@ -16761,6 +16843,10 @@ static Base64 = {
 					
 				}
 			}
+		}
+
+		if(details.recipient){
+			this.#Reipient = details.recipient;
 		}
 		
 		//console.log("fully processed block data");
@@ -21402,7 +21488,7 @@ static Base64 = {
 							
 							var string = location.origin;
 							let server 	= this.hashed( string );
-							let run 	= await this.getData(["server", "staff", "value", "type", "ID"],[server, this.scriptKey, details.agreement.value, "SIGN", details.agreement.agreeID], location.origin );
+							let run 	= await this.getData(["server", "staff", "value", "type", "ID"],[server, this.scriptKey, details.agreement.value, "SIGN", details.agreement.agreeID], location.origin, "socket" );
 							
 							
 							if( ! run || ! run.verify  ){
@@ -24928,6 +25014,37 @@ static Base64 = {
 					return false;
 				});
 			}
+			else if(type == "socket"){
+				const client = this.#createClient();
+				if(typeof data == "object" && typeof key == "object" && data.length && key.length && data.length == key.length ){
+					
+
+					const datas = await Promise.all(data.map( async (dat,  x)=>{
+						const {data: datad} 	= await client
+											.from("block")
+											.select("*")
+											.eq(key[x], dat)
+											.limit(100)
+						return datad;
+					}))
+					return datas.reduce((all, dat, x)=>{
+						if(! all ) all  = [];
+
+						return all.concat(typeof dat == "object" && dat.length ? dat : [dat])
+					})
+					
+				} else {
+					data = typeof data == "object" && data.length ? data[0] : data;
+					key = typeof key == "object" && key.length ? key[0] : key;
+					const {data:datad}  = await client
+						.from("blocks")
+						.select("*")
+						.eq(key, data)
+						.limit(100)
+						return datad.length == 1 ?  datad[0]:datad;
+				}
+				
+			}
 		} catch(e){
 			this.errorMessage(e.toString());
 			console.error(e);
@@ -25064,7 +25181,7 @@ static Base64 = {
 					
 					if( this.blocks.length < limit ){ 
 					
-						blocks 	= await this.getData("noteType", config.noteType, this.server ? this.server : "");
+						blocks 	= await this.getData("noteType", config.noteType, this.server ? this.server : "", "socket");
 						
 						if( blocks && blocks.length && typeof blocks == "object" ){
 							blocks.forEach( block =>{
@@ -25137,7 +25254,7 @@ static Base64 = {
 					//console.log( "check blocks", blocks );
 					if( this.blocks.length < limit ){ 
 					
-						blocks 	= await this.getData("transType", config.transType, this.server ? this.server : "");
+						blocks 	= await this.getData("transType", config.transType, this.server ? this.server : "", "socket");
 						//console.log( "check blocks", blocks );
 						if( blocks && blocks.length && typeof blocks == "object" ){
 							blocks.forEach( block =>{
@@ -25209,7 +25326,7 @@ static Base64 = {
 					
 					if( this.blocks.length < limit ){ 
 					
-						blocks 	= await this.getData("noteType", config.sellCredit, this.server ? this.server : "");
+						blocks 	= await this.getData("noteType", config.sellCredit, this.server ? this.server : "", "socket");
 						
 						if( blocks && blocks.length && typeof blocks == "object" ){ 
 							blocks.forEach( block =>{
@@ -25278,7 +25395,7 @@ static Base64 = {
 					
 					if( this.blocks.length < limit ){ 
 					
-						blocks 	= await this.getData("noteType", this.buyCredit, this.server ? this.server : "");
+						blocks 	= await this.getData("noteType", this.buyCredit, this.server ? this.server : "", "socket");
 						
 						if( blocks && blocks.length && typeof blocks == "object" ){
 							blocks.forEach( block =>{
@@ -25385,7 +25502,7 @@ static Base64 = {
 					
 					if( this.blocks.length < limit ){ 
 					
-						blocks = await this.getData(["transValue", "type"], [config.transValue, typeCheck ], this.server ? this.server : "");
+						blocks = await this.getData(["transValue", "type"], [config.transValue, typeCheck ], this.server ? this.server : "", "socket");
 						
 						if( blocks && blocks.length && typeof blocks == "object" ){
 							blocks.forEach( block =>{
@@ -25492,7 +25609,7 @@ static Base64 = {
 					
 					if( this.blocks.length < limit ){ 
 					
-						blocks = await this.getData(["noteValue", "type"], [config.noteValue, typeCheck ], this.server ? this.server : "");
+						blocks = await this.getData(["noteValue", "type"], [config.noteValue, typeCheck ], this.server ? this.server : "", "socket");
 						
 						if( blocks && blocks.length && typeof blocks == "object" ){
 							blocks.forEach( block =>{
@@ -25562,7 +25679,7 @@ static Base64 = {
 					
 					if( this.blocks.length < limit ){ 
 					
-						blocks 	= await this.getData("signRef", config.signRef, this.server ? this.server : "");
+						blocks 	= await this.getData("signRef", config.signRef, this.server ? this.server : "", "socket");
 						
 						if( blocks && blocks.length && typeof blocks == "object" ){
 							blocks.forEach( block =>{
@@ -25628,7 +25745,7 @@ static Base64 = {
 					
 					if( this.blocks.length < limit ){ 
 					
-						blocks 	= await this.getData("referenceID", config.referenceID, this.server ? this.server : "");
+						blocks 	= await this.getData("referenceID", config.referenceID, this.server ? this.server : "", "socket");
 						
 						if( blocks && blocks.length && typeof blocks == "object" ){
 							blocks.forEach( block =>{
@@ -25695,7 +25812,7 @@ static Base64 = {
 					
 					if( this.blocks.length < limit ){ 
 					
-						blocks 	= await this.getData("referenceKey", config.referenceKey, this.server ? this.server : "");
+						blocks 	= await this.getData("referenceKey", config.referenceKey, this.server ? this.server : "", "socket");
 						
 						if( blocks && blocks.length && typeof blocks == "object" ){
 							blocks.forEach( block =>{
@@ -25762,7 +25879,7 @@ static Base64 = {
 					
 					if( this.blocks.length < limit ){ 
 					
-						blocks 	= await this.getData("splitID", config.splitID, this.server ? this.server : "");
+						blocks 	= await this.getData("splitID", config.splitID, this.server ? this.server : "", "socket");
 						
 						if( blocks && blocks.length && typeof blocks == "object" ){
 							blocks.forEach( block =>{
@@ -25834,7 +25951,7 @@ static Base64 = {
 					
 					if( this.blocks.length < limit ){ 
 					
-						blocks 	= await this.getData("budgetID", config.budgetID, this.server ? this.server : "");
+						blocks 	= await this.getData("budgetID", config.budgetID, this.server ? this.server : "", "socket");
 						
 						if( blocks && blocks.length && typeof blocks == "object" ){
 							blocks.forEach( block =>{
@@ -25904,7 +26021,7 @@ static Base64 = {
 					
 					if( this.blocks.length < limit ){ 
 					
-						blocks 	= await this.getData("productID", config.productID, this.server ? this.server : "");
+						blocks 	= await this.getData("productID", config.productID, this.server ? this.server : "", "socket");
 						
 						if( blocks && blocks.length && typeof blocks == "object" ){
 							blocks.forEach( block =>{
@@ -26012,7 +26129,7 @@ static Base64 = {
 					
 					if( this.blocks.length < limit ){ 
 					
-						blocks = await this.getData(["transTime", "type"], [config.transTime, typeCheck ], this.server ? this.server : "");
+						blocks = await this.getData(["transTime", "type"], [config.transTime, typeCheck ], this.server ? this.server : "", "socket");
 						
 						if( blocks && blocks.length && typeof blocks == "object" ){
 							blocks.forEach( block =>{
@@ -26082,7 +26199,7 @@ static Base64 = {
 					
 					if( this.blocks.length < limit ){ 
 					
-						blocks 	= await this.getData("agreeID", config.agreeID, this.server ? this.server : "");
+						blocks 	= await this.getData("agreeID", config.agreeID, this.server ? this.server : "", "socket");
 						
 						if( blocks && blocks.length && typeof blocks == "object" ){
 							blocks.forEach( block =>{
@@ -26151,7 +26268,7 @@ static Base64 = {
 					}			
 					else { 
 					
-						blocks 	= await this.getData("productBlockID", config.productBlockID, this.server ? this.server : "");
+						blocks 	= await this.getData("productBlockID", config.productBlockID, this.server ? this.server : "", "socket");
 						
 						if( blocks && blocks.blockID ){
 							this.blocks.push( blocks );
@@ -26227,7 +26344,7 @@ static Base64 = {
 					
 					else { 
 					
-						blocks 	= await this.getData("exBlockID", config.exBlockID, this.server ? this.server : "");
+						blocks 	= await this.getData("exBlockID", config.exBlockID, this.server ? this.server : "", "socket");
 						
 						if( blocks && blocks.blockID ){
 							this.blocks.push( blocks );
@@ -26300,7 +26417,7 @@ static Base64 = {
 					}
 					else { 
 					
-						blocks 	= await this.getData("walletHASH", config.walletHASH, this.server ? this.server : "");
+						blocks 	= await this.getData("walletHASH", config.walletHASH, this.server ? this.server : "", "socket");
 						
 						if( blocks && blocks.blockID ){
 							this.blocks.push( blocks );
@@ -26383,7 +26500,7 @@ static Base64 = {
 					
 					if( this.blocks.length < limit ){ 
 						if( typeof config.blockID == "string" )
-							blocks 	= await this.getData("blockID", config.blockID, this.server ? this.server : "");
+							blocks 	= await this.getData("blockID", config.blockID, this.server ? this.server : "", "socket");
 						
 						else {
 							if( config.blockID.length ){
@@ -26391,7 +26508,7 @@ static Base64 = {
 									blocks = [];
 								
 								for( let r = 0; r < config.blockID.length; r++ ){
-									blocks.push( await this.getData("blockID", config.blockID[r], this.server ? this.server : "") );
+									blocks.push( await this.getData("blockID", config.blockID[r], this.server ? this.server : "", "socket") );
 								}
 							}
 						}
