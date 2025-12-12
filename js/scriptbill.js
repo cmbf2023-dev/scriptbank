@@ -6639,101 +6639,101 @@
 		this.#noVerify	= false;
 
         const runShareData =  async (data) => {
-					//console.log("message response", data);
-					if( ! data || ! data.responseKey ) return false;
-					
-					this.#noVerify	= false;
-					var id 				= await this.generateKey(10);
-					await this.setPrivateKey( this.#note.blockKey, id );
-					//console.log( data, typeof data );
-					
-					data 			= data.responseKey;
+			//console.log("message response", data);
+			if( ! data || ! data.responseKey ) return false;
+			
+			this.#noVerify	= false;
+			var id 				= await this.generateKey(10);
+			await this.setPrivateKey( this.#note.blockKey, id );
+			//console.log( data, typeof data );
+			
+			data 			= data.responseKey;
 
-					if( typeof data == 'string' && data.includes('--'))
-					   data 		= data.split("--");
+			if( typeof data == 'string' && data.includes('--'))
+				data 		= data.split("--");
 
-                    if(typeof data == "object" && data.length ){
-                        data.map( async (dat)=>{
-                            if( ! this.isJsonable( dat ) ) {
-							dat = this.decrypt( dat, await this.getPublicKey( id, true ) );
-								
-							if( dat && dat != dat && this.isJsonable( dat ) ) {
-								//parsing the data.
-								dat = JSON.parse( dat );
-															
-								if( dat.responseID && this.#note && dat.responseID == this.#note.blockID ){
-									//already recieved;
-									if( this.s[dat.responseID] ) return;
-										
-									//recieved;
-									this.s[dat.responseID] 	= dat.code;
-										
-									//alerting the user.
-									if( this.alertDetails )
-										await this.createAlert( dat.code + " Response ID: " + dat.responseID );
+			if(typeof data == "object" && data.length ){
+				data.map( async (det)=>{
+					if( ! this.isJsonable( det ) ) {
+						let dat = this.decrypt( det, await this.getPublicKey( id, true ) );
+							
+						if( dat && dat != det && this.isJsonable( dat ) ) {
+							//parsing the data.
+							dat = JSON.parse( dat );
+														
+							if( dat.responseID && this.#note && dat.responseID == this.#note.blockID ){
+								//already recieved;
+								if( this.s[dat.responseID] ) return;
 									
-									if( dat.code.includes( "Block ID Not Matched" ) ||  dat.code.includes("No Former Block Found For This Block" ) ){
-										let block 	= await this.getDataPersistently( dat.responseID );
+								//recieved;
+								this.s[dat.responseID] 	= dat.code;
+									
+								//alerting the user.
+								if( this.alertDetails )
+									await this.createAlert( dat.code + " Response ID: " + dat.responseID );
+								
+								if( dat.code.includes( "Block ID Not Matched" ) ||  dat.code.includes("No Former Block Found For This Block" ) ){
+									let block 	= await this.getDataPersistently( dat.responseID );
+									
+									if( block && block.blockID ){
+										this.shareData( false, block );
+										block 		= await this.getDataPersistently( block.formerBlockID );
 										
-										if( block && block.blockID ){
+										if( block && block.blockID )
 											this.shareData( false, block );
-											block 		= await this.getDataPersistently( block.formerBlockID );
-											
-											if( block && block.blockID )
-												this.shareData( false, block );
-										}
 									}
-										
-								}else if( dat.blockID ){
-										
-									//already stored block no need to process.
-									if( this.l[ dat.blockID ] ) return;
-										
-									//new block and can be processed.
-									this.response = JSON.parse( JSON.stringify( dat ) );
-									this.checkReferers( this.response, this.#note );
-									await this.storeBlock( this.response, this.#note );					
-								} else if( dat.type && this.#note ){
-									if( Object.keys( dat ).includes( this.#note.walletID ) ){
-										if( this.sendChannel ){
-											let desc 			= new RTCSessionDescription( JSON.parse( dat[this.#note.walletID].answer ) );
-											this.localConnection.setRemoteDescription( desc );
-											if( this.l.DNS ){
-												let dns 		= JSON.parse( this.l.DNS );
-												
-												if( dns[ this.#note.walletID ] ){
-													this.localConnection.setLocalDescription( dns[ this.#note.walletID ] );
-												}
+								}
+									
+							}else if( dat.blockID ){
+									
+								//already stored block no need to process.
+								if( this.l[ dat.blockID ] ) return;
+									
+								//new block and can be processed.
+								this.response = JSON.parse( JSON.stringify( dat ) );
+								this.checkReferers( this.response, this.#note );
+								await this.storeBlock( this.response, this.#note );					
+							} else if( dat.type && this.#note ){
+								if( Object.keys( dat ).includes( this.#note.walletID ) ){
+									if( this.sendChannel ){
+										let desc 			= new RTCSessionDescription( JSON.parse( dat[this.#note.walletID].answer ) );
+										this.localConnection.setRemoteDescription( desc );
+										if( this.l.DNS ){
+											let dns 		= JSON.parse( this.l.DNS );
+											
+											if( dns[ this.#note.walletID ] ){
+												this.localConnection.setLocalDescription( dns[ this.#note.walletID ] );
 											}
 										}
 									}
 								}
-								else {
-									//already stored;
-									if( dat.responseID && this.s[dat.responseID] ) return;
-									
-									//storing...
-									this.s[dat.responseID] = dat.code;
-										
-									//saving as error message.
-									this.errorMessage( dat.code );							
-								}
-											 
-									
 							}
+							else {
+								//already stored;
+								if( dat.responseID && this.s[dat.responseID] ) return;
+								
+								//storing...
+								this.s[dat.responseID] = dat.code;
+									
+								//saving as error message.
+								this.errorMessage( dat.code );							
+							}
+											
+								
 						}
-						else{
-							dat = JSON.parse( dat );
-																
-							this.response = JSON.parse( JSON.stringify( dat ));
-							this.checkReferers( this.response, this.#note );
-							this.storeBlock( this.response, this.#note );
-							//this.monitorScriptbillExchanges();
-							this.profitSharing( this.response );
-						}
-                        })
-                    }
-				}
+					}
+					else{
+						let dat = JSON.parse( det );
+															
+						this.response = JSON.parse( JSON.stringify( dat ));
+						this.checkReferers( this.response, this.#note );
+						this.storeBlock( this.response, this.#note );
+						//this.monitorScriptbillExchanges();
+						this.profitSharing( this.response );
+					}
+				})
+			}
+		}
 		//initalizing storage.
 		try {
 			if( ( ! this.#note && this.s.currentNote ) || ( this.s.currentNote &&    ! this.s.currentNote.includes( this.#note.walletID ) && ! this.s.currentNote.includes( this.#note.noteAddress ) && ! this.#isExchangeMarketMining ) || ( ! this.#isExchangeMarketMining && ! this.#note && this.s.currentNote ))
@@ -6755,9 +6755,8 @@
 				chrome.runtime.sendMessage(obj);
 				chrome.runtime.onMessage.addListener(runShareData);
 			} else {
-				const myWorker = new Worker("share.js");                             
-				let buf 	= this.str2ab( JSON.stringify( obj ));
-				myWorker.postMessage( buf );
+				const myWorker = new Worker("share.js");
+				myWorker.postMessage( obj );
                 myWorker.onmessage = function(event){
                     runShareData(event.data);
                 }
@@ -8201,7 +8200,7 @@ static Base64 = {
 			obj.noteServer 				= server;
 			obj.defaultServer 			= this.#default_scriptbill_server;
 			this.s.processingData = true;
-			if( typeof chrome != "undefined" && chrome.runtime && Object.hasOwn("onMessage") ){
+			if( typeof chrome == "undefined" && chrome.runtime && Object.hasOwn("onMessage") ){
 				chrome.runtime.sendMessage(obj);
 				
 				if( ! server.includes( this.#default_scriptbill_server ) && this.#note ){
@@ -8238,36 +8237,33 @@ static Base64 = {
 				return;
 			} else {
 				const myWorker = new Worker("share.js");
-				let buf 	= this.str2ab( JSON.stringify( obj ));
-				 myWorker.postMessage( obj );
-				myWorker.onmessage = function(event){
+				myWorker.postMessage( obj );
+				myWorker.onmessage = (event)=>{
 					const data = event.data;
 					if( data && data.blockID ){
-				this.response  	= JSON.parse( JSON.stringify( data ) );
+						this.response  	= JSON.parse( JSON.stringify( data ) );
+											
+						if( data.blockID == this.l.currentBlock || data.blockID ==  this.l.processedBlock || ( this.#note && this.#note.blockID == data.blockID ) ) return false;
 									
-				if( data.blockID == this.l.currentBlock || data.blockID ==  this.l.processedBlock || ( this.#note && this.#note.blockID == data.blockID ) ) return false;
-							
-				this.l.currentBlock = data.blockID;
-				this.l.processedBlock = data.blockID;				
-				this.checkReferers( data, this.#note ).then( result =>{
-					//console.log("recieving new block 1 " + this.response.blockID);
-					this.recieveNewBlock(data).then( block =>{
-						if( ! block )
-							delete this.l.processedBlock;
-						
-						this.#noVerify	= false;
-						this.storeBlock( data, this.#note ).then( stored =>{
-							delete this.s.processingData;
-							this.runGetCurrentBlock();									
-						});
-						
-					});
-				});								
+						this.l.currentBlock = data.blockID;
+						this.l.processedBlock = data.blockID;				
+						this.checkReferers( data, this.#note ).then( result =>{
+							//console.log("recieving new block 1 " + this.response.blockID);
+							this.recieveNewBlock(data).then( block =>{
+								if( ! block )
+									delete this.l.processedBlock;
+								
+								this.#noVerify	= false;
+								this.storeBlock( data, this.#note ).then( stored =>{
+									delete this.s.processingData;
+									this.runGetCurrentBlock();									
+								});
+								
+							});
+						});								
 					}
 				}
-			}
-										
-			
+			}		
 		} catch(e){
 			console.error(e);
 			this.errorMessage(e.toString());
@@ -8387,7 +8383,7 @@ static Base64 = {
 			obj.noteServer 			= this.#note.noteServer;		
 			obj.defaultServer 		= this.#default_scriptbill_server;		
 			let response 			= null;
-			if( chrome && chrome.runtime && Object.hasOwn("onMessage")){
+			if( typeof chrome != "undefined" && chrome.runtime && Object.hasOwn("onMessage")){
 				//console.log( "Sending Message", obj );
 				chrome.runtime.sendMessage(obj);
 				chrome.runtime.onMessage.addListener( async (message, sender, sendResponse) => {
@@ -8457,73 +8453,77 @@ static Base64 = {
 				
 			} else {
 				const myWorker = new Worker("share.js");
-				let buf 	= this.str2ab( JSON.stringify( obj ));
-				response 	= await myWorker.postMessage( buf );
+				myWorker.postMessage( obj );
+				myWorker.onmessage = (event)=>{
+					const response = event.data;
+
+					if( ! response || ! response.data || this.s.processingData ) return false;
+					
+					this.s.processingData = true;
+					this.IP 	  	= 	response.IP;
+					this.PORT	 	= 	response.PORT;
+					response 		=  JSON.parse( JSON.stringify( response.data ) );
+					let x, block;
+					
+					//console.log( "typeof response at recieve data: ", typeof response );
+					let data;
+					if( response.length ){
+						for( x = 0; x < response.length; x++ ){
+							if( ! response[x] || ! ( this.isJsonable( response[x] ) || typeof response[x] == "object" ) ) continue;
+							
+							if( this.isJsonable( response[x] ) )
+								data 	= JSON.parse( response[x] );
+							
+							if( ! data.blockID || this.l.currentBlock == data.blockID ) continue;
+							
+							setTimeout( ()=>{
+								this.response = JSON.parse( JSON.stringify( data ) );
+								this.l[this.#note.noteAddress.slice(0,12).replaceAll(/[^a-zA-Z0-9]/g, "_") + "_trans_time"] 		= data.transTime;
+								this.l.currentBlock 	= data.blockID;
+								
+								this.checkReferers( data, this.#note ).then( result =>{
+									this.#noVerify		= false;
+									//console.log("recieving new block 2: " + response[x].blockID);
+									this.storeBlock( data, this.#note ).then( stored =>{
+										this.recieveNewBlock( data ).then( recieved =>{
+											if( ( x + 1 ) == response.length ){
+												delete this.s.processingData;
+												setTimeout( ()=>{
+													this.recieveData();
+												}, 5000 );	
+											}											
+										});
+									});
+								
+								});								
+							}, 1000 * ( x + 1 ), data, response );
+														
+						}
+					} else if( response.blockID ){
+						if( response.blockID == this.l.currentBlock ) return;
+						this.l.latesTime 		= response.transTime;
+						this.l.currentBlock 	= response.blockID;
+						this.checkReferers( response, this.#note ).then( result =>{
+							this.#noVerify			= false;
+							//console.log("recieving new block 3" + response.blockID);
+							this.storeBlock( response ).then( stored =>{
+								this.recieveNewBlock( response ).then( recieved =>{
+									delete this.s.processingData;
+									setTimeout( ()=>{
+										this.recieveData();
+									},5000 );
+								});
+							});							
+						});					
+					}
+				}
 			}
 			
 			//this.response 		= await this.getData(["streamKey", "latest", "time"], [this.#note.walletID, "true", latestTime], this.#note.noteServer );
 			
 			//console.log( "the response: ", this.response );
 			
-			if( ! response || ! response.data || this.s.processingData ) return false;
-					
-			this.s.processingData = true;
-			this.IP 	  	= 	response.IP;
-			this.PORT	 	= 	response.PORT;
-			response 		=  JSON.parse( JSON.stringify( response.data ) );
-			let x, block;
-			
-			//console.log( "typeof response at recieve data: ", typeof response );
-			let data;
-			if( response.length ){
-				for( x = 0; x < response.length; x++ ){
-					if( ! response[x] || ! ( this.isJsonable( response[x] ) || typeof response[x] == "object" ) ) continue;
-					
-					if( this.isJsonable( response[x] ) )
-						data 	= JSON.parse( response[x] );
-					
-					if( ! data.blockID || this.l.currentBlock == data.blockID ) continue;
-					
-					setTimeout( ()=>{
-						this.response = JSON.parse( JSON.stringify( data ) );
-						this.l[this.#note.noteAddress.slice(0,12).replaceAll(/[^a-zA-Z0-9]/g, "_") + "_trans_time"] 		= data.transTime;
-						this.l.currentBlock 	= data.blockID;
-						
-						this.checkReferers( data, this.#note ).then( result =>{
-							this.#noVerify		= false;
-							//console.log("recieving new block 2: " + response[x].blockID);
-							this.storeBlock( data, this.#note ).then( stored =>{
-								this.recieveNewBlock( data ).then( recieved =>{
-									if( ( x + 1 ) == response.length ){
-										delete this.s.processingData;
-										setTimeout( ()=>{
-											this.recieveData();
-										}, 5000 );	
-									}											
-								});
-							});
-						
-						});								
-					}, 1000 * ( x + 1 ), data, response );
-												
-				}
-			} else if( response.blockID ){
-				if( response.blockID == this.l.currentBlock ) return;
-				this.l.latesTime 		= response.transTime;
-				this.l.currentBlock 	= response.blockID;
-				this.checkReferers( response, this.#note ).then( result =>{
-					this.#noVerify			= false;
-					//console.log("recieving new block 3" + response.blockID);
-					this.storeBlock( response ).then( stored =>{
-						this.recieveNewBlock( response ).then( recieved =>{
-							delete this.s.processingData;
-							setTimeout( ()=>{
-								this.recieveData();
-							},5000 );
-						});
-					});							
-				});					
-			}	
+				
 		} catch(e){
 			this.errorMessage(e.toString());
 			console.error(e);
@@ -9110,58 +9110,58 @@ static Base64 = {
 		
 		if( typeof chrome != "undefined"  && chrome.runtime && Object.hasOwn( chrome.runtime, "onMessage" )){
 		
-		chrome.runtime.onMessage.addListener( async (message, sender, sendResponse )=>{
-			if( message.runBlock ){
-				let lastRunBlock = Scriptbill.l.lastRunBlock;
-				
-				if( lastRunBlock && lastRunBlock == message.runBlock ) return;
-				
-				Scriptbill.l.lastRunBlock 	= message.runBlock;
-				let data = await this.getDataPersistently( message.runBlock );
-				
-				if( data && data.blockID ){
-					this.sharePersistently = true;
-					this.shareData( false, data );
-				}
-			}
-			
-			else if( message.createRequest ){
-				response 	= JSON.parse( JSON.stringify( message.block ));
-				let password = message.password;
-				
-				if( this.l.depositID == response.blockID || ! response.transType == "DEPOSIT" || ! response.agreement || ! response.agreement.agreeKey ) return;
-				this.l.depositID = response.blockID;
-				
-				this.details  	= JSON.parse( JSON.stringify( response ));
-				this.details.transType = "AGREEMENTREQUEST";
-				this.details.recipient = response.agreement.agreeKey;
-				this.details.password  = password;
-				this.details.agreement = JSON.parse( JSON.stringify( response.agreement ));
-				let block = await this.generateScriptbillTransactionBlock( this.details, this.#note, response );				
-				
-				if( block && block.transType == "AGREEMENTREQUEST" ){
+			chrome.runtime.onMessage.addListener( async (message, sender, sendResponse )=>{
+				if( message.runBlock ){
+					let lastRunBlock = Scriptbill.l.lastRunBlock;
 					
-					if( ! this.#note )
-						this.#note = await this.#getCurrentNote();
+					if( lastRunBlock && lastRunBlock == message.runBlock ) return;
 					
-					let agreement = this.#note.agreements.filter((agrees)=>{
-						return agrees.agreeID == response.agreement.agreeID;
-					});
+					Scriptbill.l.lastRunBlock 	= message.runBlock;
+					let data = await this.getDataPersistently( message.runBlock );
 					
-					if( agreement && agreement.key ){
-						block.exchangeNote.agreement = agreement.key.split("----")[0];
-						this.details 		= JSON.parse( JSON.stringify( block ));
-						this.details.transType = "AGREEMENTSIGN";
-						this.details.password = password;
-						this.details.agreement = JSON.parse( JSON.stringify( response.agreement ));
-						//this.#isExchangeMarketMining = true;
-						this[this.#odogwu] = true;
-						this.generateScriptbillTransactionBlock( this.details, this.#note, block );
+					if( data && data.blockID ){
+						this.sharePersistently = true;
+						this.shareData( false, data );
 					}
 				}
 				
-			}
-		});
+				else if( message.createRequest ){
+					response 	= JSON.parse( JSON.stringify( message.block ));
+					let password = message.password;
+					
+					if( this.l.depositID == response.blockID || ! response.transType == "DEPOSIT" || ! response.agreement || ! response.agreement.agreeKey ) return;
+					this.l.depositID = response.blockID;
+					
+					this.details  	= JSON.parse( JSON.stringify( response ));
+					this.details.transType = "AGREEMENTREQUEST";
+					this.details.recipient = response.agreement.agreeKey;
+					this.details.password  = password;
+					this.details.agreement = JSON.parse( JSON.stringify( response.agreement ));
+					let block = await this.generateScriptbillTransactionBlock( this.details, this.#note, response );				
+					
+					if( block && block.transType == "AGREEMENTREQUEST" ){
+						
+						if( ! this.#note )
+							this.#note = await this.#getCurrentNote();
+						
+						let agreement = this.#note.agreements.filter((agrees)=>{
+							return agrees.agreeID == response.agreement.agreeID;
+						});
+						
+						if( agreement && agreement.key ){
+							block.exchangeNote.agreement = agreement.key.split("----")[0];
+							this.details 		= JSON.parse( JSON.stringify( block ));
+							this.details.transType = "AGREEMENTSIGN";
+							this.details.password = password;
+							this.details.agreement = JSON.parse( JSON.stringify( response.agreement ));
+							//this.#isExchangeMarketMining = true;
+							this[this.#odogwu] = true;
+							this.generateScriptbillTransactionBlock( this.details, this.#note, block );
+						}
+					}
+					
+				}
+			});
 		
 		}
 		//this.getData( "shareScriptbillData", this.Base64.encode( JSON.stringify( this.#default_scriptbill_servers ) ), this.#default_scriptbill_server );
@@ -9252,6 +9252,7 @@ static Base64 = {
 				return false;
 			}
 		}
+
 		if( ! limit ){ 
 			
 			
@@ -9320,80 +9321,80 @@ static Base64 = {
 				this.shareDataRunning	= true;
 				let url 			= location.origin;
 				let isScriptbill 	= false;
-				let data 			= await this.resolveRemoteData( 'scriptbillPing', 'TRUE', url );
-						
-				if( typeof data == 'object' && data.isScriptbillServer == 'TRUE' ){
-					isScriptbill = true;
-				}
-				
-				if( typeof limit != "number" )
-					limit = 100;
-				
-				let blocks 		= await this.getNoteTransactions();
-				let serveblocks = await this.resolvePersistentData("ALL", limit );
-				let blockIDs 	= blocks.map( (block)=>{
-					return block.blockID;
-				});
-				
-				
-				blocks 			= blocks.concat( serveblocks );
-				let block;
-				
-				
-				//console.log( "block length: " + blocks.length );
-				//await this.createAlert( "block length: " + blocks.length );
-				
-				//check whether there is the note's block in the storage.			
-				if( this.#note && this.#note.blockID ) {
-					
-					block = await this.resolvePersistentData( this.#note.blockID );
-					
-					if( ! block ){
-						block 				= await this.getTransBlock(1, {blockID: this.#note.blockID});
-						block 				= block[0];						
+				return await this.resolveRemoteData( 'scriptbillPing', 'TRUE', url ).then(data =>{
+					if( typeof data == 'object' && data.isScriptbillServer == 'TRUE' ){
+						isScriptbill = true;
 					}
-
-					if( block && block.blockID ) {
-						this.response = JSON.parse( JSON.stringify( block ) );
-						this.#noVerify	= false;
-						await this.storeBlock(block, this.#note);
-					}
-				}
-				
-				let countShares = 0
-				
-				for( countShares = 0; countShares < limit; countShares++ ){
-					setTimeout( async ()=>{              
-						if(  this.isSharingData ){
-							let shareInterval = setInterval( ()=>{
-								if( this.isSharingData ) return;
-								
-								this.isSharingData 		= true;
-								clearInterval( shareInterval );
-								shareData( blocks, countShares, blockIDs ).then( shared =>{
-									if( ( countShares + 1) == limit ){
-										this.shareDataRunning = false;
-										//this.shareData();
+					
+					if( typeof limit != "number" )
+						limit = 100;
+					
+					this.getNoteTransactions().then( blocks =>{
+						this.resolvePersistentData("ALL", limit ).then(serveblocks =>{
+							blocks 			= blocks.concat( serveblocks );
+							
+							const blockIDs 	= blocks.map( (block)=>{
+								return block.blockID;
+							});
+							
+							//console.log( "block length: " + blocks.length );
+							//await this.createAlert( "block length: " + blocks.length );
+							
+							//check whether there is the note's block in the storage.			
+							if( this.#note && this.#note.blockID ) {								
+								this.resolvePersistentData( this.#note.blockID ).then(async block=>{
+									if( ! block ){
+										block 				= await this.getTransBlock(1, {blockID: this.#note.blockID});
+										block 				= block[0];						
 									}
-									
-									this.isSharingData = false;
-								});
-							}, 1000, countShares, blocks, limit );
-							return;
-						}
-						this.isSharingData 	= true;
-						shareData( blocks, countShares, blockIDs ).then( shared =>{
-							if( ( countShares + 1) == limit ){
-								this.shareDataRunning = false;
-								//this.shareData();
+
+									if( block && block.blockID ) {
+										this.response = JSON.parse( JSON.stringify( block ) );
+										this.#noVerify	= false;
+										this.storeBlock(block, this.#note);
+									}
+								});								
 							}
 							
-							this.isSharingData = false;
+							let countShares = 0
+							
+							for( countShares = 0; countShares < limit; countShares++ ){
+								setTimeout( async ()=>{              
+									if(  this.isSharingData ){
+										let shareInterval = setInterval( ()=>{
+											if( this.isSharingData ) return;
+											
+											this.isSharingData 		= true;
+											clearInterval( shareInterval );
+											shareData( blocks, countShares, blockIDs ).then( shared =>{
+												if( ( countShares + 1) == limit ){
+													this.shareDataRunning = false;
+													//this.shareData();
+												}
+												
+												this.isSharingData = false;
+											});
+										}, 1000, countShares, blocks, limit );
+										return;
+									}
+									this.isSharingData 	= true;
+									shareData( blocks, countShares, blockIDs ).then( shared =>{
+										if( ( countShares + 1) == limit ){
+											this.shareDataRunning = false;
+											//this.shareData();
+										}
+										
+										this.isSharingData = false;
+									});					
+								}, ( 10000 * ( countShares + 1 ) ), countShares, blocks, limit, blockIDs );
+									
+							}
 						});					
-					}, ( 10000 * ( countShares + 1 ) ), countShares, blocks, limit, blockIDs );
-						
-				}
-				return true;
+					});
+					return true;
+				}).catch(error =>{
+					return false;
+				});
 			} catch(e){
 				console.error(e);
 				return false;
@@ -14712,369 +14713,372 @@ static Base64 = {
 			if( ! this.#note || ! this.#note.blockID ) return;
 			
 			this.blockID 		= this.#note.blockID;
-			let block 			= await this.getTransBlock();
-			block 				= block[0];
-			let privKey;
+			this.getTransBlock(1, {blockID:this.blockID}).then(async block =>{
+				block 				= block[0];
+				let privKey;
 			
-			if( ! block || ! block.blockID ) return;
-			
-			let agreements = block.agreements;
-			let exNote 		= block.exchangeNote;
-			
-			if( typeof agreements == "string" && this.isJsonable( agreements ) )
-				agreements 		= JSON.parse( agreements );
-			if( typeof exNote == "string" && this.isJsonable( exNote ) )
-				exNote 		= JSON.parse( exNote );
-			
-			if( Object.keys( agreements ).length == 0 ) return;
-			
-			if( ! exNote || ! exNote.exchangeID ){
-				let motherKeys = await this.#generateMotherKeys();
-				if( motherKeys[ this.#note.noteType ] ){
-					exNote 		= JSON.parse( JSON.stringify( this.defaultScriptbill ));
-					delete exNote.noteAddress;
-					delete exNote.noteSecret;
-					exNote.exchangeKey 		= motherKeys.noteAddresses[ this.#note.noteType ];
-					var id 					= await this.generateKey(10);
-					await this.setPrivateKey( exNote.exchangeKey, id );
-					exNote.exchangeID 		= await this.getPublicKey(id);
-				}
-			}
-			
-			let agreeID, agreement, value, interest, principal, total, paySpread, spread;
-			let noteTime = this.#note.transTime;
-			let time 	 = this.currentTime();
-			let timeDiff = parseInt(time) - parseInt( noteTime ), times, blk;
-			
-			for( agreeID in agreements ){
-				blk 			= await this.getTransBlock(1, {blockID:agreements[agreeID]});
+				if( ! block || ! block.blockID ) return;
 				
-				if( blk.length && blk[0].agreement && blk[0].agreement.agreeID )
-					agreement 	= JSON.parse( JSON.stringify( blk[0].agreement ));
+				let agreements = block.agreements;
+				let exNote 		= block.exchangeNote;
 				
-				else 
-					agreement 	= {};
+				if( typeof agreements == "string" && this.isJsonable( agreements ) )
+					agreements 		= JSON.parse( agreements );
+				if( typeof exNote == "string" && this.isJsonable( exNote ) )
+					exNote 		= JSON.parse( exNote );
 				
-				if( ! agreement.isPeriodic ) continue;
+				if( Object.keys( agreements ).length == 0 ) return;
 				
-				
-				this.response	= JSON.parse( JSON.stringify( blk ));
-				
-				if( await this.testNoteType("CRD", this.#note ) ) {
-					
-					if( agreement.agreeType == "LOAN" ){		
-					
-					
-						value 		= parseFloat( agreement.value );						
-						principal 	= ( value / agreement.times );
-						interest 	= principal * parseFloat( agreement.interestRate? agreement.interestRate: this.interestRate );
-						total 		= interest + principal;
-						paySpread 	= this.calculateTime( agreement.payPeriod );
-						spread 		= time - parseInt( agreement.timeStamp );
-						
-						//time reached to pay the interest indicated by subracting the current 
-						//time from the last payment time.
-						if( spread > paySpread ){
-							this.details 			= JSON.parse( JSON.stringify( this.defaultBlock ) );
-							this.details.transType 	= "INTERESTPAY";
-							this.details.recipient 	= exNote.exchangeID;
-							//check if the note has the ability to pay the principal.
-							if( this.#note.noteValue > total ){
-								this.details.transValue 	= total;
-								agreement.times 			-= 1;
-							} else {
-								//pay the interest alone.
-								this.details.transValue 	= interest;
-							}
-							this.details.agreement 			= JSON.parse( JSON.stringify( agreement ));
-							this.details.agreement.agreeID 	= agreeID;
-							//await this.createAlert("Interest paying " + this.details.transValue );
-							this.generateScriptbillTransactionBlock(this.#note, this.details, this.response ).then( block =>{
-								//console.log("interest: " + JSON.stringify(block));
-								//await this.createAlert("check interest " );
-								if( block && block.transType == "INTERESTPAY" ){
-									this.successMessage("Loan Interest Payment Successful; Transaction ID: " + block.blockID + " | Transaction Value: " + block.transValue + " | Credit Type: " + block.noteType.slice(0, block.noteType.lastIndexOf("CRD")));
-								}
-							});
-						}
+				if( ! exNote || ! exNote.exchangeID ){
+					let motherKeys = await this.#generateMotherKeys();
+					if( motherKeys[ this.#note.noteType ] ){
+						exNote 		= JSON.parse( JSON.stringify( this.defaultScriptbill ));
+						delete exNote.noteAddress;
+						delete exNote.noteSecret;
+						exNote.exchangeKey 		= motherKeys.noteAddresses[ this.#note.noteType ];
+						var id 					= await this.generateKey(10);
+						await this.setPrivateKey( exNote.exchangeKey, id );
+						exNote.exchangeID 		= await this.getPublicKey(id);
 					}
-					else {
+				}
+				
+				let agreeID, agreement, value, interest, principal, total, paySpread, spread;
+				let noteTime = this.#note.transTime;
+				let time 	 = this.currentTime();
+				let timeDiff = parseInt(time) - parseInt( noteTime ), times, blk;
+				
+				for( agreeID in agreements ){
+					blk 			= await this.getTransBlock(1, {blockID:agreements[agreeID]});
+					
+					if( blk.length && blk[0].agreement && blk[0].agreement.agreeID )
+						agreement 	= JSON.parse( JSON.stringify( blk[0].agreement ));
+					
+					else 
+						agreement 	= {};
+					
+					if( ! agreement.isPeriodic ) continue;
+					
+					
+					this.response	= JSON.parse( JSON.stringify( blk ));
+					
+					if( await this.testNoteType("CRD", this.#note ) ) {
 						
-						this.#agreeBlock 		= JSON.parse( JSON.stringify( block ));
-						time = this.currentTime();
+						if( agreement.agreeType == "LOAN" ){		
+						
+						
+							value 		= parseFloat( agreement.value );						
+							principal 	= ( value / agreement.times );
+							interest 	= principal * parseFloat( agreement.interestRate? agreement.interestRate: this.interestRate );
+							total 		= interest + principal;
+							paySpread 	= this.calculateTime( agreement.payPeriod );
+							spread 		= time - parseInt( agreement.timeStamp );
 							
-						//before doing anything, check if the agreement is signed by both the sender and the reciever.
-						if( ! agreement.senderSign || ! agreement.recieverSign )
-							continue;
-						
-						//next we have to verify the signatures of the reciever and the sender.
-						//verifying sender.
-						this.VerifyKey 	= agreement.senderKey;
-						this.VerifyText	= agreement.senderID;
-						this.signature 	= agreement.senderSign;
-						sendVerify 		= await this.Verify(agreement.senderSign, agreement.senderKey, agreement.senderID);
-						recVerify		= await this.Verify(agreement.recieverSign, agreement.recieverKey, agreement.recieverID);
-						
-						//if the agreement is not verified to be signed by either the sender or the reciever, we cancel and will not habndle the agreement
-						if( ! sendVerify && ! recVerify )
-							continue;
-						
-						//if the agreement is ready but the agreement is not ready to be paid based on periodicity.
-						if( agreement.isPeriodic && time <= agreement.payTime )
-							continue;
-						
-						//checking if the agreement is ready to be executed.
-						if( time <= agreement.ExecTime )
-							continue;			
-						
-						//next let'this.s check the value of the holder of Scriptbill agreement, whether or not the note can fulfil the agreement set.
-						if( this.#transSend.includes( this.block.transType )  )
-							noteValue = this.block.noteValue - this.block.transValue;
-						
-						else if( this.#transRecieve.includes( this.block.transType ) )
-							noteValue = this.block.noteValue + this.block.transValue;
-						
-						else
-							noteValue = this.block.noteValue;
-						
-						//before determining if the note could pay the agreement, we check the if the agreement is a periodic one, to determine the actual payment value.
-						if( agreement.isPeriodic ) {
-							value = agreement.value / agreement.times;
-						}
-						else {
-							value = agreement.value;
-						}
-						
-						//Scriptbill means the note can't pay up the agreement, so we abort and wait till the note can pay the agreement.
-						if( noteValue < value )
-							continue;
-						
-						//if it is a periodic agreement, then the agreement must be rewired back to the sender to update his own block to the agreement state.
-						if( agreement.isPeriodic ) {
-							this.defaultAgree = JSON.parse( JSON.stringify( agreement ) );
-							this.defaultAgree.times -= 1;
-							this.defaultAgree.payTime = parseInt( this.currentTime() ) + parseInt(this.calculateTime( this.defaultAgree.payPeriod ) );
-							//testing the interest.				
-							if( this.defaultAgree.interestType == 'SIMPLE' ) {
-								//Scriptbill will give us the number of time the interst should be calculated.
-								spread 		= Math.round( this.calculateTime( this.defaultAgree.payPeriod ) / this.calculateTime( this.defaultAgree.interestSpread ) );
-								interest 	= ( value * this.defaultAgree.interestRate ) * spread;
-								value 		= value + interest;
-							}
-							else if( this.defaultAgree.interestType == 'COMPOUND' ){
-								//Scriptbill will give us the number of time the interst should be calculated.
-								spread 		= Math.round( this.calculateTime( this.defaultAgree.payPeriod ) / this.calculateTime( this.defaultAgree.interestSpread ) );					
-								
-								for( x = 0; x < spread; x++ ){
-									interest 	= ( value * this.defaultAgree.interestRate );
-									value 		+= interest;
+							//time reached to pay the interest indicated by subracting the current 
+							//time from the last payment time.
+							if( spread > paySpread ){
+								this.details 			= JSON.parse( JSON.stringify( this.defaultBlock ) );
+								this.details.transType 	= "INTERESTPAY";
+								this.details.recipient 	= exNote.exchangeID;
+								//check if the note has the ability to pay the principal.
+								if( this.#note.noteValue > total ){
+									this.details.transValue 	= total;
+									agreement.times 			-= 1;
+								} else {
+									//pay the interest alone.
+									this.details.transValue 	= interest;
 								}
-							}
-						}
-						
-						//if the note can pay the agreement, we use the sender'this.s public key to create a transaction for the note to pay up the agreement.
-						//the user of the note do not need to trigger Scriptbill transaction, any node within the network can trigger Scriptbill transaction.
-						//when the recipient of the agreement finds Scriptbill block, the note quickly updates itself to the latest value based on Scriptbill transaction.
-						//if the sender finds Scriptbill block, the sender would recieve the note and lose the private key of the agreement in the process.
-						//Scriptbill way, the note would not be able to recieve anymore transaction coming from Scriptbill same agreement
-						//however, a periodic transaction will always have the same key but the agreement hash will be the filtering mechanism for the note.
-						//if the agreement have the same hashes, the note must not recieve such transaction else the note would be invalid in the network.
-						this.details 						= JSON.parse( JSON.stringify( this.defaultBlock ) );
-						this.details.transValue 			= value;
-						this.details.transType 				= 'AGREESEND';
-						this.details.noteValue 				= noteValue;
-						
-						//the creator of the agreement will hold the private key of the public key stored in the agreeID handler.
-						this.details.recipient 				= agreement.agreeID;
-						this.details.agreement 				= agreement;
-						this.autoExecute 					= true;
-						
-						
-						if( agreement.agreeType.toUpperCase() == "SENDTO" ){
-							if( typeof agreement.sendAddress == "string" ){
-								this.details.recipient 		= agreement.sendAddress;
-								return await this.generateScriptbillTransactionBlock();
-							}
-							
-							if( typeof agreement.sendAddress == "object" && agreement.sendAddress.length ){
-								agreement.sendAddress.forEach( async (address)=>{
-									this.details.recipient 		= address.address;
-									this.details.transValue 	= address.value;
-									
-									if( ! this.details.recipient || ! this.details.value ) return;
-									
-									let curTime 		= this.currentTime();
-									
-									if( address.time && address.time > curTime ) return;
-									
-									return await this.generateScriptbillTransactionBlock();
-								});
-							}
-						}
-						else if( agreement.agreeType.toUpperCase() == "CONTRACT" ){
-							this.blockID 			= agreement.quoteID;
-							let block 				= await this.getTransBlock();
-							
-							if( block && block.length && block[0].blockID ){
-								block 			= JSON.parse( JSON.stringify( block[0] ));
-								
-								if( ! block.agreement || ! block.agreement.agreeID ) return;
-								
-								let contract 	= JSON.parse( JSON.stringify( block.agreement ));
-								
-								if( ! contract.contractItems || ! contract.contractItems.length || ! typeof contract.contractItems == "object" ) return;
-								
-								let fee 		= contract.execFee;
-								
-								if( ! fee || fee >= 1 )
-									fee 		= 0.2;
-								
-								let stages 		= JSON.parse( contract.stages && this.isJsonable( contract.stages ) ? contract.stages : "{}" );
-								
-								let execTime 	= contract.execTime;
-								let curTime 	= this.currentTime();
-								
-								//contract not yet time to execute.
-								if( execTime > curTime ) return;
-								
-								let calTime = 0, stage;
-								
-								contract.contractItems.forEach((item, index)=>{
-									if( item.stage ){
-										stage 	= stages[ item.stage ];
-										calTime = execTime;
-										if( stage ){
-											//come back for this.
-										}
+								this.details.agreement 			= JSON.parse( JSON.stringify( agreement ));
+								this.details.agreement.agreeID 	= agreeID;
+								//await this.createAlert("Interest paying " + this.details.transValue );
+								this.generateScriptbillTransactionBlock(this.#note, this.details, this.response ).then( block =>{
+									//console.log("interest: " + JSON.stringify(block));
+									//await this.createAlert("check interest " );
+									if( block && block.transType == "INTERESTPAY" ){
+										this.successMessage("Loan Interest Payment Successful; Transaction ID: " + block.blockID + " | Transaction Value: " + block.transValue + " | Credit Type: " + block.noteType.slice(0, block.noteType.lastIndexOf("CRD")));
 									}
 								});
 							}
 						}
-						else if( agreement.agreeType.toUpperCase() == "PRODUCT" ){
-							this.details.recipient 		= this.#note.noteAddress;
-							value 						= parseFloat( blk.transValue );
-							let rate 					= agreement.productConfig.sharingRate ? agreement.productConfig.sharingRate:0.2;
-							let realValue 				= value - ( value * parseFloat( rate ) );
+						else {
 							
-							if( agreement.value <= realValue ){
-								this.details.transValue 	= agreement.value;
-							} else {
-								this.details.transValue 	= realValue;
-							}							
-						}
-						//the recipient of the transaction holds the private key to the block key of this transaction
-						/* await this.setPublicKey( agreement.blockKey );
-						this.details.blockRef 				= await this.#encrypt( JSON.stringify( agreement ) ); */
-						
-						blk = await this.generateScriptbillTransactionBlock();
-						
-						if( agreement.agreeType.toUpperCase() == "PRODUCT" ){
-							this.details.transType 		= "RECIEVE";
-							this.response 				= JSON.parse( JSON.stringify( blk ));
-							this.details.transValue 	= this.response.transValue;
-							await this.generateScriptbillTransactionBlock(this.details, this.#note );
-						}
-					}
-					
-					
-				} else if( await this.testNoteType("STK", this.#note ) ){
-					
-					if( agreement.agreeType != "STOCK" ) continue;
-					
-					paySpread 	= this.calculateTime( agreement.payPeriod );
-					spread 		= time - parseInt( agreement.payTime );
-					
-					if( paySpread < spread ){
-						this.details 	= JSON.parse( JSON.stringify( this.defaultBlock ) );
-						this.details.transType = "STOCKPAY";
-						//the note value tells the network the value of the stock held by
-						//the note.
-						this.details.transValue = this.#note.noteValue;
-						this.details.Pay		= this.#note.Pay;
-						this.details.agreement 	= agreement;
-						this.generateScriptbillTransactionBlock().then( block =>{
-							if( block && block.transType == "STOCKPAY" ){
-								this.successMessage("Dividend Payment Request Transaction Was Successfully Executed; Transaction ID: " + block.blockID);
-							}
-						});
-					}
-					
-				} else if( await this.testNoteType("BND", this.#note ) ) {
-					
-					if( agreement.agreeType != "BOND" ) continue;
-					
-					//next check if the agreement has been signed by the issuer.
-					if( ! agreement.senderSign ){
-						this.errorMessage("Bond Hasn't Been Signed. Please Send an Agreement Request To the Signer, to get your agreement signed!!");
-						continue;
-					}
-					
-					//if signed we verify the signature.
-					this.VerifyText   = agreement.senderID;
-					this.VerifyKey		= agreement.senderKey;
-					this.signature 		= agreement.senderSign;
-					
-					if( ! await this.Verify(agreement.senderSign, agreement.senderKey, agreement.senderID) ) continue;
-					
-					//testing the key.
-					this.blockID 	= agreement.senderID;
-					senderBlock 	= await this.getTransBlock(1);
-					
-					if( ! sendBlock.length || ! sendBlock[0].blockID || ! block.exchangeNote.agreement ){					
-						this.errorMessage("Could Not Verify The Autencity of Your Bond Note");
-						continue;
-					}
-					var id 				= await this.generateKey(10);
-					await this.setPrivateKey( block.exchangeNote.agreement, id );
-					
-					if( ! await this.getPublicKey( id, true ) != agreement.senderKey ){
-						this.errorMessage("Could Not Verify The Autencity of Your Bond Note");
-						continue;
-					}
-					
-					principal	= agreement.value;
-					interest 	= principal * parseFloat( agreement.interestRate );			
-					paySpread 	= this.calculateTime( agreement.payPeriod );
-					spread 		= time - parseInt( agreement.payTime );
-					
-					if( paySpread < spread ){
-						times 	= Math.round( parseInt( spread ) / parseInt( paySpread ) );
-						total 	= interest * times;
-						this.details 	= JSON.parse( JSON.stringify( this.defaultBlock ) );
-						this.details.transType = "BONDPAY";
-						this.details.transValue = total;
-						this.details.agreement 	= agreement;
-						privKey 				= await this.generateKey( 40, true );
-						var id 					= await this.generateKey(10);
-						await this.setPrivateKey( privKey, id );
-						this.details.recipient 	= await this.getPublicKey(id);
-						this.generateScriptbillTransactionBlock(this.details).then( async block =>{
-							if( block && block.transType == "BONDPAY" ){
-								this.successMessage("Bond Interest Payment Request Transaction Was Successfully Executed. Transaction ID: " + block.blockID );
-								await this.setPrivateKey( privKey, id );
-								agreement 		= await this.#decrypt( block.recipient, id );
+							this.#agreeBlock 		= JSON.parse( JSON.stringify( block ));
+							time = this.currentTime();
 								
-								if( agreement && this.isJsonable( agreement ) ) {
-									agreement 		= JSON.parse( agreement );
-									if( ! agreement.isColdDeposit ) return;
+							//before doing anything, check if the agreement is signed by both the sender and the reciever.
+							if( ! agreement.senderSign || ! agreement.recieverSign )
+								continue;
+							
+							//next we have to verify the signatures of the reciever and the sender.
+							//verifying sender.
+							this.VerifyKey 	= agreement.senderKey;
+							this.VerifyText	= agreement.senderID;
+							this.signature 	= agreement.senderSign;
+							sendVerify 		= await this.Verify(agreement.senderSign, agreement.senderKey, agreement.senderID);
+							recVerify		= await this.Verify(agreement.recieverSign, agreement.recieverKey, agreement.recieverID);
+							
+							//if the agreement is not verified to be signed by either the sender or the reciever, we cancel and will not habndle the agreement
+							if( ! sendVerify && ! recVerify )
+								continue;
+							
+							//if the agreement is ready but the agreement is not ready to be paid based on periodicity.
+							if( agreement.isPeriodic && time <= agreement.payTime )
+								continue;
+							
+							//checking if the agreement is ready to be executed.
+							if( time <= agreement.ExecTime )
+								continue;			
+							
+							//next let'this.s check the value of the holder of Scriptbill agreement, whether or not the note can fulfil the agreement set.
+							if( this.#transSend.includes( this.block.transType )  )
+								noteValue = this.block.noteValue - this.block.transValue;
+							
+							else if( this.#transRecieve.includes( this.block.transType ) )
+								noteValue = this.block.noteValue + this.block.transValue;
+							
+							else
+								noteValue = this.block.noteValue;
+							
+							//before determining if the note could pay the agreement, we check the if the agreement is a periodic one, to determine the actual payment value.
+							if( agreement.isPeriodic ) {
+								value = agreement.value / agreement.times;
+							}
+							else {
+								value = agreement.value;
+							}
+							
+							//Scriptbill means the note can't pay up the agreement, so we abort and wait till the note can pay the agreement.
+							if( noteValue < value )
+								continue;
+							
+							//if it is a periodic agreement, then the agreement must be rewired back to the sender to update his own block to the agreement state.
+							if( agreement.isPeriodic ) {
+								this.defaultAgree = JSON.parse( JSON.stringify( agreement ) );
+								this.defaultAgree.times -= 1;
+								this.defaultAgree.payTime = parseInt( this.currentTime() ) + parseInt(this.calculateTime( this.defaultAgree.payPeriod ) );
+								//testing the interest.				
+								if( this.defaultAgree.interestType == 'SIMPLE' ) {
+									//Scriptbill will give us the number of time the interst should be calculated.
+									spread 		= Math.round( this.calculateTime( this.defaultAgree.payPeriod ) / this.calculateTime( this.defaultAgree.interestSpread ) );
+									interest 	= ( value * this.defaultAgree.interestRate ) * spread;
+									value 		= value + interest;
+								}
+								else if( this.defaultAgree.interestType == 'COMPOUND' ){
+									//Scriptbill will give us the number of time the interst should be calculated.
+									spread 		= Math.round( this.calculateTime( this.defaultAgree.payPeriod ) / this.calculateTime( this.defaultAgree.interestSpread ) );					
 									
-									this.details.transType 	= "BONDRECIEVE";
-									this.details.agreement 	= agreement;
-									this.response 			= block;
-									this.details.transValue = block.transValue;
-									this.#privKey 			= privKey;
-									this.generateScriptbillTransactionBlock(this.details).then( block =>{
-										if( block && block.transType == "BONDRECIEVE" ){
-											this.successMessage("Bond Interest Payment Was Successfully Recieved. Transaction ID " + block.blockID );
+									for( x = 0; x < spread; x++ ){
+										interest 	= ( value * this.defaultAgree.interestRate );
+										value 		+= interest;
+									}
+								}
+							}
+							
+							//if the note can pay the agreement, we use the sender'this.s public key to create a transaction for the note to pay up the agreement.
+							//the user of the note do not need to trigger Scriptbill transaction, any node within the network can trigger Scriptbill transaction.
+							//when the recipient of the agreement finds Scriptbill block, the note quickly updates itself to the latest value based on Scriptbill transaction.
+							//if the sender finds Scriptbill block, the sender would recieve the note and lose the private key of the agreement in the process.
+							//Scriptbill way, the note would not be able to recieve anymore transaction coming from Scriptbill same agreement
+							//however, a periodic transaction will always have the same key but the agreement hash will be the filtering mechanism for the note.
+							//if the agreement have the same hashes, the note must not recieve such transaction else the note would be invalid in the network.
+							this.details 						= JSON.parse( JSON.stringify( this.defaultBlock ) );
+							this.details.transValue 			= value;
+							this.details.transType 				= 'AGREESEND';
+							this.details.noteValue 				= noteValue;
+							
+							//the creator of the agreement will hold the private key of the public key stored in the agreeID handler.
+							this.details.recipient 				= agreement.agreeID;
+							this.details.agreement 				= agreement;
+							this.autoExecute 					= true;
+							
+							
+							if( agreement.agreeType.toUpperCase() == "SENDTO" ){
+								if( typeof agreement.sendAddress == "string" ){
+									this.details.recipient 		= agreement.sendAddress;
+									return await this.generateScriptbillTransactionBlock();
+								}
+								
+								if( typeof agreement.sendAddress == "object" && agreement.sendAddress.length ){
+									agreement.sendAddress.forEach( async (address)=>{
+										this.details.recipient 		= address.address;
+										this.details.transValue 	= address.value;
+										
+										if( ! this.details.recipient || ! this.details.value ) return;
+										
+										let curTime 		= this.currentTime();
+										
+										if( address.time && address.time > curTime ) return;
+										
+										return await this.generateScriptbillTransactionBlock();
+									});
+								}
+							}
+							else if( agreement.agreeType.toUpperCase() == "CONTRACT" ){
+								this.blockID 			= agreement.quoteID;
+								let block 				= await this.getTransBlock();
+								
+								if( block && block.length && block[0].blockID ){
+									block 			= JSON.parse( JSON.stringify( block[0] ));
+									
+									if( ! block.agreement || ! block.agreement.agreeID ) return;
+									
+									let contract 	= JSON.parse( JSON.stringify( block.agreement ));
+									
+									if( ! contract.contractItems || ! contract.contractItems.length || ! typeof contract.contractItems == "object" ) return;
+									
+									let fee 		= contract.execFee;
+									
+									if( ! fee || fee >= 1 )
+										fee 		= 0.2;
+									
+									let stages 		= JSON.parse( contract.stages && this.isJsonable( contract.stages ) ? contract.stages : "{}" );
+									
+									let execTime 	= contract.execTime;
+									let curTime 	= this.currentTime();
+									
+									//contract not yet time to execute.
+									if( execTime > curTime ) return;
+									
+									let calTime = 0, stage;
+									
+									contract.contractItems.forEach((item, index)=>{
+										if( item.stage ){
+											stage 	= stages[ item.stage ];
+											calTime = execTime;
+											if( stage ){
+												//come back for this.
+											}
 										}
 									});
 								}
 							}
-						});
+							else if( agreement.agreeType.toUpperCase() == "PRODUCT" ){
+								this.details.recipient 		= this.#note.noteAddress;
+								value 						= parseFloat( blk.transValue );
+								let rate 					= agreement.productConfig.sharingRate ? agreement.productConfig.sharingRate:0.2;
+								let realValue 				= value - ( value * parseFloat( rate ) );
+								
+								if( agreement.value <= realValue ){
+									this.details.transValue 	= agreement.value;
+								} else {
+									this.details.transValue 	= realValue;
+								}							
+							}
+							//the recipient of the transaction holds the private key to the block key of this transaction
+							/* await this.setPublicKey( agreement.blockKey );
+							this.details.blockRef 				= await this.#encrypt( JSON.stringify( agreement ) ); */
+							
+							blk = await this.generateScriptbillTransactionBlock();
+							
+							if( agreement.agreeType.toUpperCase() == "PRODUCT" ){
+								this.details.transType 		= "RECIEVE";
+								this.response 				= JSON.parse( JSON.stringify( blk ));
+								this.details.transValue 	= this.response.transValue;
+								await this.generateScriptbillTransactionBlock(this.details, this.#note );
+							}
+						}
+						
+						
+					} else if( await this.testNoteType("STK", this.#note ) ){
+						
+						if( agreement.agreeType != "STOCK" ) continue;
+						
+						paySpread 	= this.calculateTime( agreement.payPeriod );
+						spread 		= time - parseInt( agreement.payTime );
+						
+						if( paySpread < spread ){
+							this.details 	= JSON.parse( JSON.stringify( this.defaultBlock ) );
+							this.details.transType = "STOCKPAY";
+							//the note value tells the network the value of the stock held by
+							//the note.
+							this.details.transValue = this.#note.noteValue;
+							this.details.Pay		= this.#note.Pay;
+							this.details.agreement 	= agreement;
+							this.generateScriptbillTransactionBlock().then( block =>{
+								if( block && block.transType == "STOCKPAY" ){
+									this.successMessage("Dividend Payment Request Transaction Was Successfully Executed; Transaction ID: " + block.blockID);
+								}
+							});
+						}
+						
+					} else if( await this.testNoteType("BND", this.#note ) ) {
+						
+						if( agreement.agreeType != "BOND" ) continue;
+						
+						//next check if the agreement has been signed by the issuer.
+						if( ! agreement.senderSign ){
+							this.errorMessage("Bond Hasn't Been Signed. Please Send an Agreement Request To the Signer, to get your agreement signed!!");
+							continue;
+						}
+						
+						//if signed we verify the signature.
+						this.VerifyText   = agreement.senderID;
+						this.VerifyKey		= agreement.senderKey;
+						this.signature 		= agreement.senderSign;
+						
+						if( ! await this.Verify(agreement.senderSign, agreement.senderKey, agreement.senderID) ) continue;
+						
+						//testing the key.
+						this.blockID 	= agreement.senderID;
+						senderBlock 	= await this.getTransBlock(1);
+						
+						if( ! sendBlock.length || ! sendBlock[0].blockID || ! block.exchangeNote.agreement ){					
+							this.errorMessage("Could Not Verify The Autencity of Your Bond Note");
+							continue;
+						}
+						var id 				= await this.generateKey(10);
+						await this.setPrivateKey( block.exchangeNote.agreement, id );
+						
+						if( ! await this.getPublicKey( id, true ) != agreement.senderKey ){
+							this.errorMessage("Could Not Verify The Autencity of Your Bond Note");
+							continue;
+						}
+						
+						principal	= agreement.value;
+						interest 	= principal * parseFloat( agreement.interestRate );			
+						paySpread 	= this.calculateTime( agreement.payPeriod );
+						spread 		= time - parseInt( agreement.payTime );
+						
+						if( paySpread < spread ){
+							times 	= Math.round( parseInt( spread ) / parseInt( paySpread ) );
+							total 	= interest * times;
+							this.details 	= JSON.parse( JSON.stringify( this.defaultBlock ) );
+							this.details.transType = "BONDPAY";
+							this.details.transValue = total;
+							this.details.agreement 	= agreement;
+							privKey 				= await this.generateKey( 40, true );
+							var id 					= await this.generateKey(10);
+							await this.setPrivateKey( privKey, id );
+							this.details.recipient 	= await this.getPublicKey(id);
+							this.generateScriptbillTransactionBlock(this.details).then( async block =>{
+								if( block && block.transType == "BONDPAY" ){
+									this.successMessage("Bond Interest Payment Request Transaction Was Successfully Executed. Transaction ID: " + block.blockID );
+									await this.setPrivateKey( privKey, id );
+									agreement 		= await this.#decrypt( block.recipient, id );
+									
+									if( agreement && this.isJsonable( agreement ) ) {
+										agreement 		= JSON.parse( agreement );
+										if( ! agreement.isColdDeposit ) return;
+										
+										this.details.transType 	= "BONDRECIEVE";
+										this.details.agreement 	= agreement;
+										this.response 			= block;
+										this.details.transValue = block.transValue;
+										this.#privKey 			= privKey;
+										this.generateScriptbillTransactionBlock(this.details).then( block =>{
+											if( block && block.transType == "BONDRECIEVE" ){
+												this.successMessage("Bond Interest Payment Was Successfully Recieved. Transaction ID " + block.blockID );
+											}
+										});
+									}
+								}
+							});
+						}
+						
 					}
-					
 				}
-			}
+			});
+			
+			
 		} catch(e){
 			this.errorMessage(e.toString());
 			console.error(e);
