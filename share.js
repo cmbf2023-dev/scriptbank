@@ -178,7 +178,11 @@ self.onmessage = async (event) => {
 
         if (!servers.includes(response.exchangeNote.noteServer)) servers.splice(2, 0, response.exchangeNote.noteServer)
 
-          runWebsocket(response, url.href)
+          servers.forEach((server)=>{
+            const url    = new URL(server)
+            runWebsocket(response, url.href)
+          })
+          
           return
 		
 		  const returnData = async (data, x, datas, streamKey, serverKey, url, y) => {
