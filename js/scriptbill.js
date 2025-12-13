@@ -8937,7 +8937,7 @@ static Base64 = {
 			//console.log( "stored: " + JSON.stringify( stored ));
 			if( stored ){
 			 local = await Promise.all(
-					Array.from(stored.values()).map(async (value) => {
+					Array.from(await stored.values()).map(async (value) => {
 						try {
 							const file = await value.getFile();
 							const text = await file.text();
