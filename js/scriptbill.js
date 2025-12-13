@@ -9488,6 +9488,7 @@ static Base64 = {
 
 		// Listen for broadcasts
 		channel.on("broadcast", { event: "block_broadcast" }, (payload) => {
+			console.log("broadcasted block recieved");
 			this.recieveNewBlock(this.isJsonable( payload.payload.text ) ? JSON.parse(payload.payload.text) : payload.payload.text)
 		})
 
@@ -9556,8 +9557,6 @@ static Base64 = {
 		if(!client) return;
 
 		console.log("supabase running for: ", block.blockID );
-
-		console.log("client created: ", createClient, "block: ", block )
 
 		// Broadcast channel for real-time messaging
 		const channel = client.channel("general")
@@ -9788,7 +9787,7 @@ static Base64 = {
 
 		// Call the function with your block
 		await processBlock(block)
-		//cleanup();
+		channel.unsubscribe();
 
 	}
 	
