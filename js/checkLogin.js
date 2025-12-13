@@ -10392,6 +10392,14 @@ async function verifyPayment(ref, seconds,  type = 'squad', isTest = true ){
 					
 					if( transBlock ){
 						//console.log( JSON.stringify( transBlock ));			
+						let sendConfig;
+
+						if(Scriptbill.s.sendConfig && Scriptbill.isJsonable(Scriptbill.s.sendConfig)){
+							sendConfig 	= JSON.parse(Scriptbill.s.sendConfig);
+						}
+						else {
+							sendConfig = {};
+						}
 						Scriptbill.s.depositConfirmBlock = JSON.stringify( transBlock );
 						sendConfig.block 	= transBlock;
 						sendConfig.agreeBlock = transBlock;
