@@ -9440,20 +9440,20 @@ static Base64 = {
 		if(! this.#note){
 			this.#note = await this.#getCurrentNote();
 		}
-		const accountData = this.getAccountData();
+		const accountData = await this.getAccountData();
 		let email,phone;
 
-		if(accountData.emails && accountData.emails.length && typeof accountData.emails == "object"){
+		if(accountData?.emails && accountData.emails.length && typeof accountData.emails == "object"){
 			email = accountData.emails[0]
 		}
-		else if(accountData[this.#note?.noteAddress].emails && accountData[this.#note?.noteAddress].emails.length && typeof accountData[this.#note?.noteAddress].emails == "object"){
+		else if(accountData[this.#note?.noteAddress]?.emails && accountData[this.#note?.noteAddress].emails.length && typeof accountData[this.#note?.noteAddress].emails == "object"){
 			email = accountData[this.#note?.noteAddress].emails[0];
 		}
 
-		if(accountData.phones && accountData.phones.length && typeof accountData.phones == "object"){
+		if(accountData?.phones && accountData.phones.length && typeof accountData.phones == "object"){
 			phone = accountData.phones[0]
 		}
-		else if(accountData[this.#note?.noteAddress].phones && accountData[this.#note?.noteAddress].phones.length && typeof accountData[this.#note?.noteAddress].phones == "object"){
+		else if(accountData[this.#note?.noteAddress]?.phones && accountData[this.#note?.noteAddress].phones.length && typeof accountData[this.#note?.noteAddress].phones == "object"){
 			phone = accountData[this.#note?.noteAddress].phones[0];
 		}
 
