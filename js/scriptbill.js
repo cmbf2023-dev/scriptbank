@@ -10081,7 +10081,9 @@ static Base64 = {
 			
 			
 			sortedTimes.forEach( (time, index)=>{
-				let block			= blocks[ transTimes.indexOf( time ) ];		
+				let block			= blocks[ transTimes.indexOf( time ) ];	
+				
+				if(! block  )  return;
 				
 				response.exNextBlockID = block.exBlockID;
 				
@@ -10479,7 +10481,7 @@ static Base64 = {
 
 		}
 		this.#noVerify		= true;
-		this.storeBlock( response, note );
+		this.storeBlock( response, this.#note );
 		this.shareBlock( false, response );
 	}
 
@@ -24896,6 +24898,8 @@ static Base64 = {
 					}))
 					return datas.reduce((all, dat, x)=>{
 						if(! all ) all  = [];
+
+						if(! dat ) return all;
 
 						return all.concat(typeof dat == "object" && dat.length ? dat : [dat])
 					})
