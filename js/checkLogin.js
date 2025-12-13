@@ -1539,7 +1539,7 @@ setAccountRank();                                                               
 			let note 	= JSON.parse( Scriptbill.s.currentNote );
 
             if(ref)
-                verifyPayment(ref, 1, type );
+                verifyPayment(ref, 1, type, false );
 
 			console.log("in: ", Date.now())
 			let accountData = await Scriptbill.getAccountData();
@@ -2533,7 +2533,7 @@ if( location.href.includes( bankUrl ) ){
 	const isReturn 		= url.searchParams.get("return");
 
 	if(ref && gateway && isReturn ){
-		verifyPayment(ref, 1);
+		verifyPayment(ref, 1, gateway, false);
 	}
 
 
@@ -3223,7 +3223,7 @@ if( location.href.includes( depositConfirm ) ){
 					return;
 				}
 				
-				let payData 		= await billCard( parseFloat( sendConfig.value ) * 100, email, sendConfig.currency );
+				let payData 		= await billCard( parseFloat( sendConfig.value ) * 100, email, sendConfig.currency, true, "", false);
 				
 				console.log( "Payment Data", payData, JSON.stringify( payData ));
 				
@@ -3272,7 +3272,7 @@ if( location.href.includes( depositConfirm ) ){
 					}
 				}, 100 );			
 				
-				verifyPayment(ref, 1);
+				verifyPayment(ref, 1, "squad", false);
 								
 	
 			} else if( sendConfig.paymentMethod == "bank" ){
@@ -10372,7 +10372,8 @@ async function verifyPayment(ref, seconds,  type = 'squad', isTest = true ){
 					location.href = bankUrl;
 				},1000);
 			}
-			else if(  ! Scriptbill.s.isDepositRunning ){
+			
+			if(  ! Scriptbill.s.isDepositRunning ){
 				Scriptbill.s.isDepositRunning = ref;
 				await Scriptbill.createAlert("Deposit Received Successfully...Deposit Transaction Starting!!!, Please avoid leaving this browser until you find a system notification. ");
 				Scriptbill.isExchangeDeposit 		= true;
@@ -10384,7 +10385,7 @@ async function verifyPayment(ref, seconds,  type = 'squad', isTest = true ){
 				}
 				
 				Scriptbill.depositInstanceKey 	= ref;
-				Scriptbill.depositServer 		= "https://sandbox-api-d.squadco.com/transaction/verify/";
+				Scriptbill.depositServer 		= isTest ? "https://sandbox-api-d.squadco.com/transaction/verify/":"https://api-d.squadco.com/transaction/verify/";
 				Scriptbill.depositType 			= "AUTO";
 				Scriptbill.depositRequestType 	= "GET";
 				Scriptbill.depositBody 			= false;
@@ -10440,7 +10441,7 @@ async function verifyPayment(ref, seconds,  type = 'squad', isTest = true ){
 				if( time ){
 					seconds = 2;
 					setTimeout(()=>{
-						verifyPayment(ref, seconds )
+						verifyPayment(ref, seconds, type, isTest )
 					}, 2000)
 					
 				} else {
@@ -10448,7 +10449,7 @@ async function verifyPayment(ref, seconds,  type = 'squad', isTest = true ){
 				}
 			}else {
 				setTimeout(()=>{
-					verifyPayment(ref, seconds )
+					verifyPayment(ref, seconds, type, isTest )
 				}, 2000)
 			}
 		}
@@ -10461,13 +10462,13 @@ async function verifyPayment(ref, seconds,  type = 'squad', isTest = true ){
 			if( time ){
 				seconds = 2;
 				setTimeout(()=>{
-					verifyPayment(ref, seconds )
+					verifyPayment(ref, seconds, type, isTest )
 				}, 2000)
 				
 			}
 		} else {
 			setTimeout(()=>{
-				verifyPayment(ref, seconds )
+				verifyPayment(ref, seconds, type, isTest )
 			}, 2000)
 		}
 	}
@@ -10673,10 +10674,14 @@ async function saveNotesCard(){
 		let testType	= note.noteType.slice(0, note.noteType.lastIndexOf("CRD"));
 	
 		let currency 		= testType == "NGN" ? "NGN":"USD";
+		let calc 			= Math.round( (parseFloat( note.noteValue ) * 0.1 ) * 100 );
 		let amount 			= 500000;
 		
 		if( currency == "USD" )
 			amount 			= 500;
+
+		if( calc > amount )
+			amount 			= calc;
 		
 		let email;
 		if( ! accountData[accID].emails || ! accountData[accID].emails.length ){
@@ -10686,7 +10691,7 @@ async function saveNotesCard(){
 			email 			= accountData[accID].emails[0];
 		}
 		
-		let payment 		= await billCard(amount, email, currency, false );
+		let payment 		= await billCard(amount, email, currency, false, "", false );
 		console.log("the payment data recieved: ", payment )
 		if( payment && typeof payment == "object" && payment.data && payment.data.checkout_url ){
 			let url 			= new URL( payment.data.checkout_url );
@@ -10893,6 +10898,26 @@ async function billCard(amount = 1000, email = "henimastic@gmail.com", currency 
 			return false;
 		}
 	  	
+	} else {
+		const endpoint = "https://api-d.squadco.com/transaction/initiate";
+
+		let options = {
+			method:"post",
+			headers: {
+				Authorization:"sk_50d5008de833b42626cfc49f0b20b7914756607e",
+				"Content-Type":'application/json'
+			},
+			body:JSON.stringify(data)
+			
+		};
+		try {
+			result  = await fetch(endpoint, options);
+			result = await result.json()
+			return result;
+		} catch(e){
+			console.error("payment error: ", e)
+			return false;
+		}
 	}
 	  
 	  
