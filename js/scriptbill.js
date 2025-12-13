@@ -17,8 +17,6 @@
 	
 	//the private key of the current note.
 	static #noteSecret  = false;
-
-	static #channels = this.#subscribeChannels();
 	
 	//private key that holds the key of the creator of Scriptbill. This key can be used to 
 	//override so many thing in the Scriptbill network. It is harded for security and transparency.
@@ -162,6 +160,8 @@
 	//private key of the current note to the new note, then downloads the splitted note 
 	//for the user.
 	static #runSplitNote = this.splitNote();
+
+	static #channels = this.#subscribeChannels();
 	
 	/*
 	@fiatCurrencies
