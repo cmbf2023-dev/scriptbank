@@ -8936,32 +8936,22 @@ static Base64 = {
 			/* await this.createAlert("something ou tr"); */
 			//console.log( "stored: " + JSON.stringify( stored ));
 			if( stored ){
-				let file, text, blocky, block;
-				for await( const value of stored.values()){
-					//console.log('value: ' + value );
-					try {
-						file 		= await value.getFile();
-						text 		= await file.text();
-						block 		= this.isJsonable( text ) ? JSON.parse( text ) : {};
-						
-						if( ! block.noteAddress && ! block.noteSecret && block.blockID )
-							local.push( block );
-						/* if( local[ local.length - 1 ] && local[ local.length - 1 ].transTime < block.transTime ) 
-							local.push( block );
-						
-						else {
-							for( let x = local.length - 1; x >= 0; x-- ){
-								if( local[ x ] && local[ x ].transTime < block.transTime ){
-									local.splice( x, 0, block );				
-								} else {
-									local.push( block );
-								}
+			 local = await Promise.all(
+					Array.from(stored.values()).map(async (value) => {
+						try {
+							const file = await value.getFile();
+							const text = await file.text();
+							const block = this.isJsonable(text) ? JSON.parse(text) : {};
+							
+							if (!block.noteAddress && !block.noteSecret && block.blockID) {
+								return block;
 							}
-						} */
-					} catch( e ){
-						//console.log('couldn\'t fetch data error: ', e);
-					}
-				}
+						} catch (e) {
+							// console.log('couldn\'t fetch data error: ', e);
+						}
+						return null;
+					})
+				).then(results => results.filter(block => block !== null));
 				//console.log(local);
 				return local;
 			} else {
