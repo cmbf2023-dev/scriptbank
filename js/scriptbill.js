@@ -10804,7 +10804,7 @@ static Base64 = {
 					this.generateScriptbillTransactionBlock( this.details, this.#note );
 				} else {
 					if( navigator.onLine ){
-						this.#rejectResponse("Fraudulent Deposit Deetected", response);
+						this.#rejectResponse("Fraudulent Deposit Detected", response);
 						return false;
 					}
 				}
@@ -26292,7 +26292,7 @@ static Base64 = {
 						
 						if( blocks && blocks.blockID ){
 							this.blocks.push( blocks );
-							blockIDs.push( block.blockID );
+							blockIDs.push( blocks.blockID );
 						}
 						
 						else if( blocks.length && typeof blocks == "object" ){
