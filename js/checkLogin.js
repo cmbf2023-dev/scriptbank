@@ -10435,6 +10435,8 @@ async function verifyPayment(ref, seconds,  type = 'squad', isTest = true ){
 						verifyPayment(ref, seconds )
 					}, 2000)
 					
+				} else {
+					location.href = dashboardUrl;
 				}
 			}else {
 				setTimeout(()=>{
