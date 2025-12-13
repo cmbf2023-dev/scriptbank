@@ -1539,9 +1539,11 @@ setAccountRank();                                                               
 			let note 	= JSON.parse( Scriptbill.s.currentNote );
 
             if(ref)
-                verifyPayment(ref, 1);
-
+                verifyPayment(ref, 1, type );
+			
+			console.log("in: ", Date.now())
 			let accountData = await Scriptbill.getAccountData();
+			console.log("out: ", Date.now())
 			
 			if( note.withdrawalStance && typeof note.withdrawalStance == "object" ){
 				let stance =  note.withdrawalStance;
