@@ -10373,8 +10373,8 @@ async function verifyPayment(ref, seconds,  type = 'squad', isTest = true ){
 				},1000);
 			}
 			else if(  ! Scriptbill.s.isDepositRunning ){
-				Scriptbill.s.isDepositRunning = true;
-				await Scriptbill.createAlert("Deposit Received Successfully...Deposit Transaction Starting!!!");
+				Scriptbill.s.isDepositRunning = ref;
+				await Scriptbill.createAlert("Deposit Received Successfully...Deposit Transaction Starting!!!, Please avoid leaving this browser until you find a system notification. ");
 				Scriptbill.isExchangeDeposit 		= true;
 				Scriptbill.exchangeKey 				= EXCHANGEKEY;
 				let nonce 							= await Scriptbill.getData('getTransNonce', 'TRUE', SERVER );
@@ -10403,9 +10403,26 @@ async function verifyPayment(ref, seconds,  type = 'squad', isTest = true ){
 					} else {
 						await Scriptbill.createAlert("Deposit Unsuccessful, Please send a mail to admin@scriptbank.org with this transaction reference code to manually credit your account: " + ref );
 						delete Scriptbill.s.sendConfig;
+						delete Scriptbill.s.isDepositRunning;
 						location.href = depositUrl;
 					}
 				});													
+			} else {
+				const confirmed = await Scriptbill.createConfirm(`A Deposit Transaction of ref: ${Scriptbill.s.isDepositRunning} Seems to be running underneath, If you're having issues with a previous deposit, please contact Scriptbank with this transaction ref, a team should help. Should we close that deposit transaction to run this one with ref: ${ref}?`);
+
+				if(confirmed){
+					delete Scriptbill.s.isDepositRunning;
+					setTimeout(()=>{
+						verifyPayment(ref, seconds, type, isTest );
+					}, 3000)
+				} else {
+					await Scriptbill.createAlert(`Deposit of ${Scriptbill.s.isDepositRunning} restarting again`);
+					ref = Scriptbill.s.isDepositRunning;
+					seconds = 1;
+					delete Scriptbill.s.isDepositRunning;
+					verifyPayment(ref, seconds, type, isTest );
+				}
+				
 			}
 		} else {
 			seconds++;
