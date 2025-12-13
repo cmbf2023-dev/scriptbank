@@ -10391,15 +10391,15 @@ async function verifyPayment(ref, seconds,  type = 'squad', isTest = true ){
 				Scriptbill.depositFiat( (parseInt( request.data.transaction_amount ) / 100 ).toFixed(2), note.noteType ).then( async transBlock =>{
 					
 					if( transBlock ){
-					//console.log( JSON.stringify( transBlock ));			
-					Scriptbill.s.depositConfirmBlock = JSON.stringify( transBlock );
-					sendConfig.block 	= transBlock;
-					sendConfig.agreeBlock = transBlock;
-					Scriptbill.s.sendConfig = JSON.stringify( sendConfig );
-					await Scriptbill.createAlert("Deposit Successful");
-					Scriptbill.s.confirmDocumentUpload = "TRUE";
-					delete Scriptbill.s.isDepositRunning;
-					location.href 			= depositSuccess;
+						//console.log( JSON.stringify( transBlock ));			
+						Scriptbill.s.depositConfirmBlock = JSON.stringify( transBlock );
+						sendConfig.block 	= transBlock;
+						sendConfig.agreeBlock = transBlock;
+						Scriptbill.s.sendConfig = JSON.stringify( sendConfig );
+						await Scriptbill.createAlert("Deposit Successful");
+						Scriptbill.s.confirmDocumentUpload = "TRUE";
+						delete Scriptbill.s.isDepositRunning;
+						location.href 			= depositSuccess;
 					} else {
 						await Scriptbill.createAlert("Deposit Unsuccessful, Please send a mail to admin@scriptbank.org with this transaction reference code to manually credit your account: " + ref );
 						delete Scriptbill.s.sendConfig;
