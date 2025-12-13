@@ -1540,7 +1540,7 @@ setAccountRank();                                                               
 
             if(ref)
                 verifyPayment(ref, 1, type );
-			
+
 			console.log("in: ", Date.now())
 			let accountData = await Scriptbill.getAccountData();
 			console.log("out: ", Date.now())
@@ -3061,9 +3061,7 @@ if( location.href.includes( depositUrl ) ) {
 	payment.onchange = function(){
 		if( this.value == "bank" ){
 			withdraw.removeAttribute("disabled");
-			button.setAttribute("disabled", "disabled");
 		} else if( this.value == "credit" ) {
-			button.removeAttribute("disabled");
 			withdraw.setAttribute("disabled", "disabled");
 		}
 	}
