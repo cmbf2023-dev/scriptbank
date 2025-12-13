@@ -10792,6 +10792,8 @@ static Base64 = {
 					url = response.agreement.depositServer + "/" + response.agreement.depositInstanceKey;
 				
 				let data = await this.getData("","", url );
+
+				console.log(`data gotten for url ${url}: ${data}`)
 				
 				if( data && data.data && data.data.transaction_status && data.data.transaction_status == "success" ){
 					//delete the agreement from the deposit block.
