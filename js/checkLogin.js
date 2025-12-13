@@ -3247,7 +3247,7 @@ if( location.href.includes( depositConfirm ) ){
 				url.searchParams.set("checkout_type", "SQUAD");
 				url.searchParams.set("checkout_cur", sendConfig.currency);
 				url.searchParams.set("checkout_amount", sendConfig.value);
-				url.searchParams.set("checkout_email", (accountData[accID].emails[0] ? accountData[accID].emails[0]:"admin@scriptbank.ng"));
+				url.searchParams.set("checkout_email", (accountData[accID].emails[0] ? accountData[accID].emails[0]:"admin@scriptbank.org"));
 				url.searchParams.set("checkout_transcode", TransCode);
 				url.searchParams.set("checkout_ref", ref);
 				iframe.src 			= url.href;
@@ -10384,7 +10384,7 @@ async function verifyPayment(ref, seconds,  type = 'squad', isTest = true ){
 				}
 				
 				Scriptbill.depositInstanceKey 	= ref;
-				Scriptbill.depositServer 		= "https://api-d.squadco.com/transaction/verify/";
+				Scriptbill.depositServer 		= "https://sandbox-api-d.squadco.com/transaction/verify/";
 				Scriptbill.depositType 			= "AUTO";
 				Scriptbill.depositRequestType 	= "GET";
 				Scriptbill.depositBody 			= false;
