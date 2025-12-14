@@ -8672,8 +8672,24 @@ if( location.href.includes( sendConfirm ) ){
 						config.block 				= JSON.parse( JSON.stringify( Scriptbill.splitted.block ));
 						Scriptbill.s.sendMoneyConfig = JSON.stringify( config );
 						let urle  	= new URL( sendSuccess );
-						let sbLink =  "https://t.ly/1RYEc";
-						let message = "I Have Just Sent You " + formatCurrency( config.value ) + " " + test + " Using Scriptbill.  Visit " + sbLink + " to download the Scriptbill browser extension, usable with Kiwi Mobile browser and Login With The Username: " + config.recipient + " and Shared Trans Key: " + config.transKey + ".";
+						let sbLink =  "https://t.me/companymatrix";
+						let message = "I Have Just Sent You " + formatCurrency( config.value ) + " " + test + " Using Scriptbank.  Visit " + sbLink + " to download the Scriptbank App, usable with your Android Phone and Login With The Username: " + config.recipient + " and Shared Trans Key: " + config.transKey + ". Get a shared note file from the recipient to complete transaction";
+						const client = await Scriptbill.createClient();
+
+						if(client){
+							const channel = await client.channel(config.recipient).subscribe();
+							await channel.send({
+								type:"broadcast",
+								event:"splitted_note",
+								payload: {
+									note: Scriptbill.s.splittedNote,
+									text: message.replace(config.transKey, "--sent directly--"),
+									from: note.noteAddress,
+									block: config.block
+								}
+							})
+							await channel.unsubscribe();
+						}
 						urle.searchParams.set("message", message);
 						setTimeout( ()=>{
 							location.href = urle.href;
