@@ -2836,7 +2836,7 @@ if( location.href.includes( loanConfirm ) ){
 			}
 		}
 
-		alert( eligibility );
+		//alert( eligibility );
 		
 		let accountData   		= await getAccountData();
 		let url 				= new URL( SERVER );
