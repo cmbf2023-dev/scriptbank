@@ -4665,7 +4665,7 @@
 							else
 								this.walletID 	= await this.generateKey();
 							
-							this.mergeNote 			= JSON.parse( JSON.stringify( this.defaultScriptbill ) );
+							this.mergeNoted 			= JSON.parse( JSON.stringify( this.defaultScriptbill ) );
 							if( this.key && this.key.match(/[0-9]/) && parseInt( this.key ) != NaN )
 								this.#passwordKey 	= this.key;
 							
@@ -7626,21 +7626,21 @@
 				let password 	= await this.#generatePassword( this.mergePassword );
 				this.binary 	= this.mergeNoteBinary;
 				let noteEncrypt	= await this.debinarilize();
-				this.mergeNote  = this.decrypt( noteEncrypt, password );
+				this.mergeNoted  = this.decrypt( noteEncrypt, password );
 				
-				if( this.isJsonable( this.mergeNote ) ){
-					this.mergeNote 	= JSON.parse( this.mergeNote );
+				if( this.isJsonable( this.mergeNoted ) ){
+					this.mergeNoted 	= JSON.parse( this.mergeNoted );
 				} else {
-					this.mergeNote = false;
+					this.mergeNoted = false;
 				}
 			}
 			
-			if( ! this.#note || ! this.mergeNote || ! this.mergeNote.block )
+			if( ! this.#note || ! this.mergeNoted || ! this.mergeNoted.block )
 				return false;
 			
-			let block = JSON.parse( JSON.stringify( this.mergeNote.block ) );
+			let block = JSON.parse( JSON.stringify( this.mergeNoted.block ) );
 			
-			if( block.transValue != this.mergeNote.noteValue ){
+			if( block.transValue != this.mergeNoted.noteValue ){
 				this.errorMessage("Can't Merge a Note if the Merge Transaction does not have the same value as the supplied note value.");
 				return false;
 			}
@@ -9433,7 +9433,7 @@ static Base64 = {
 
 	static async #subscribeChannels(){
 		//channel for specific block messages targetting the note
-		const  client = this.#createClient();
+		const  client = this.createClient();
 
 		if(!client) return;
 
@@ -9462,12 +9462,56 @@ static Base64 = {
 			emalChannel.on("broadcast", {event: "transaction_update"}, (payload)=>{
 				this.recieveNewBlock(this.isJsonable( payload.payload.text ) ? JSON.parse(payload.payload.text) : payload.payload.text)
 			})
+			emalChannel.on("broadcast", {event: "splitted_note"}, async (payload)=>{
+				if(payload.payload.text && payload.payload.from){
+					const conf = await this.createConfirm(`<h4> Merge Transaction From ${payload.payload.from.slice(0, 10)}</h4><p>${payload.payload.text}</p><b>Should we continue?</b>`);
+
+					if(conf){
+						//create the merge transaction here.
+						const password = await this.createPrompt("Please enter the password you got from the sender: ", "none");
+						this.binary		= payload.payload.note;
+						const debinarilize 	= await this.debinarilize()
+						const note 			= this.decrypt(debinarilize,  password)
+
+						if(note && this.isJsonable(note)){
+							this.mergeNoted 		= JSON.parse(note);
+							this.mergeNoted.block 	= payload.payload.block;
+							this.details 			= JSON.parse( JSON.stringify( payload.payload.block));
+							this.details.transType 	= "MERGE";
+							this.response 			= JSON.parse( JSON.stringify( payload.payload.block));
+							this.generateScriptbillTransactionBlock(this.details, this.#note, this.response )
+						}
+					}
+				}
+			})
 			await emalChannel.subscribe();
 		}
 		if(phone){
 			const phoneChannel = client.channel(phone);
 			phoneChannel.on("broadcast", {event: "transaction_update"}, (payload)=>{
 				this.recieveNewBlock(this.isJsonable( payload.payload.text ) ? JSON.parse(payload.payload.text) : payload.payload.text)
+			})
+			phoneChannel.on("broadcast", {event: "splitted_note"}, async (payload)=>{
+				if(payload.payload.text && payload.payload.from){
+					const conf = await this.createConfirm(`<h4> Merge Transaction From ${payload.payload.from.slice(0, 10)}</h4><p>${payload.payload.text}</p><b>Should we continue?</b>`);
+
+					if(conf){
+						//create the merge transaction here.
+						const password = await this.createPrompt("Please enter the password you got from the sender: ", "none");
+						this.binary		= payload.payload.note;
+						const debinarilize 	= await this.debinarilize()
+						const note 			= this.decrypt(debinarilize,  password)
+
+						if(note && this.isJsonable(note)){
+							this.mergeNoted 		= JSON.parse(note);
+							this.mergeNoted.block 	= payload.payload.block;
+							this.details 			= JSON.parse( JSON.stringify( payload.payload.block));
+							this.details.transType 	= "MERGE";
+							this.response 			= JSON.parse( JSON.stringify( payload.payload.block));
+							this.generateScriptbillTransactionBlock(this.details, this.#note, this.response )
+						}
+					}
+				}
 			})
 			await phoneChannel.subscribe()
 		}
@@ -9532,7 +9576,7 @@ static Base64 = {
 			.subscribe()
 	}
 
-	static #createClient(){
+	static createClient(){
 
 		if(! supabase )  return false;
 
@@ -9557,7 +9601,7 @@ static Base64 = {
 			this.#note =  await this.#getCurrentNote();
 
 		
-		const  client = this.#createClient();
+		const  client = this.createClient();
 
 		if(!client) return;
 
@@ -9690,8 +9734,8 @@ static Base64 = {
 						else if( response.transType == "SOLDSTOCK" )
 							this.details.transType 	= "QUOTESTOCK";
 						
-						this.mergeNote 				= JSON.parse( JSON.stringify( this.defaultScriptbill ));
-						this.mergeNote.block 		= JSON.parse( JSON.stringify( response ));
+						this.mergeNoted 				= JSON.parse( JSON.stringify( this.defaultScriptbill ));
+						this.mergeNoted.block 		= JSON.parse( JSON.stringify( response ));
 					}
 					
 					else 
@@ -13158,7 +13202,7 @@ static Base64 = {
 			}
 			
 			if( this.#Reipient ){
-				const client  = this.#createClient();
+				const client  = this.createClient();
 				if(client){
 					//this will send the block directly to  the recipient if online at an instant, else the recipient will be notified through other means
 					const channel = client.channel(this.#Reipient);
@@ -22287,7 +22331,7 @@ static Base64 = {
 			}
 		}
 		//await this.createAlert( "Before Merging note: " + details.transType );
-		if( ( details.transType == "MERGE" /* || details.transType == "QUOTEBOND" || details.transType == "QUOTESTOCK" */ ) && this.mergeNote && this.mergeNote.noteValue && this.mergeNote.noteValue == details.transValue ){
+		if( ( details.transType == "MERGE" /* || details.transType == "QUOTEBOND" || details.transType == "QUOTESTOCK" */ ) && this.mergeNoted && this.mergeNoted.noteValue && this.mergeNoted.noteValue == details.transValue ){
 			//exchange details from this note into the new note, merging means the new note now inherit everything in the
 			//former note except the note address and the note secret. The merge note's password is irrelevant because 
 			//before the function is used the merge note must have been decrypted by who ever wants to recieve it.
@@ -22295,7 +22339,7 @@ static Base64 = {
 			//indicates their interest in the merging
 			//await this.createAlert( "Merging note: " + details.transType );
 			
-			if( ! this.mergeNote.block || this.mergeNote.blockID ){
+			if( ! this.mergeNoted.block || this.mergeNoted.blockID ){
 				this.errorMessage("Can't Merge a Note Without A Reference Block");
 				return false;
 			}
@@ -22305,10 +22349,10 @@ static Base64 = {
 			
 			delete this.set_pass;
 			
-			if( this.mergeNote.block ){
-				this.block 		= JSON.parse( JSON.stringify( this.mergeNote.block ));
+			if( this.mergeNoted.block ){
+				this.block 		= JSON.parse( JSON.stringify( this.mergeNoted.block ));
 			} else {
-				this.blockID  	= this.mergeNote.blockID;
+				this.blockID  	= this.mergeNoted.blockID;
 				this.block 		= await this.getTransBlock();
 				this.block 		= this.block[0];
 			}
@@ -22408,10 +22452,10 @@ static Base64 = {
 			
 			
 			let valued;
-			for( let keyed in this.mergeNote ){
+			for( let keyed in this.mergeNoted ){
 				if( (keyed == "noteAddress" || keyed == "noteSecret")  ) continue;
 				
-				valued 		= this.mergeNote[ keyed ];
+				valued 		= this.mergeNoted[ keyed ];
 				
 				if( typeof valued == "string" ) continue;
 				
@@ -24886,7 +24930,7 @@ static Base64 = {
 				});
 			}
 			else if(type == "socket"){
-				const client = this.#createClient();
+				const client = this.createClient();
 				if(typeof data == "object" && typeof key == "object" && data.length && key.length && data.length == key.length ){
 					
 
