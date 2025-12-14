@@ -10802,14 +10802,14 @@ static Base64 = {
 					this.details 			= JSON.parse( JSON.stringify( response ));
 					this.details.transType 	= "AGREEMENTREQUEST";
 					this.details.transValue = 0;
-					this.details.recipient 	= response.agreement.agreeKey;
-					this.generateScriptbillTransactionBlock( this.details, this.#note );
-				} else {
+					this.details.recipient 	= response.agreement.agreeKey;					
+					this.generateScriptbillTransactionBlock( this.details, this.#note, response );
+				} /* else {
 					if( navigator.onLine ){
 						this.#rejectResponse("Fraudulent Deposit Detected", response);
 						return false;
 					}
-				}
+				} */
 			}
 			
 			
