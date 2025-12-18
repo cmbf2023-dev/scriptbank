@@ -1724,14 +1724,15 @@ setAccountRank();                                                               
 			}
 			walletEl.setAttribute("data-original-title", note.walletID );
 			
-			await saveNotesCard();
-			await saveBankDetails();
-			await checkBudgets();
-			await checkSubscriptions();
-			await checkAgreements();
-			await checkTransactions();
+			saveNotesCard();
+			saveBankDetails();
+			checkBudgets();
+			checkSubscriptions();
+			checkAgreements();
+			checkTransactions();
 			
 			handle_mergers();
+			console.log("running remove loading div");
 			removeLoadingDiv();
 			//await Scriptbill.createAlert('running end');
 		} else {
