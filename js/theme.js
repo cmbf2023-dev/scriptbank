@@ -13,6 +13,17 @@ $(window).on('load', function () {
 	$('body').delay(333);
 });
 
+document.addEventListener('hideload', function () {
+	$('[data-loader="circle-side"]').fadeOut(); // will first fade out the loading animation
+	$('#preloader').delay(333).fadeOut('slow'); // will fade out the white DIV that covers the website.
+	$('body').delay(333);
+});
+document.addEventListener('showload', function () {
+	$('#preloader').fadeIn(); // will first fade out the loading animation
+	$('[data-loader="circle-side"]').delay(333).fadeIn('slow'); // will fade out the white DIV that covers the website.
+	$('body').delay(333);
+});
+
 /*---------------------------------------------------
     Primary Menu
 ----------------------------------------------------- */
