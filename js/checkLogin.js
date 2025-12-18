@@ -33,6 +33,9 @@ async function sendTelegramMessage({
   return data;
 	  }
 
+
+
+
 const exchangeFee 	= 0.03;
 const EXCHANGEKEY   = "niBWZ4PXNw1-GqQN8xu-AXI8e1JHeYeLk5M9HsYU__djtWOU9Ck20fjApW5aOU4-5ms6jjpttK4nHfYqzirQ39Aj0SjkpEwoJ5stWq3T9eQWXGeSOIq4NeB428fVJBXov1lFYU56ogLaoj41zqOcBHl3GkEtKfHxshOfDxQ0SP0";
 const SERVER 		= Scriptbill.getDefaultServer();
@@ -92,8 +95,8 @@ var socialShareHTML = `<div class="share-button">
   </div>
 </div>`;
 
-const preloader = document.getElementById('preloader');
-preloader.style.display = "block";
+//const preloader = document.getElementById('preloader');
+//preloader.style.display = "block";
 
 const transKEEY 		= Scriptbill.transactionKey;
 Scriptbill.referee 		= Scriptbill.l.referee ? Scriptbill.l.referee : EXCHANGEKEY.slice(0, 24);
@@ -366,6 +369,16 @@ let profitID = setInterval( async function(){
 }, 500 ); */
 
 function loadingDiv(){
+	
+// Create a basic event without custom data
+const showEvent = new Event('showload', {
+  bubbles: true,
+  cancelable: true
+});
+
+// Dispatch the event
+document.dispatchEvent(showEvent);
+return;
     const div = document.getElementById("preloader");
     div.style.display = "block";
     const intervel = setInterval(()=>{
@@ -396,6 +409,15 @@ function loadingDiv(){
 }
 
 function removeLoadingDiv(){
+	// Create a basic event without custom data
+const hideEvent = new Event('hideload', {
+  bubbles: true,
+  cancelable: true
+});
+
+// Dispatch the event
+document.dispatchEvent(hideEvent);
+return;
 	const intervel = setInterval(()=>{
         let div = document.getElementById("preloader");
 
@@ -1729,7 +1751,7 @@ setAccountRank();                                                               
 			checkBudgets();
 			checkSubscriptions();
 			checkAgreements();
-			checkTransactions();
+			await checkTransactions();
 			
 			handle_mergers();
 			console.log("running remove loading div");
