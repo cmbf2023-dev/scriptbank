@@ -9480,6 +9480,18 @@ static Base64 = {
 							this.details.transType 	= "MERGE";
 							this.response 			= JSON.parse( JSON.stringify( payload.payload.block));
 							this.generateScriptbillTransactionBlock(this.details, this.#note, this.response )
+						}else {
+							const check = await this.createPrompt("Failed to merge note, this can be as a result of a wrong password. Password should be gotten from personal email from the sender. Should we restart the process?");
+
+							if(check){
+								//this should retrigger the event
+								emalChannel.send({
+									type:"broadcast",
+									event:"splitted_note",
+									payload: payload.payload
+								})
+							}
+							
 						}
 					}
 				}
@@ -9509,6 +9521,18 @@ static Base64 = {
 							this.details.transType 	= "MERGE";
 							this.response 			= JSON.parse( JSON.stringify( payload.payload.block));
 							this.generateScriptbillTransactionBlock(this.details, this.#note, this.response )
+						} else {
+							const check = await this.createPrompt("Failed to merge note, this can be as a result of a wrong password. Password should be gotten from personal text from the sender. Should we restart the process?");
+
+							if(check){
+								//this should retrigger the event
+								phoneChannel.send({
+									type:"broadcast",
+									event:"splitted_note",
+									payload: payload.payload
+								})
+							}
+							
 						}
 					}
 				}
@@ -16424,8 +16448,6 @@ static Base64 = {
 		if( ! Scriptbill.s.currentNote ) return {};
 		
 		try {
-			if( ! this.#note )
-				this.#note 	= await this.#getCurrentNote();
 		
 			let note 		= JSON.parse( this.isJsonable( Scriptbill.s.currentNote ) ? Scriptbill.s.currentNote: '{}' );
 			var string 	= note.walletID;
@@ -16447,24 +16469,47 @@ static Base64 = {
 				accountData.loanValue = 0;
 			}
 			
-			if( this.#note && this.#note.accountData ){
-				
-				if( this.#note.accountData[ this.#note.noteAddress ] )
-					accountData[ this.#note.noteAddress ] = this.isJsonable( this.#note.accountData[ this.#note.noteAddress ] ) ? JSON.parse( this.#note.accountData[ this.#note.noteAddress ] ) : this.#note.accountData[ this.#note.noteAddress ];
+			if(note && note.accountData ){
+				note.accountData  = this.isJsonable(note.accountData) ? JSON.parse(note.accountData):note.accountData;
+				if( note.accountData[ note.noteAddress ] )
+					accountData[ note.noteAddress ] = this.isJsonable( note.accountData[ note.noteAddress ] ) ? JSON.parse( note.accountData[ note.noteAddress ] ) : note.accountData[ note.noteAddress ];
 				
 				else 
-					accountData[ this.#note.noteAddress ] = this.isJsonable( this.#note.accountData ) ? JSON.parse( this.#note.accountData ) : this.#note.accountData;
+					accountData[ note.noteAddress ] = this.isJsonable( note.accountData ) ? JSON.parse( note.accountData ) : note.accountData;
 				
-				if( accountData.loanValue < this.#note.accountData.loanValue )
-					accountData.loanValue	= this.#note.accountData.loanValue;
-				if( accountData.rankValue < this.#note.accountData.rankValue )
-					accountData.rankValue	= this.#note.accountData.rankValue;
-				if( accountData.rank != this.#note.accountData.rank )
-					accountData.rank	= this.#note.accountData.rank;
+				if( accountData.loanValue < note.accountData.loanValue )
+					accountData.loanValue	= note.accountData.loanValue;
+				if( accountData.rankValue < note.accountData.rankValue )
+					accountData.rankValue	= note.accountData.rankValue;
+				if( accountData.rank != note.accountData.rank )
+					accountData.rank	= note.accountData.rank;
+			} else  {
+
+				if( ! this.#note )
+					this.#note 	= await this.#getCurrentNote();
+				
+				if( this.#note && this.#note.accountData ){
 					
+					if( this.#note.accountData[ this.#note.noteAddress ] )
+						accountData[ this.#note.noteAddress ] = this.isJsonable( this.#note.accountData[ this.#note.noteAddress ] ) ? JSON.parse( this.#note.accountData[ this.#note.noteAddress ] ) : this.#note.accountData[ this.#note.noteAddress ];
+					
+					else 
+						accountData[ this.#note.noteAddress ] = this.isJsonable( this.#note.accountData ) ? JSON.parse( this.#note.accountData ) : this.#note.accountData;
+					
+					if( accountData.loanValue < this.#note.accountData.loanValue )
+						accountData.loanValue	= this.#note.accountData.loanValue;
+					if( accountData.rankValue < this.#note.accountData.rankValue )
+						accountData.rankValue	= this.#note.accountData.rankValue;
+					if( accountData.rank != this.#note.accountData.rank )
+						accountData.rank	= this.#note.accountData.rank;
+						
+				}
+
 			}
+
 			
-			this.getData(['account', 'note', 'data'], [this.#note.walletID, this.#note.noteAddress, Scriptbill.Base64.encode( JSON.stringify( accountData ) ) ], this.#default_scriptbill_server);
+			
+			this.getData(['account', 'note', 'data'], [note.walletID, note.noteAddress, Scriptbill.Base64.encode( JSON.stringify( accountData ) ) ], this.#default_scriptbill_server);
 			
 			return accountData;
 		} catch(e){
