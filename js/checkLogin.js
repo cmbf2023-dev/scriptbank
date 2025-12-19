@@ -10383,7 +10383,7 @@ async function verifyPayment(ref, seconds,  type = 'squad', isTest = true ){
             options = {
                 method:"get",
                 headers: {
-                    Authorization:isTest ? "sandbox_sk_74c81698e40d46309408a31f8242f3527e4217b75c5a":"",
+                    Authorization:isTest ? "sandbox_sk_74c81698e40d46309408a31f8242f3527e4217b75c5a":"sk_50d5008de833b42626cfc49f0b20b7914756607e",
                     "Content-Type":'application/json'
                 }
                 
