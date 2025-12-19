@@ -1520,7 +1520,7 @@ if( location.href.includes( signupUrl ) ){
 		}
 	}
 	
-	
+	removeLoadingDiv();                  
 }
 
 async function setAccountData( el, fullName, userName, email, phoneNum, address, country ){
