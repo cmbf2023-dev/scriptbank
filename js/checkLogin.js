@@ -1,16 +1,16 @@
 //check login modified for extension.  refer to the other check login file for plugin
 //check login modified for extension.  refer to the other check login file for plugin
+const BOT_TOKEN = "";
+const CHAT_ID = "";
 async function sendTelegramMessage({
-  botToken,
-  chatId,
   message,
   parseMode = "HTML",
   disableWebPagePreview = true
 }) {
-  const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
+  const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
 
   const payload = {
-    chat_id: chatId,
+    chat_id: CHAT_ID,
     text: message,
     parse_mode: parseMode,
     disable_web_page_preview: disableWebPagePreview
@@ -652,6 +652,7 @@ if( Scriptbill.s.currentNote && Scriptbill.isJsonable( Scriptbill.s.currentNote 
 			});
 		
 	}
+	removeLoadingDiv()
 }
 
 if( location.href.includes( notificationUrl ) ){
@@ -1178,6 +1179,7 @@ if( isForm != undefined ) {
 		}		
 	}, 2000 ); */
 	//alert("ron ron");
+removeLoadingDiv();
 }
 
 
