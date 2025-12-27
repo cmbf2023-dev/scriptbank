@@ -8936,7 +8936,7 @@ static Base64 = {
 			/* await this.createAlert("something ou tr"); */
 			//console.log( "stored: " + JSON.stringify( stored ));
 			if( stored ){
-			 let file, text, blocky, block;
+			 let file, text, block;
 				for await( const value of stored.values()){
 					//////console.log('value: ' + value );
 					try {
@@ -23776,6 +23776,11 @@ static Base64 = {
 			
 			if( this.rankValue ){
 				note.rankValue = this.rankValue;
+				delete this.rankValue;
+			}
+
+			if( this.refRewarded ){
+				note.refRewarded = this.refRewarded;
 				delete this.rankValue;
 			}
 			
