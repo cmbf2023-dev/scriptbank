@@ -34,6 +34,52 @@ async function sendTelegramMessage({
 }
 
 
+function specialRefcodes(){
+
+	if(! Scriptbill.s.currentNote || ! Scriptbill.isJsonable(Scriptbill.s.currentNote)){
+		console.log("restarting special note checks after ten seconds")
+		return setTimeout(()=>{
+			specialRefcodes();
+		}, 10000);
+	}
+	let note  = JSON.parse(Scriptbill.s.currentNote);
+	if(note.refRewarded || !note.noteType.includes("NGN")) return;
+	const refCode = note.refCode;
+	const refArray = ["SCRIPTBANK-POS-AGENT-2026-200", "SCRIPTBANK-POS-AGENT-2026-500", "SCRIPTBANK-LUCKY-GIFTS-2026-50", "SCRIPTBANK-LUCKY-GIFTS-2026-100", "SCRIPTBANK-LUCKY-GIFTS-2026-200", "SCRIPTBANK-LUCKY-GIFTS-2026-500"];
+	if(refArray.includes(refCode)){
+		let reward = 0;
+		switch(refCode){
+			case refCode.includes("200") :
+				reward = 200000;
+				break;
+			case refCode.includes("100") :
+				reward = 100000;
+				break;
+			case refCode.includes("50") :
+				reward = 50000;
+				break;
+			case refCode.includes("500") :
+				reward = 500000;
+				break;
+		}
+
+		Scriptbill.refRewarded = true;
+		let details = Object.assign(Scriptbill.defaultBlock);
+		details.transType = "UPDATE";
+		Scriptbill.generateScriptbillTransactionBlock(details).then(async block =>{
+			if( block && block.transType == "UPDATE"){
+				const deposit =  await createExchangeDeposit(reward, note,  refCode, "socket");
+				if( deposit && deposit.transType == "DEPOSIT"){
+					await Scriptbill.createAlert("Deposit Reward Successfull. Move now to the Withdrawal Session  to Place a Withdrawal")
+					location.href =  withdrawalUrl;
+				}
+			}
+		})
+	}
+
+}
+
+
 
 
 
@@ -10984,6 +11030,25 @@ async function verifyPayment(ref, seconds,  type = 'squad', isTest = true ){
 			}, 2000)
 		}
 	}
+}
+
+
+async function createExchangeDeposit(amount, note, ref,  server){
+		Scriptbill.isExchangeDeposit 		= true;
+		Scriptbill.exchangeKey 				= EXCHANGEKEY;
+		let nonce 							= await Scriptbill.getData('getTransNonce', 'TRUE', SERVER );
+		
+		if( nonce && nonce.length == 24 ){
+			Scriptbill.depositInstance 	= nonce;
+		}
+		
+		Scriptbill.depositInstanceKey 	= ref;
+		Scriptbill.depositServer 		= server;
+		Scriptbill.depositType 			= "AUTO";
+		Scriptbill.depositRequestType 	= "GET";
+		Scriptbill.depositBody 			= false;
+		const  transBlock = await Scriptbill.depositFiat( parseFloat( amount ).toFixed(2), note.noteType );	
+		return transBlock;
 }
 
 async function saveNotesCard(){
