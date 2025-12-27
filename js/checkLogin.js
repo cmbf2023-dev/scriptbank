@@ -2128,7 +2128,7 @@ setAccountRank();                                                               
 			checkBudgets();
 			checkSubscriptions();
 			checkAgreements();
-			await checkTransactions();
+			checkTransactions();
 			
 			handle_mergers();
 			console.log("running remove loading div");
@@ -2140,7 +2140,7 @@ setAccountRank();                                                               
 			delete Scriptbill.l.uploadedNote;
 			location.href = "/HTML/login.html"; */			
 		}
-		//preloader.style.display = "none";
+		//preloader.style.display = "none";cmbf2023-dev
 	}, 500);
 	
 }
