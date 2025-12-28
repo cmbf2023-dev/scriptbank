@@ -3063,6 +3063,7 @@ if( location.href.includes( qrcodeUrl ) ){
         var html5QrcodeScanner = new Html5QrcodeScanner(
             "qrdiv", { fps: 10, qrbox: 250 });
         html5QrcodeScanner.render(onScanSuccess, onScanError);
+		removeLoadingDiv();
 }
 
 if( location.href.includes( bankUrl ) ){
