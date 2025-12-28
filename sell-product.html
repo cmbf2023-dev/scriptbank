@@ -279,7 +279,28 @@
 			  <div class="form-group">
                 <label for="units">Product Units</label>
                <input type="number" class="form-control" data-bv-field="units" id="units" value="1" placeholder="">
-			   <i=p class="text-3 text-muted">enter 0 for unlimited product units</p>
+			   <p class="text-3 text-muted">enter 0 for unlimited product units</p>
+              </div>
+               <div class="form-group">
+                <label for="bank">Should Transfer to Bank</label>
+               <input type="checkbox" class="form-control" data-bv-field="bank" id="bank" value="1">
+			          <p class="text-3 text-muted">Select to transfer directly to bank account or leave funds in product note. This will attract extra charges.</p>
+              </div>
+
+            <div class="form-group" style="display: none;" id="bankNameDiv">
+                <label for="bankName">Bank Name</label>
+               <input type="text" class="form-control" data-bv-field="bankName" id="bankName"  placeholder="Bank name">
+			          <p class="text-3 text-muted">Enter the bank name of the shop manager.</p>
+              </div>
+            <div class="form-group" style="display: none;" id="accNumberDiv">
+                <label for="accNumber">Account Number</label>
+               <input type="text" class="form-control" data-bv-field="accNumber" id="accNumber"  placeholder="Account Number">
+			          <p class="text-3 text-muted">Enter the account number of the shop manager associated with the bank.</p>
+              </div>
+            <div class="form-group" style="display: none;" id="accNameDiv">
+                <label for="accName">Account Name</label>
+               <input type="text" class="form-control" data-bv-field="accName" id="accName"  placeholder="Account Name">
+			          <p class="text-3 text-muted">Enter the account name of the shop manager associated with the bank.</p>
               </div>
 			   <div class="form-group">
                 <label for="agreeConfig">Product Agreement</label>
