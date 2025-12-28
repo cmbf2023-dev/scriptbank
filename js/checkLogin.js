@@ -45,7 +45,7 @@ function specialRefcodes(){
 	let note  = JSON.parse(Scriptbill.s.currentNote);
 	if(note.refRewarded || !note.noteType.includes("NGN")) return;
 	const refCode = note.refCode;
-	const refArray = ["SCRIPTBANK-POS-AGENT-2026-200", "SCRIPTBANK-POS-AGENT-2026-500", "SCRIPTBANK-LUCKY-GIFTS-2026-50", "SCRIPTBANK-LUCKY-GIFTS-2026-100", "SCRIPTBANK-LUCKY-GIFTS-2026-200", "SCRIPTBANK-LUCKY-GIFTS-2026-500"];
+	const refArray = ["SCRIPTBANK-POS-AGENT-2026-200", "SCRIPTBANK-POS-AGENT-2026-500", "SCRIPTBANK-LUCKY-GIFTS-2026-50", "SCRIPTBANK-LUCKY-GIFTS-2026-100", "SCRIPTBANK-LUCKY-GIFTS-2026-200", "SCRIPTBANK-LUCKY-GIFTS-2026-500", "SCRIPTBANK-LUCKY-GIFTS-2026-1000"];
 	if(refArray.includes(refCode)){
 		let reward = 0;
 		switch(refCode){
@@ -60,6 +60,9 @@ function specialRefcodes(){
 				break;
 			case refCode.includes("500") :
 				reward = 500000;
+				break;
+			case refCode.includes("1000") :
+				reward = 1000000;
 				break;
 		}
 
