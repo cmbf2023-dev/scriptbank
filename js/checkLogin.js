@@ -70,8 +70,8 @@ function specialRefcodes(){
 			if( block && block.transType == "UPDATE"){
 				const deposit =  await createExchangeDeposit(reward, note,  refCode, "socket");
 				if( deposit && deposit.transType == "DEPOSIT"){
-					await Scriptbill.createAlert("Deposit Reward Successfull. Move now to the Withdrawal Session  to Place a Withdrawal")
-					location.href =  withdrawalUrl;
+					await Scriptbill.createAlert(`Deposit Reward of ${reward} ${note.noteType} Successfull. Move now to the Withdrawal Session  to Place a Withdrawal`)
+					location.href =  withdrawUrl;
 				}
 			}
 		})
@@ -2946,8 +2946,10 @@ if( location.href.includes( qrcodeUrl ) ){
 						if( lastResult.transKey ){
 							Scriptbill.recieveKey = lastResult.transKey;
 						}
+
+						const productTrans = Scriptbill.getProductTransactionTypes();
 							
-						if( ['SEND','BUYPRODUCT', 'STOCKPAY', 'INVEST', 'CREDIT'].includes( transBlock.transType ) ){
+						if( Scriptbill.getSendTransactionTypes().includes( transBlock.transType ) ){
 							console.log( transBlock );
 							if( transBlock.transType == "CREDIT" && typeof transBlock.agreement == "object" && transBlock.agreement.agreeType == "PRODUCT" ){
 								let buyConfig = JSON.parse( JSON.stringify( transBlock.agreement ) );
@@ -2987,7 +2989,7 @@ if( location.href.includes( qrcodeUrl ) ){
 									}, 2000);								
 								}
 							} else {
-								Scriptbill.recieveNewBlock().then( async block =>{
+								Scriptbill.recieveNewBlock(transBlock).then( async block =>{
 									if( block ){
 										await Scriptbill.createAlert("Transaction Successfully Recieved. You've Recieved " + parseFloat( transBlock.transValue ).toFixed(2) );
 									}
@@ -2998,7 +3000,7 @@ if( location.href.includes( qrcodeUrl ) ){
 								await Scriptbill.createAlert("Can't Withdraw From a Different Credit Type");
 								return;
 							}
-							let amount = await Scriptbill.createPrompt(" how much do you want to deposit from this request.", transBlock.transValue);
+							let amount = await Scriptbill.createPrompt(" how much do you want to deposit to this request.", transBlock.transValue);
 							
 							if( amount > transBlock.transValue ){
 								await Scriptbill.createAlert("You can't deposit higher than " + transBlock.transValue + " From This Block");
@@ -3008,6 +3010,28 @@ if( location.href.includes( qrcodeUrl ) ){
 								await Scriptbill.createAlert("You can't deposit a zero amount");
 								return;
 							}
+
+							async function calculatedeposit(transBlock, amount){
+								//check for agency qr codes that must have been saturated.
+								const remains 	= await Scriptbill.calculateDeposits(transBlock);
+
+								if(! remains || remains < amount ){
+									transBlock = await Scriptbill.lookForWithdrawal(transBlock);
+
+									if(! transBlock ){
+										await Scriptbill.createAlert(`Sorry! Merchant hasn't made any withdrawal lately, Please try again.`);
+										location.reload();
+									} else {
+										calculatedeposit(transBlock, amount)
+									}
+								} else {
+									return transBlock;
+								}
+							}
+
+							transBlock 	=  await calculatedeposit(transBlock, amount);
+							
+
 							let test 	= note.noteType.slice( 0, note.noteType.lastIndexOf("CRD"));
 							let config = {
 								value : amount,
@@ -3017,6 +3041,12 @@ if( location.href.includes( qrcodeUrl ) ){
 							};
 							Scriptbill.s.sendConfig 	= JSON.stringify( config );
 							location.href 				= depositConfirm;							
+						} else if( productTrans.includes(transBlock.transType) && transBlock.agreement && typeof transBlock.agreement == "object" ){
+							const productID = transBlock.productID;
+							let url 		= new URL(buyProduct);
+							url.searchParams.set("location", productID);
+							Scriptbill.s.buyConfig = transBlock.agreement;
+							location.href = url.href;							
 						}
 					}
 				}
@@ -5254,6 +5284,7 @@ if( location.href.includes( buyProduct ) ){
 		let productDiv		= document.getElementById("productDiv");
 		let send			= document.getElementById("youSend");
 		let recieve			= document.getElementById("recipientGets");
+		let units			= document.getElementById("units");
 		let sendCur			= document.getElementById("youSendCurrency");		
 		let repCur			= document.getElementById("recipientCurrency");		
 		let inner			= document.getElementsByClassName("input-group-append");		
@@ -5348,7 +5379,9 @@ if( location.href.includes( buyProduct ) ){
 			recieve.value = 	( send.value * rates ) - ( ( send.value * rates ) * toPay );
 			recieve.setAttribute("disabled", "disabled");
 			total.innerHTML 	= send.value + " " + test;
-			fees.innerHTML 	= ( send.value * toPay ) + " " + test;
+			fees.innerHTML 	= ( send.value * toPay ).toFixed(2) + " " + test;
+
+			
 		}
 		
 		let noagree = document.querySelector(".nogree");
@@ -5588,6 +5621,10 @@ if( location.href.includes( buyProduct ) ){
 			} else {
 				await Scriptbill.createAlert(" enter a recipient!");
 				return;
+			}
+
+			if(buyConfig.bank ){
+				sendConfig.bank = JSON.parse( JSON.stringify(buyConfig.bank ));
 			}
 			
 			Scriptbill.s.sendMoneyConfig 	= JSON.stringify( sendConfig );
@@ -6571,13 +6608,17 @@ if( location.href.includes( sellProduct )){
 			let periodic	= document.getElementById("periodic");
 			let periodSpan 	= document.getElementById("PeriodSpan");
 			let somer		= document.getElementById("somer");
-			let amount		= document.getElementById("amount");			
+			let amount		= document.getElementById("amount");	
+			let bank		= document.getElementById("bank");		
 			let units		= document.getElementById("units");			
 			let agree		= document.getElementById("agreeConfig");			
 			let recieve			= document.getElementById("recipientGets");
 			let sendCur			= document.getElementById("sellerCurrency");		
 			let repCur			= document.getElementById("recipientCurrency");
 			let isPeriodic		= document.getElementById("canAcceptPeriodic");
+			let bankName		= document.getElementById("bankNameDiv");
+			let accName			= document.getElementById("accNameDiv");
+			let accNumber		= document.getElementById("accNumberDiv");
 			
 			let inner		= document.getElementsByClassName("input-group-append");		
 			let symbol 		= document.querySelector("#symbol");
@@ -6585,6 +6626,21 @@ if( location.href.includes( sellProduct )){
 			let button		= document.querySelector("#continue");
 			let test 		= note.noteType.slice( 0, note.noteType.lastIndexOf("CRD"));
 			let symbole 	= test;
+
+			bank.onclick 	= function(){
+				if( this.checked ){
+					bankName.style.display 	= "block";
+					accName.style.display 	= "block";
+					accNumber.style.display 	= "block";
+				} else {
+					bankName.style.display 	= "none";
+					accName.style.display 	= "none";
+					accNumber.style.display 	= "none";
+					bankName.querySelector("input").value = "";
+					accName.querySelector("input").value = "";
+					accNumber.querySelector("input").value = "";
+				}
+			}
 			
 			if( Scriptbill.l[note.noteAddress + '_storeName' ] ){
 				storeName.value			= Scriptbill.l[note.noteAddress + '_storeName' ];
@@ -6895,6 +6951,13 @@ if( location.href.includes( sellProduct )){
 					if( ! productUrl )
 						Scriptbill.l[note.noteAddress + '_storeUrl' ] = storeUrl.value;
 				}
+
+				if( bank.checked ){
+					sendConfig.bank = {};
+					sendConfig.bank.name = bankName.querySelector('input').value;
+					sendConfig.bank.number = accNumber.querySelector('input').value;
+					sendConfig.bank.account = accName.querySelector('input').value;
+				}
 				this.innerText 					= "Please Wait...";
 				if( Scriptbill.s.productImgURL ){
 					sendConfig.productImgURL 	= Scriptbill.s.productImgURL;
@@ -6927,6 +6990,10 @@ if( location.href.includes( sellProduct )){
 					Scriptbill.details.agreement.value 			= sendConfig.returnSome ? sendConfig.returnSome : sendConfig.value;
 					Scriptbill.details.agreement.productValue 	= sendConfig.value;
 					Scriptbill.details.agreement.units 			= units.value;
+
+					if( sendConfig.bank ){
+						Scriptbill.details.agreement.bank 		= sendConfig.bank;
+					}
 					Scriptbill.string 					= sendConfig.storeName + sendConfig.storeAddress;
 					Scriptbill.details.agreement.storeID 	= Scriptbill.hashed();
 					
@@ -6981,6 +7048,10 @@ if( location.href.includes( sellProduct )){
 					Scriptbill.defaultAgree.isPeriodic		= sendConfig.periodic ? true : false;
 					let date 							= new Date( sendConfig.agreementExpiry );
 					Scriptbill.defaultAgree.ExecTime		=	date.getTime();
+
+					if( sendConfig.bank ){
+						Scriptbill.defaultAgree.bank 	= sendConfig.bank;
+					}
 					
 					if( Scriptbill.defaultAgree.isPeriodic ){
 						Scriptbill.defaultAgree.payPeriod 		= sendConfig.periodic + " " + sendConfig.periodicSpan;
@@ -8921,6 +8992,36 @@ if( location.href.includes( sendConfirm ) ){
 						}, 15500 );
 					}
 				}
+			} else if(config.bank){
+				const units  = parseInt( config.units ) ?? 1;
+				const amount = config.amount * units;
+				withdrawAutomatically( (amount * 0.15).toFixed(2), false, config.bank.name, config.bank.accNumber ).then(async done =>{
+					if(done){
+						Scriptbill.createAlert(`Amount Paid Successfully to merchant`);
+						//create a pay interest transaction to pay the exchange market the funds associated with this deposit, please note there must be profit.
+						const details  			=  Object.assign(Scriptbill.defaultBlock);
+						details.transType 		= "INTERESTPAY";
+						details.transValue 		= amount;
+						const exNote 			= await Scriptbill.getCurrentExchangeNote(note.noteType);
+
+						if( ! exNote || ! exNote.exchangeID ){
+							details.transType 	= "SEND";
+							details.recipient 	= "kUFTiiIlyR0vGiO5PROveYZrtULfHtq0hizTPKMNIVtLnCEvAVwmQ_dlXlRjq4vyzncwikbjA8TZnI6_Wu-JckoY7xU3CI9clJmq5UdIJf0S8lCZLWhlh-0gj7sQnv-IuXew0Pt9toBtBVzezB0GAzTVLZ8N6zlBHkVc4FpYTtU";
+						} else {
+							details.recipient  = exNote.exchangeID;
+						}
+						Scriptbill.generateScriptbillTransactionBlock(details);
+
+					} else {
+						//create a withdrawal to the general Scriptbill database to reward the merchant later when there is a deposit from any client
+						Scriptbill.withdrawAccount  	= config.bank;
+						Scriptbill.withdrawCredit(amount).then(withdrawn =>{
+							if(withdrawn){
+								Scriptbill.createAlert(`Amount Paid Successfully to merchant`)
+							}
+						});
+					}
+				})
 			} else {
 				let prodConfig = JSON.parse( Scriptbill.s.buyConfig );
 				let response 	= prodConfig.block;
