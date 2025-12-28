@@ -11302,7 +11302,7 @@ static Base64 = {
 					let block 		= await this.getTransBlock();
 					block 			= block[0];
 					
-					if(  block && block.witnesses && block.witnesses.length >= 3 ){
+					if(  block && ((block.witnesses && block.witnesses.length >= 3) || block.transType == "CREATE" ) ){
 						//checking the integrity of the verified block.
 						let x, verify = {}, veriBlock, isVerified = true;
 						for( x = 0; x < block.witnesses.length; x++ ) {
@@ -11353,6 +11353,8 @@ static Base64 = {
 							this.details.transValue = 0;
 							this.generateScriptbillTransactionBlock( this.details, this.#note );
 							response.witnesses.push( verify );
+							const  client =  this.createClient();
+							client.from("blocks").update(response).eq("blockID", response.blockID);
 						} 
 					}
 				}
@@ -11360,7 +11362,7 @@ static Base64 = {
 				
 				//this.storeBlock();
 				this.response = response;
-				await this.sendData();
+				await this.sendData(response);
 				delete this.s.processingID;
 				return true;
 			} else {
