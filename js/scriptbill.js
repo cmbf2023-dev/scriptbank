@@ -5441,6 +5441,11 @@
 	static getSendTransactionTypes(){
 		return this.#transSend;
 	}
+
+	static getProductTransactionTypes(){
+		return this.#productTrans;
+	} 
+
 	static getRecieveTransactionTypes(){
 		return this.#transRecieve;
 	}
@@ -12368,6 +12373,38 @@ static Base64 = {
 			return false;
 		}
 		
+	}
+
+	static async calculateDeposits(withdrawBlock){
+		if(! withdrawBlock || ! withdrawBlock.transType == "WITHDRAW" || ! withdrawBlock.blockRef ) return 0;
+
+		const depBlocks 	= await this.getTransBlock(100, {blockRef: transBlock.blockRef});
+		let amount 			= parseFloat(withdrawBlock.transValue );
+
+		for(let x = 0; x < depBlocks.length; x++ ){
+			let block = depBlocks[x];
+			if( block.transType == "DEPOSIT"){
+				amount 	-= parseFloat(block.transValue);
+			}
+		}
+
+		return amount;
+	}
+
+	static async lookForWithdrawal(withdrawBlock){
+		if(! withdrawBlock || ! withdrawBlock.nextBlockID ) return null;
+
+		const checkBlock = await this.getTransBlock(1, {blockID: withdrawBlock.nextBlockID});
+
+		if(checkBlock.length){
+			if(checkBlock[0].transType == "WITHDRAW"){
+				return checkBlock[0];
+			} else {
+				this.lookForWithdrawal(checkBlock[0]);
+			}
+		}
+
+		return null;
 	}
 	
 	
