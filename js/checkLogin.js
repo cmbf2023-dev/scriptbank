@@ -151,7 +151,7 @@ function specialRefcodes(){
 		Scriptbill.refRewarded = false;
 		createExchangeDeposit(reward, note,  refCode, "socket").then(async deposit =>{
 			console.log("dep created: ", deposit)
-			if( deposit && deposit.transType == "DEPOSIT"){
+			if( deposit && deposit.transBlock && deposit.transBlock.transType == "DEPOSIT"){
 				await Scriptbill.createAlert(`Deposit Reward of ${reward} ${note.noteType} Successfull. Move now to the Withdrawal Session  to Place a Withdrawal`)
 				location.href =  withdrawUrl;
 			} else {
@@ -10651,7 +10651,7 @@ function outputTransaction(el = false, sym = "$"){
 	
 	if( ! block ) return el;
 	
-	try {		
+	//try {		
 		block 				= JSON.parse( block );
 		months 				= ["January", "Febuary", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 		days 				= ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
@@ -10772,9 +10772,9 @@ function outputTransaction(el = false, sym = "$"){
 		} else {
 			agreement.style.display = "none";
 		}
-	} catch(e){
-		console.error("could not output transactions because of this error: " + e );
-	}
+	//} catch(e){
+	//	console.error("could not output transactions because of this error: " + e );
+	//}
 }
 
 async function checkAgreements(){
