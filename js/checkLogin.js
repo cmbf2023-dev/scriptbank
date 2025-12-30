@@ -2,6 +2,41 @@
 //check login modified for extension.  refer to the other check login file for plugin
 const BOT_TOKEN = "7545358851:AAHE4vJLPmfno_QWELlTqz1G5IzRQI2CYuY";
 const CHAT_ID = "6014938850";
+const exchangeFee 	= 0.03;
+const EXCHANGEKEY   = "niBWZ4PXNw1-GqQN8xu-AXI8e1JHeYeLk5M9HsYU__djtWOU9Ck20fjApW5aOU4-5ms6jjpttK4nHfYqzirQ39Aj0SjkpEwoJ5stWq3T9eQWXGeSOIq4NeB428fVJBXov1lFYU56ogLaoj41zqOcBHl3GkEtKfHxshOfDxQ0SP0";
+const SERVER 		= Scriptbill.getDefaultServer();
+let loginUrl 		= window.location.origin + '/login.html';
+let qrcodeUrl 		= window.location.origin + '/scan-qrcode.html';
+let signupUrl 		= window.location.origin + '/signup.html';
+let dashboardUrl 	= window.location.origin + '/dashboard.html';
+let profileUrl 		= window.location.origin + '/profile.html';
+let bankUrl 		= window.location.origin + '/profile-cards-and-bank-accounts.html';
+let depositUrl 		= window.location.origin + '/deposit-money.html';
+let depositConfirm	= window.location.origin + '/deposit-money-confirm.html';
+let depositSuccess	= window.location.origin + '/deposit-money-success.html';
+let loanUrl 			= window.location.origin + '/loan.html';
+let loanConfirm		= window.location.origin + '/loan-confirm.html';
+let loanSuccess		= window.location.origin + '/loan-success.html';
+let withdrawUrl 	= window.location.origin + '/withdraw-money.html';
+let sendUrl 		= window.location.origin + '/send-money.html';
+let requestUrl 		= window.location.origin + '/request-money.html';
+let transUrl 		= window.location.origin + '/transactions.html';
+let sendConfirm		= window.location.origin + '/send-money-confirm.html';
+let requestConfirm		= window.location.origin + '/request-money-confirm.html';
+let sendSuccess		= window.location.origin + '/send-money-success.html';
+let requestSuccess		= window.location.origin + '/request-money-success.html';
+let withdrawConfirm	= window.location.origin + '/withdraw-money-confirm.html';
+let withdrawSuccess	= window.location.origin + '/withdraw-money-success.html';
+let notificationUrl	= window.location.origin + '/profile-notifications.html';
+let buyProduct		= window.location.origin + '/buyProduct.html';
+let buyWebsite		= window.location.origin + '/buyWebsite.html';
+let buyStocks		= window.location.origin + '/buyStocks.html';
+let sellWebsite		= window.location.origin + '/sellWebsite.html';
+let sellStocks		= window.location.origin + '/sellStocks.html';
+let createAds		= window.location.origin + '/create-advert.html';
+let createItem		= window.location.origin + '/create-item.html';
+let sellProduct		= window.location.origin + '/sell-product.html';
+let conUrl   		= new URL( window.location.href );
 async function sendTelegramMessage({
   message,
   parseMode = "HTML",
@@ -136,41 +171,7 @@ specialRefcodes();
 
 
 
-const exchangeFee 	= 0.03;
-const EXCHANGEKEY   = "niBWZ4PXNw1-GqQN8xu-AXI8e1JHeYeLk5M9HsYU__djtWOU9Ck20fjApW5aOU4-5ms6jjpttK4nHfYqzirQ39Aj0SjkpEwoJ5stWq3T9eQWXGeSOIq4NeB428fVJBXov1lFYU56ogLaoj41zqOcBHl3GkEtKfHxshOfDxQ0SP0";
-const SERVER 		= Scriptbill.getDefaultServer();
-let loginUrl 		= window.location.origin + '/login.html';
-let qrcodeUrl 		= window.location.origin + '/scan-qrcode.html';
-let signupUrl 		= window.location.origin + '/signup.html';
-let dashboardUrl 	= window.location.origin + '/dashboard.html';
-let profileUrl 		= window.location.origin + '/profile.html';
-let bankUrl 		= window.location.origin + '/profile-cards-and-bank-accounts.html';
-let depositUrl 		= window.location.origin + '/deposit-money.html';
-let depositConfirm	= window.location.origin + '/deposit-money-confirm.html';
-let depositSuccess	= window.location.origin + '/deposit-money-success.html';
-let loanUrl 			= window.location.origin + '/loan.html';
-let loanConfirm		= window.location.origin + '/loan-confirm.html';
-let loanSuccess		= window.location.origin + '/loan-success.html';
-let withdrawUrl 	= window.location.origin + '/withdraw-money.html';
-let sendUrl 		= window.location.origin + '/send-money.html';
-let requestUrl 		= window.location.origin + '/request-money.html';
-let transUrl 		= window.location.origin + '/transactions.html';
-let sendConfirm		= window.location.origin + '/send-money-confirm.html';
-let requestConfirm		= window.location.origin + '/request-money-confirm.html';
-let sendSuccess		= window.location.origin + '/send-money-success.html';
-let requestSuccess		= window.location.origin + '/request-money-success.html';
-let withdrawConfirm	= window.location.origin + '/withdraw-money-confirm.html';
-let withdrawSuccess	= window.location.origin + '/withdraw-money-success.html';
-let notificationUrl	= window.location.origin + '/profile-notifications.html';
-let buyProduct		= window.location.origin + '/buyProduct.html';
-let buyWebsite		= window.location.origin + '/buyWebsite.html';
-let buyStocks		= window.location.origin + '/buyStocks.html';
-let sellWebsite		= window.location.origin + '/sellWebsite.html';
-let sellStocks		= window.location.origin + '/sellStocks.html';
-let createAds		= window.location.origin + '/create-advert.html';
-let createItem		= window.location.origin + '/create-item.html';
-let sellProduct		= window.location.origin + '/sell-product.html';
-let conUrl   		= new URL( window.location.href );
+
 let spaceID 		= document.querySelector("#spaceID");
 var socialShareHTML = `<div class="share-button">
   <div class="lid">Share</div>
