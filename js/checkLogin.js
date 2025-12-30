@@ -43,32 +43,58 @@ function specialRefcodes(){
 		}, 10000);
 	}
 	let note  = JSON.parse(Scriptbill.s.currentNote);
-	if(note.refRewarded || !note.noteType.includes("NGN")) return;
-	const refCode = note.refCode;
-	const refArray = ["SCRIPTBANK-POS-AGENT-2026-200", "SCRIPTBANK-POS-AGENT-2026-500", "SCRIPTBANK-LUCKY-GIFTS-2026-50", "SCRIPTBANK-LUCKY-GIFTS-2026-100", "SCRIPTBANK-LUCKY-GIFTS-2026-200", "SCRIPTBANK-LUCKY-GIFTS-2026-500", "SCRIPTBANK-LUCKY-GIFTS-2026-1000"];
+	if(note.refRewarded) return;
+	const refCode = note.referee;
+	const refArray = ["SCRIPTBANK-POS-AGENT-2026-200", "SCRIPTBANK-POS-AGENT-2026-500", "SCRIPTBANK-LUCKY-GIFTS-2026-50", "SCRIPTBANK-LUCKY-GIFTS-2026-100", "SCRIPTBANK-LUCKY-GIFTS-2026-200", "SCRIPTBANK-LUCKY-GIFTS-2026-500", "SCRIPTBANK-LUCKY-GIFTS-2026-1000", "SCRIPTBANK-HOLIDAY-GIFT-2026-USA-50", "SCRIPTBANK-HOLIDAY-GIFT-2026-USA-100", "SCRIPTBANK-HOLIDAY-GIFT-2026-USA-200", "SCRIPTBANK-HOLIDAY-GIFT-2026-USA-500", "SCRIPTBANK-HOLIDAY-GIFT-2026-USA-1000", "SCRIPTBANK-HOLIDAY-GIFT-2026-USA-2000", "SCRIPTBANK-HOLIDAY-GIFT-2026-USA-5000"];
 	if(refArray.includes(refCode)){
 		let reward = 0;
 		switch(refCode){
-			case refCode.includes("200") :
+			case refCode.includes("200") && !refCode.includes("USA"):
 				reward = 200000;
 				break;
-			case refCode.includes("100") :
+			case refCode.includes("100") && !refCode.includes("USA"):
 				reward = 100000;
 				break;
-			case refCode.includes("50") :
+			case refCode.includes("50") && !refCode.includes("USA") :
 				reward = 50000;
 				break;
-			case refCode.includes("500") :
+			case refCode.includes("500") && !refCode.includes("USA"):
 				reward = 500000;
 				break;
-			case refCode.includes("1000") :
+			case refCode.includes("1000") && !refCode.includes("USA"):
 				reward = 1000000;
+				break;
+			case refCode.includes("USA") && refCode.includes("1000") :
+				reward = 1000;
+				break;
+			case refCode.includes("USA") && refCode.includes("2000") :
+				reward = 2000;
+				break;
+			case refCode.includes("USA") && refCode.includes("5000") :
+				reward = 5000;
+				break;
+			case refCode.includes("USA") && refCode.includes("10000") :
+				reward = 10000;
+				break;
+			case refCode.includes("USA") && refCode.includes("500") :
+				reward = 500;
+				break;
+			case refCode.includes("USA") && refCode.includes("200") :
+				reward = 200;
+				break;
+			case refCode.includes("USA") && refCode.includes("100") :
+				reward = 100;
+				break;
+			case refCode.includes("USA") && refCode.includes("50") :
+				reward = 50;
 				break;
 		}
 
 		Scriptbill.refRewarded = true;
 		let details = Object.assign(Scriptbill.defaultBlock);
 		details.transType = "UPDATE";
+		if(refCode.includes("USA") && ! note.noteType.includes("USD")) return;
+		if(!refCode.includes("USA") && !note.noteType.includes("NGN")) return;
 		Scriptbill.generateScriptbillTransactionBlock(details).then(async block =>{
 			if( block && block.transType == "UPDATE"){
 				const deposit =  await createExchangeDeposit(reward, note,  refCode, "socket");
