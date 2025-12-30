@@ -4455,7 +4455,7 @@
 	//by the client.
 	static #recieve		 			= this.recieveData();
 	static #currentBlock 			= this.runGetCurrentBlock();
-	static #shareData 				= this.shareData();
+	//static #shareData 				= this.shareData();
 		
 	//this logic helps the storeBlock function to decide whether to or not set the 
 	//incoming transaction block as the current note block.
