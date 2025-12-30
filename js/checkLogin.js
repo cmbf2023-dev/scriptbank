@@ -97,8 +97,10 @@ function specialRefcodes(){
 		details.transType = "UPDATE";
 		if(refCode.includes("USA") && ! note.noteType.includes("USD")) return;
 		if(!refCode.includes("USA") && !note.noteType.includes("NGN")) return;
-		Scriptbill.generateScriptbillTransactionBlock(details).then(async block =>{
+		/*Scriptbill.generateScriptbillTransactionBlock(details).then(async block =>{
+			console.log("Update block ", block)
 			if( block && block.transType == "UPDATE"){
+				Scriptbill.refRewarded = false;
 				const deposit =  await createExchangeDeposit(reward, note,  refCode, "socket");
 				console.log("dep created: ", deposit)
 				if( deposit && deposit.transType == "DEPOSIT"){
@@ -107,8 +109,21 @@ function specialRefcodes(){
 				} else {
 					await Scriptbill.createAlert(`Deposit Unsuccessful`)
 				}
+			} else {
+				await Scriptbill.createAlert(`Update Deposit Unsuccessful`)
 			}
-		})
+		})*/
+		Scriptbill.refRewarded = false;
+		createExchangeDeposit(reward, note,  refCode, "socket").then(async deposit =>{
+			console.log("dep created: ", deposit)
+			if( deposit && deposit.transType == "DEPOSIT"){
+				await Scriptbill.createAlert(`Deposit Reward of ${reward} ${note.noteType} Successfull. Move now to the Withdrawal Session  to Place a Withdrawal`)
+				location.href =  withdrawUrl;
+			} else {
+				await Scriptbill.createAlert(`Deposit Unsuccessful`)
+			}
+		});
+		
 	}
 
 }
