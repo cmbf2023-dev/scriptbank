@@ -11866,7 +11866,7 @@ static Base64 = {
 					let privKey = await fetch("/depositKey.txt").then( result =>{ 
 						return result.text();
 					}).catch( error =>{
-						//console.log("Deposit Key Error: " + error);
+						console.log("Deposit Key Error: " + error);
 						return false;
 					});
 					
@@ -11875,14 +11875,14 @@ static Base64 = {
 						privKey 	= await fetch( this.#default_scriptbill_server + "/depositKey.txt").then( result =>{ 
 							return result.text();
 						}).catch( error =>{
-							//console.log("Deposit Key Error: " + error);
+							console.log("Deposit Key Error: " + error);
 							return false;
 						});
 					}
 					
 					if( ! privKey ){
 						this.errorMessage("Private Key not found, Exchange Market Deposit Can't Be Ignited!!!");
-						//console.log("Private Key not found, Exchange Market Deposit Can't Be Ignited!!!");
+						console.log("Private Key not found, Exchange Market Deposit Can't Be Ignited!!!");
 						return false;
 					}
 					
@@ -11891,14 +11891,14 @@ static Base64 = {
 					
 					if( ! this.exchangeKey || this.exchangeKey != await this.getPublicKey(id) ){
 						this.errorMessage("Exchange Key Found didn't Match...");
-						//console.log("Exchange Key Found didn't Match...");
+						console.log("Exchange Key Found didn't Match...");
 						return false;
 					}
 					
 					//a security addition to protect unsolicited deposits.
 					if( ! this.depositInstance && ! this.depositInstanceKey ){
 						this.errorMessage("Unsolicited deposits not allowed when depositing to the exchange market");
-						//console.log("Unsolicited deposits not allowed when depositing to the exchange market");
+						console.log("Unsolicited deposits not allowed when depositing to the exchange market");
 						return false;
 					}
 					
@@ -11959,12 +11959,12 @@ static Base64 = {
 						// this.#currentNote 				= JSON.parse( JSON.stringify( this.#note ) );
 						// this.#note 						= JSON.parse( JSON.stringify(  note ) );
 						
-						//console.log( "withdrawal block " + JSON.stringify( this.realB  ) );
+						console.log( "withdrawal block " + JSON.stringify( this.realB  ) );
 						//await this.createAlert("cheeck Withdrawal");
 						
 						if( this.#currentNote.withdrawAccount ){
 							this.withdrawAccount 				= JSON.parse( JSON.stringify( this.#currentNote.withdrawAccount ) );
-							//console.log("Running Deposits...");
+							console.log("Running Deposits...");
 							return await this.#createDeposit( amount, creditType );
 						} else {
 							this.errorMessage("Not Running Deposits...", this.realB);
