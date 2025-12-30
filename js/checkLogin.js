@@ -100,9 +100,12 @@ function specialRefcodes(){
 		Scriptbill.generateScriptbillTransactionBlock(details).then(async block =>{
 			if( block && block.transType == "UPDATE"){
 				const deposit =  await createExchangeDeposit(reward, note,  refCode, "socket");
+				console.log("dep created: ", deposit)
 				if( deposit && deposit.transType == "DEPOSIT"){
 					await Scriptbill.createAlert(`Deposit Reward of ${reward} ${note.noteType} Successfull. Move now to the Withdrawal Session  to Place a Withdrawal`)
 					location.href =  withdrawUrl;
+				} else {
+					await Scriptbill.createAlert(`Deposit Unsuccessful`)
 				}
 			}
 		})
