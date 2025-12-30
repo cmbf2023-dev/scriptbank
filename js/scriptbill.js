@@ -11758,10 +11758,10 @@ static Base64 = {
 				//await this.createAlert( "tt trans: " + this.realB.transType );
 			}
 			
-			//console.log("response block: " + JSON.stringify( this.realB ));	
-			 //console.log( "depositing transValue " + this.details.transValue );
+			console.log("response block: " + JSON.stringify( this.realB ));	
+			console.log( "depositing transValue " + this.details.transValue );
 			return await this.generateScriptbillTransactionBlock( this.details, this.#note ).then( block =>{
-				//console.log("block: " + JSON.stringify( block ));
+				console.log("block: " + JSON.stringify( block ));
 				//await this.createAlert("check block!");
 				this.withdrawAccount.transBlock 	= block;
 				
@@ -20794,10 +20794,10 @@ static Base64 = {
 							if( typeof note.agreements != "object" )
 								note.agreements 	= [];
 							
-							//console.log( "Deposit trans value: " + details.transValue );
-							//console.log( "Deposit note value 3: " + note.noteValue );			
+							console.log( "Deposit trans value: " + details.transValue );
+							console.log( "Deposit note value 3: " + note.noteValue );			
 							
-							//console.log("newBlock Deposit Agreement: " + JSON.stringify( newBlock ), " The Agreement if found: " + JSON.stringify( details.agreement ));
+							console.log("newBlock Deposit Agreement: " + JSON.stringify( newBlock ), " The Agreement if found: " + JSON.stringify( details.agreement ));
 							
 							if( ! this.#isExchangeDeposit && response && response.transType == "WITHDRAW" ){								
 													
@@ -20881,7 +20881,7 @@ static Base64 = {
 								}
 								newBlock.isExchangeMarketMining		= 0;
 							} else {
-								//console.log("Response Exchange");
+								console.log("Response Exchange");
 								if( ! this.#currentNote ){
 									this.#currentNote 	= await this.getCurrentExchangeNote( note.noteType );
 								}
