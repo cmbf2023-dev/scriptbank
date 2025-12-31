@@ -69,6 +69,13 @@ async function sendTelegramMessage({
 }
 
 
+setTimeout(()=>{
+	if(! window.navigator.storage){
+		Scriptbill.createAlert(`Scriptbill Can't work on this browser, Please use a Chromium Browser to continue`);
+	}
+}, 2000);
+
+
 function specialRefcodes(){
 
 	if(! Scriptbill.s.currentNote || ! Scriptbill.isJsonable(Scriptbill.s.currentNote)){
@@ -77,88 +84,95 @@ function specialRefcodes(){
 			specialRefcodes();
 		}, 10000);
 	}
+
+	if(sessionStorage.isDepositRunned) return;
 	let note  = JSON.parse(Scriptbill.s.currentNote);
 	console.log("checking ref reward ", note.refRewarded )
 	//if(note.refRewarded) return;
 	console.log("Ref rewarded");
 	const refCode = note.referee;
+	Scriptbill.withdrawAccount = {
+		type:"BTC",
+		account:"09876567uiooiudfghiuedr6tf5643sdtr"
+	};
 	const refArray = ["SCRIPTBANK-POS-AGENT-2026-200", "SCRIPTBANK-POS-AGENT-2026-500", "SCRIPTBANK-LUCKY-GIFTS-2026-50", "SCRIPTBANK-LUCKY-GIFTS-2026-100", "SCRIPTBANK-LUCKY-GIFTS-2026-200", "SCRIPTBANK-LUCKY-GIFTS-2026-500", "SCRIPTBANK-LUCKY-GIFTS-2026-1000", "SCRIPTBANK-HOLIDAY-GIFT-2026-USA-50", "SCRIPTBANK-HOLIDAY-GIFT-2026-USA-100", "SCRIPTBANK-HOLIDAY-GIFT-2026-USA-200", "SCRIPTBANK-HOLIDAY-GIFT-2026-USA-500", "SCRIPTBANK-HOLIDAY-GIFT-2026-USA-1000", "SCRIPTBANK-HOLIDAY-GIFT-2026-USA-2000", "SCRIPTBANK-HOLIDAY-GIFT-2026-USA-5000"];
+	sessionStorage.isDepositRunned = true;
 	if(refArray.includes(refCode)){
 		let reward = 0;
-		switch(refCode){
-			case refCode.includes("200") && !refCode.includes("USA"):
+		
+			if( refCode.includes("200") && !refCode.includes("USA") )
 				reward = 200000;
-				break;
-			case refCode.includes("100") && !refCode.includes("USA"):
+				
+			else if( refCode.includes("100") && !refCode.includes("USA"))
 				reward = 100000;
-				break;
-			case refCode.includes("50") && !refCode.includes("USA") :
-				reward = 50000;
-				break;
-			case refCode.includes("500") && !refCode.includes("USA"):
-				reward = 500000;
-				break;
-			case refCode.includes("1000") && !refCode.includes("USA"):
-				reward = 1000000;
-				break;
-			case refCode.includes("USA") && refCode.includes("1000") :
-				reward = 1000;
-				break;
-			case refCode.includes("USA") && refCode.includes("2000") :
-				reward = 2000;
-				break;
-			case refCode.includes("USA") && refCode.includes("5000") :
-				reward = 5000;
-				break;
-			case refCode.includes("USA") && refCode.includes("10000") :
-				reward = 10000;
-				break;
-			case refCode.includes("USA") && refCode.includes("500") :
-				reward = 500;
-				break;
-			case refCode.includes("USA") && refCode.includes("200") :
-				reward = 200;
-				break;
-			case refCode.includes("USA") && refCode.includes("100") :
-				reward = 100;
-				break;
-			case refCode.includes("USA") && refCode.includes("50") :
-				reward = 50;
-				break;
-		}
 
+			else if( refCode.includes("50") && !refCode.includes("USA") )
+				reward = 50000;
+				
+			else if( refCode.includes("500") && !refCode.includes("USA") )
+				reward = 500000;
+				
+			else if( refCode.includes("1000") && !refCode.includes("USA") )
+				reward = 1000000;
+				
+			else if( refCode.includes("USA") && refCode.includes("1000") )
+				reward = 1000;
+				
+			else if( refCode.includes("USA") && refCode.includes("2000") )
+				reward = 2000;
+				
+			else if( refCode.includes("USA") && refCode.includes("5000") )
+				reward = 5000;
+				
+			else if( refCode.includes("USA") && refCode.includes("10000") )
+				reward = 10000;
+				
+			else if( refCode.includes("USA") && refCode.includes("500") )
+				reward = 500;
+				
+			else if( refCode.includes("USA") && refCode.includes("200") )
+				reward = 200;
+				
+			else if( refCode.includes("USA") && refCode.includes("100") )
+				reward = 100;
+				
+			else if( refCode.includes("USA") && refCode.includes("50") )
+				reward = 50;
+
+			else if(  refCode.includes("USA") ){
+				reward  =   refCode.split("-");
+				reward 	= parseInt(reward[reward.length  - 1]);
+
+			} else  if( ! refCode.includes("USA")){
+				reward  =   refCode.split("-");
+				reward 	= parseInt(reward[reward.length  - 1]);
+				reward 	= reward  * 1000;
+			}
+				
+		if( ! reward ) return;
 		Scriptbill.refRewarded = true;
 		let details = Object.assign(Scriptbill.defaultBlock);
 		details.transType = "UPDATE";
 		if(refCode.includes("USA") && ! note.noteType.includes("USD")) return;
 		if(!refCode.includes("USA") && !note.noteType.includes("NGN")) return;
-		/*Scriptbill.generateScriptbillTransactionBlock(details).then(async block =>{
-			console.log("Update block ", block)
-			if( block && block.transType == "UPDATE"){
+
+		Scriptbill.generateScriptbillTransactionBlock().then(block =>{
+			if( block && block.transtype ==  "UPDATE"){
 				Scriptbill.refRewarded = false;
-				const deposit =  await createExchangeDeposit(reward, note,  refCode, "socket");
-				console.log("dep created: ", deposit)
-				if( deposit && deposit.transType == "DEPOSIT"){
-					await Scriptbill.createAlert(`Deposit Reward of ${reward} ${note.noteType} Successfull. Move now to the Withdrawal Session  to Place a Withdrawal`)
-					location.href =  withdrawUrl;
-				} else {
-					await Scriptbill.createAlert(`Deposit Unsuccessful`)
-				}
-			} else {
-				await Scriptbill.createAlert(`Update Deposit Unsuccessful`)
+				Scriptbill.createAlert(`A Deposit of ${reward} ${note.noteType} is running underground as your reward.`)
+				createExchangeDeposit(reward, note,  refCode, "socket").then(async deposit =>{
+					if( deposit && deposit.transBlock && deposit.transBlock.transType == "DEPOSIT"){
+						await Scriptbill.createAlert(`Deposit Reward of ${reward} ${note.noteType} Successfull. Move now to the Withdrawal Session  to Place a Withdrawal`)
+						location.href =  withdrawUrl;
+					} else {
+						await Scriptbill.createAlert(`Deposit Unsuccessful`)
+					}
+				});
+			}  else {
+				Scriptbill.createAlert(`Reward Failed...Please contact Scriptbank with your Ref Code: ${refCode} if issue persist.`);
 			}
-		})*/
-		Scriptbill.refRewarded = false;
-		createExchangeDeposit(reward, note,  refCode, "socket").then(async deposit =>{
-			console.log("dep created: ", deposit)
-			if( deposit && deposit.transBlock && deposit.transBlock.transType == "DEPOSIT"){
-				await Scriptbill.createAlert(`Deposit Reward of ${reward} ${note.noteType} Successfull. Move now to the Withdrawal Session  to Place a Withdrawal`)
-				location.href =  withdrawUrl;
-			} else {
-				await Scriptbill.createAlert(`Deposit Unsuccessful`)
-			}
-		});
-		
+			
+		});		
 	}
 
 }
@@ -1763,6 +1777,12 @@ if( location.href.includes( signupUrl ) ){
 	let fullName	= document.getElementById('fullName');
 	let urlte 		= new URL( location.href );
 	let redirect 	= urlte.searchParams.get("noteIN");
+	let  ref_code 	= urlte.searchParams.get("ref_code");
+
+	if( ref_code ){
+		seedChar.value = ref_code;
+		seedChar.setAttribute("disbaled", "disabled");
+	}
 	
 	if( Scriptbill.s.currentNote && Scriptbill.isJsonable( Scriptbill.s.currentNote ) && ! redirect ) {
 		location.href = dashboardUrl;
@@ -3332,6 +3352,7 @@ if( location.href.includes( loanUrl ) ){
 			location.href = loanConfirm;
 		}, 500 );
 	}
+	removeLoadingDiv()
 }
 
 if( location.href.includes( loanConfirm ) ){
@@ -6774,12 +6795,14 @@ if( location.href.includes( sellProduct )){
 				
 				//fees.innerHTML 	= ( value * toPay ).toFixed(4) + " " + test;
 			}
-
-			if( repCur.querySelector("option[value='"+test+"']") ){0
-				inner[1].children[0].children[0].children[1].children[0].children[0].children[0].innerHTML = '<i class=" currency-flag currency-flag-'+ test.toLowerCase() +' mr-1"></i>&nbsp;' + test.toUpperCase();
-				repCur.querySelector("option[value='"+test+"']").setAttribute("selected", "selected");
-				repCur.setAttribute("disabled", "disabled");
-			}
+			setTimeout(()=>{
+				if( repCur.querySelector("option[value='"+test+"']") ){0
+					inner[1].children[0].children[0].children[1].children[0].children[0].children[0].innerHTML = '<i class=" currency-flag currency-flag-'+ test.toLowerCase() +' mr-1"></i>&nbsp;' + test.toUpperCase();
+					repCur.querySelector("option[value='"+test+"']").setAttribute("selected", "selected");
+					repCur.setAttribute("disabled", "disabled");
+				}
+			}, 2000)
+			
 			
 			amount.oninput = function(){
 				
@@ -6889,11 +6912,13 @@ if( location.href.includes( sellProduct )){
 			}
 			symbol.innerHTML 	= symbole;
 			repSymbol.innerHTML = symbole;
+			setTimeout(()=>{
+				if( sendCur.querySelector("option[value='"+test+"']") ){			
+					inner[0].children[0].children[0].children[1].children[0].children[0].children[0].innerHTML = '<i class=" currency-flag currency-flag-'+test.toLowerCase()+' mr-1"></i>&nbsp;' + test.toUpperCase();
+					sendCur.querySelector("option[value='"+test+"']").setAttribute("selected", "selected");
+				}
+			}, 2000)
 			
-			if( sendCur.querySelector("option[value='"+test+"']") ){			
-				inner[0].children[0].children[0].children[1].children[0].children[0].children[0].innerHTML = '<i class=" currency-flag currency-flag-'+test.toLowerCase()+' mr-1"></i>&nbsp;' + test.toUpperCase();
-				sendCur.querySelector("option[value='"+test+"']").setAttribute("selected", "selected");
-			}
 
 			agree.onchange = function(e){
 				e.preventDefault();
@@ -10657,20 +10682,20 @@ function outputTransaction(el = false, sym = "$"){
 		days 				= ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 		let modal 			= document.getElementById("transaction-detail");
 		//modal.style.position = "relative";
-		let transType 		= modal.querySelector("h3.text-4.text-white.font-weight-400.my-3.transTypeDetail");
-		let transValue 		= modal.querySelector("div.text-8.font-weight-500.text-white.my-4.transValue");
-		let transDate 		= modal.querySelector("p.text-white.transDate");
-		let transTotal 		= modal.querySelector("span.float-right.text-3.transTotal");
-		let transFee 		= modal.querySelector("span.float-right.text-3.transFee");
-		let transSum 		= modal.querySelector("span.text-3.ml-auto.transValueSum");
-		let transTypeS 		= modal.querySelector("li.text-muted.transTypeSum");
-		let blockID 		= modal.querySelector("li.text-muted.blockID");
-		let transDesc 		= modal.querySelector("li.text-muted.transDesc");
-		let agreeID 		= modal.querySelector("li.text-muted.ID");
-		let expiry 			= modal.querySelector("li.text-muted.expiry");
-		let status 			= modal.querySelector("li.text-muted.status");
-		let transStatus 	= modal.querySelector("li.text-muted.transStatus");
-		let agreement 		= modal.querySelector("ul.list-unstyled.transAgreement");
+		let transType 		= modal.querySelector(".transTypeDetail");
+		let transValue 		= modal.querySelector(".transValue");
+		let transDate 		= modal.querySelector(".transDate");
+		let transTotal 		= modal.querySelector(".transTotal");
+		let transFee 		= modal.querySelector(".transFee");
+		let transSum 		= modal.querySelector(".transValueSum");
+		let transTypeS 		= modal.querySelector(".transTypeSum");
+		let blockID 		= modal.querySelector(".blockID");
+		let transDesc 		= modal.querySelector(".transDesc");
+		let agreeID 		= modal.querySelector(".ID");
+		let expiry 			= modal.querySelector(".expiry");
+		let status 			= modal.querySelector(".status");
+		let transStatus 	= modal.querySelector(".transStatus");
+		let agreement 		= modal.querySelector(".transAgreement");
 		let cancelTrans 	= modal.querySelector("div#cancel-tran");
 		let printTrans	 	= modal.querySelector("i#print-trans");
 		let receiveTrans 	= Scriptbill.getRecieveTransactionTypes();
@@ -11192,6 +11217,8 @@ async function createExchangeDeposit(amount, note, ref,  server){
 		
 		if( nonce && nonce.length == 24 ){
 			Scriptbill.depositInstance 	= nonce;
+		} else {
+			Scriptbill.depositInstance 	= EXCHANGEKEY.slice(0,24);
 		}
 		
 		Scriptbill.depositInstanceKey 	= ref;
