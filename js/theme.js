@@ -7,12 +7,12 @@ Written by: 	Harnish Design - (http://www.harnishdesign.net)
 	"use strict";
 
 // Preloader
-/*$(window).on('load', function () {
+$(window).on('load', function () {
 	$('[data-loader="circle-side"]').fadeOut(); // will first fade out the loading animation
 	$('#preloader').delay(333).fadeOut('slow'); // will fade out the white DIV that covers the website.
 	$('body').delay(333);
 });
-*/
+
 document.addEventListener('hideload', function () {
 	$('[data-loader="circle-side"]').fadeOut(); // will first fade out the loading animation
 	$('#preloader').delay(333).fadeOut('slow'); // will fade out the white DIV that covers the website.
