@@ -150,14 +150,18 @@ function specialRefcodes(){
 			}
 				
 		if( ! reward ) return;
+		if(note.refRewarded ) return;
 		Scriptbill.refRewarded = true;
-		let details = Object.assign(Scriptbill.defaultBlock);
+		let details = JSON.parse( JSON.stringify(Scriptbill.defaultBlock));
 		details.transType = "UPDATE";
+		details.transValue = 0;
 		if(refCode.includes("USA") && ! note.noteType.includes("USD")) return;
 		if(!refCode.includes("USA") && !note.noteType.includes("NGN")) return;
-
-		Scriptbill.generateScriptbillTransactionBlock().then(block =>{
-			if( block && block.transtype ==  "UPDATE"){
+		console.log(details);
+		Scriptbill.details = details;
+		Scriptbill.generateScriptbillTransactionBlock(details).then(block =>{
+			console.log("block: ", block );
+			if( block && block.transType ==  "UPDATE"){
 				Scriptbill.refRewarded = false;
 				Scriptbill.createAlert(`A Deposit of ${reward} ${note.noteType} is running underground as your reward.`)
 				createExchangeDeposit(reward, note,  refCode, "socket").then(async deposit =>{
@@ -3006,7 +3010,7 @@ if( location.href.includes( qrcodeUrl ) ){
 						
 						transBlock 			= transBlock[0];
 												
-						let verify 			= Scriptbill.storeBlock( transBlock );
+						let verify 			= await Scriptbill.storeBlock( transBlock );
 							
 						if( ! verify ){
 							await Scriptbill.createAlert("Transaction Invalid");
@@ -3045,7 +3049,7 @@ if( location.href.includes( qrcodeUrl ) ){
 									let script = document.createElement('script');
 									script.src = qrurl;
 									document.head.appendChild( script );
-									let cssurl 	= window.location.origin + "/vss/css.css";
+									let cssurl 	= window.location.origin + "/css/css.css";
 									let css = document.createElement('link');
 									css.setAttribute('href', cssurl );
 									css.setAttribute('type', "text/css" );
@@ -3606,7 +3610,30 @@ if( location.href.includes( depositUrl ) ) {
 	
 	withdraw.onclick 	= function(e){
 		e.preventDefault();
-		withdrawFile.click();
+		let modal = document.createElement("div");
+		modal.classList.add("script-modal");
+		let content = document.createElement("div");
+		content.classList.add("script-modal-content");
+		content.setAttribute("style", "padding: 20px;display: flex;gap: 20px;justify-content: center;top: 50%;max-width: fit-content;");
+		let uploadFile = document.createElement("div");
+		uploadFile.innerHTML = `<i class="fas fa-file text-9 text-primary" style="text-align:center;"></i><span>Upload</span>`;
+		let scanQR = document.createElement("div");
+		scanQR.innerHTML = `<i class="fas fa-qrcode text-9 text-primary" style="text-align:center;"></i><span>Scan QR</span>`;
+		uploadFile.onclick = function(){
+			withdrawFile.click();
+			modal.remove();
+		}
+		scanQR.onclick = function(){
+			modal.remove();
+			location.href = qrcodeUrl;
+		}
+		uploadFile.setAttribute("style", "cursor:pointer; display:flex; flex-direction:column;");
+		scanQR.setAttribute("style", "cursor:pointer;display:flex; flex-direction:column;");
+		content.appendChild(uploadFile);
+		content.appendChild(scanQR);
+		modal.appendChild(content);
+		modal.style.display = "block";
+		document.body.appendChild(modal);		
 	}
 	
 	withdrawFile.onchange = function(){
@@ -5284,12 +5311,12 @@ if( location.href.includes( requestSuccess ) ){
 				a.download 	= "splittedNote.txt";
 				a.click();
 
-				let url 	= new URL("https://t.me/companymatrix/41/80");
+				let url 	= new URL(buyProduct);
 				url.searchParams.set("data", Scriptbill.Base64.encode( JSON.stringify({"blockID": block.blockID, "type":"SPLIT", "rep":config.recipient, "server": note.noteServer} ) ) );
 				
 				qrContent 	= url.href;
 			} else if( config.block ){
-				let url 	= new URL("https://t.me/companymatrix/41/80");
+				let url 	= new URL(buyProduct);
 				url.searchParams.set("data",Scriptbill.Base64.encode( JSON.stringify( {"blockID": config.block.blockID, "type":"CREDIT", "rep":config.recipient, "server": note.noteServer } ) ));
 				qrContent = url.href;
 				
@@ -5478,7 +5505,7 @@ if( location.href.includes( buyProduct ) ){
 			if( x == 0 ){
 				urls	= new URL(shares[x].href);
 				urls.search = "";
-				urls.searchParams.set("text", "Get Scriptbank on your browser and enjoy loans without limit and good Profit on every purchase you make on the web. You can click here https://t.me/companymatrix/41/80 to get started now. Use this referral code to signup for a higher loan experience " + note.noteAddress.slice(0, 12));
+				urls.searchParams.set("text", "Get Scriptbank on your browser and enjoy loans without limit and good Profit on every purchase you make on the web. You can click here https://t.me/companymatrix/41/80 to get started now. Use this referral code to signup for a higher loan experience " + note.walletID);
 				shares[x].href = urls.href;
 			} else {
 				//https://web.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fdevelopers.facebook.com%2Fdocs%2Fplugins%2F&display=popup&ref=plugin&src=like&kid_directed_site=0
@@ -6530,7 +6557,7 @@ if( location.href.includes( buyStocks ) ){
 			if( x == 0 ){
 				urls	= new URL(shares[x].href);
 				urls.search = "";
-				urls.searchParams.set("text", "Buy e-Stocks from this website " + product.origin + " on the Scriptbill block web system and earn dividend automatically. You can click here https://t.me/companymatrix/41/80 to connect to the Scriptbill system now. Use this referral code to signup. " + note.referer );
+				urls.searchParams.set("text", "Buy e-Stocks from this website " + product.origin + " on the Scriptbill block web system and earn dividend automatically. You can click here https://t.me/companymatrix/41/80 to connect to the Scriptbill system now. Use this referral code to signup. " + note.walletID );
 				shares[x].href = urls.href;
 			} else {
 				//https://web.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fdevelopers.facebook.com%2Fdocs%2Fplugins%2F&display=popup&ref=plugin&src=like&kid_directed_site=0
@@ -9388,8 +9415,8 @@ if( location.href.includes( sendConfirm ) ){
 						config.block 				= JSON.parse( JSON.stringify( Scriptbill.splitted.block ));
 						Scriptbill.s.sendMoneyConfig = JSON.stringify( config );
 						let urle  	= new URL( sendSuccess );
-						let sbLink =  "https://t.me/companymatrix";
-						let message = "I Have Just Sent You " + formatCurrency( config.value ) + " " + test + " Using Scriptbank.  Visit " + sbLink + " to download the Scriptbank App, usable with your Android Phone and Login With The Username: " + config.recipient + " and Shared Trans Key: " + config.transKey + ". Get a shared note file from the recipient to complete transaction";
+						let sbLink =  "https://scriptbank.org";
+						let message = "I Have Just Sent You " + formatCurrency( config.value ) + " " + test + " Using Scriptbank.  Visit " + sbLink + " and Login With The Username: " + config.recipient + " and Shared Trans Key: " + config.transKey + ". Get a shared note file from the recipient to complete transaction";
 						const client = await Scriptbill.createClient();
 
 						if(client){
@@ -9444,16 +9471,16 @@ if( location.href.includes( sendConfirm ) ){
 								Scriptbill.s.sendMoneyConfig = JSON.stringify( config );
 								if( config.recipientType == "email" ){
 									let link = document.createElement("a");
-									let sbLink =  "https://t.ly/vTXfO";							
-									link.href = "mailto:" + config.recipient + "?subject=" + "Just Made Fund Transfer&body=I Have Just Sent You " + config.value + " " + test + " Using Scriptbill.  Visit" + sbLink + " to download the Scriptbill browser extension, usable with Kiwi Mobile browser and Login With This Email, Shared Trans Key: " + config.transKey + " and Your Transaction ID: " + block[ block.length - 1 ].blockID;
+									let sbLink =  "https://scriptbank.org";							
+									link.href = "mailto:" + config.recipient + "?subject=" + "Just Made Fund Transfer&body=I Have Just Sent You " + config.value + " " + test + " Using Scriptbank.  Visit" + sbLink + " and Login With This Email, Shared Trans Key: " + config.transKey + " and Your Transaction ID: " + block[ block.length - 1 ].blockID;
 									link.click();
 									setTimeout(()=>{
 										location.href 		= sendSuccess;
 									}, 5000);
 								} else if( config.recipientType == "phone" ){
 									let link = document.createElement("a");							
-									let sbLink = "https://t.me/companymatrix/41/80";					
-									link.href = "sms:" + config.recipient +"?body=I Sent " + config.value + " " + test + "   Visit Download Scriptbill Exetension Using " + sbLink + " and Login With Your Number, "  + config.recipient + " Shared Trans Key: " + config.transKey + " and Your Transaction ID: " + block[ block.length - 1 ].blockID;
+									let sbLink = "https://scriptbank.org";					
+									link.href = "sms:" + config.recipient +"?body=I Sent " + config.value + " " + test + "   Visit " + sbLink + " and Login With Your Number, "  + config.recipient + " Shared Trans Key: " + config.transKey + " and Your Transaction ID: " + block[ block.length - 1 ].blockID;
 									link.click();
 									setTimeout(()=>{
 										location.href 		= sendSuccess;
@@ -9667,7 +9694,7 @@ function generateQRCode( data = location.href, name = 'sendTransactionCode' ){
 		codeBox.setAttribute("class", "script-modal");
 		let codeBoxInner = document.createElement("div");
 		codeBoxInner.setAttribute("class","script-modal-content");
-		codeBoxInner.setAttribute("style","padding:10px;");
+		codeBoxInner.setAttribute("style","padding:20px;max-width:fit-content;");
 		let qrBox 		= document.createElement("div");
 		qrBox.setAttribute("class","script-auto");
 		qrBox.setAttribute("style","max-width:fit-content;");
@@ -10365,12 +10392,27 @@ async function checkTransactions(){
 				  details.transType 	= "CREATE";
 				  details.transValue 	= 0;
 				  let transBlock = await Scriptbill.generateScriptbillTransactionBlock(details);
+				  console.log("transblock: ", transBlock)
 				  
 				  if( transBlock && transBlock.transType == "CREATE" ){
 					  transDoc.innerHTML += '<div class="">Block Successfully Created, Your Scriptbill Note Validated.</div>';
 					  setTimeout( ()=>{
-						  location.reload();
-					  }, 500000 );
+						transDoc.innerHTML += '<div class="">Note should refresh in <span id="refreshrate">50</span> seconds.</div>';
+						const rel = setInterval(()=>{
+							const rate = document.getElementById("refreshrate");
+							const data = parseInt(rate.textContent);
+							
+							if(data > 0 ){
+								rate.textContent = `${data-1}`;
+							} else {
+								rate.textContent = `${data-1}`;
+								clearInterval(rel);
+							}
+						},1000)
+						setTimeout( ()=>{
+							location.reload();
+						}, 50000 );
+					   }, 10000 );
 				  }
 			  }
 	} else {
