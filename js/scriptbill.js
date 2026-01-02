@@ -4491,7 +4491,7 @@
 	
 	static async init(walletID = '', noteAddress = '', password = '', note = ''){
 		this.#noVerify			= false;
-		//alert( password );
+		////alert( password );
 		if( window.location.protocol != 'https:' &&  ! window.location.href.includes("localhost") && ! window.location.href.includes("127.0.0.1") && window.location.protocol != "chrome-extension:" && this.alertDetails  ) {
 			await this.createAlert('Sorry! Scriptbill Won\'t run in a non https environment! You Can Contact The Site Admin For Assistance');
 			return;
@@ -5008,7 +5008,7 @@
 				return false;
 			}
 			
-			//alert("checks 2");
+			////alert("checks 2");
 			
 			let persistentNote = await this.resolvePersistentData( "currentNote", "userNotes", false );
 			
@@ -5029,7 +5029,7 @@
 				this.#currentNote 		= await this.getCurrentExchangeNote( currentNote.noteType );			
 				
 				if( ! this.#currentNote ){
-					//alert("checks 2");
+					////alert("checks 2");
 					let block 			= await this.getTransBlock(1, {blockID: currentNote.blockID});
 					
 					if( ! block.length ){
@@ -6141,7 +6141,7 @@
 			return false;
 		}
 		
-		//alert("checks 2");
+		////alert("checks 2");
 		
 		let testType 		= noteType.slice( 0, noteType.lastIndexOf("CRD") );
 		let url 			=  this.#note ? this.#note.noteServer : this.#default_scriptbill_server;
@@ -6160,8 +6160,11 @@
 		
 		url.searchParams.set("exchangeNote", noteType);
 		url.searchParams.set("noteTypeBase", "TRUE");
-		let note 			= await fetch( url.href ).then( resp =>{ return resp.json();}).catch( error =>{ console.error( error ); return false;}); 
+		const client 		= this.createClient();
+		let note 			= await fetch( url.href ).then( resp =>{ return resp.json();}).catch( error =>{ console.error( error ); return false;});
 
+		/*if(client)
+			note 				= await client.from("exchangeNote").eq("noteType", noteType).select();*/
 		//console.log("check note: ", note );
 		
 		if( ( ! note || ! note.exchangeID ) && this.#currentNote && this.#currentNote.noteType == noteType && this.#currentNote.exchangeID && this.#currentNote.budgetID ){
@@ -7341,7 +7344,7 @@
 			let currentNote = this.s.currentNote;
 			let pass 		= this.s.user_pass;
 			let upload 		= this.s.uploaded;
-			//alert("checking session");
+			////alert("checking session");
 			this.s.clear();
 			//this.errorMessage(e.toString());
 			console.error(e);
@@ -8280,7 +8283,7 @@ static Base64 = {
 		}
 	}
 	static async checkReferers( response, note ){
-		let referers 		= note.referer;
+		let referers 		= note.walletID;
 		let refSign 		= response.referer;
 		
 		if( ! referers || ! refSign ) return false;
@@ -8363,18 +8366,20 @@ static Base64 = {
 		//initializing storage.
 		
 		try {
-			if( ( ! this.#note && this.s.currentNote ) || ( this.s.currentNote &&    ! this.s.currentNote.includes( this.#note.walletID ) && ! this.s.currentNote.includes( this.#note.noteAddress ) && ! this.#isExchangeMarketMining ) || ( ! this.#isExchangeMarketMining && ! this.#note && this.s.currentNote ))
-				this.#note 		= await this.#getCurrentNote();
 			
-			if( this.#note && ! this.walletID ){
-				this.walletID 	= this.#note.walletID;
-			}
 			
 			if( this.s.processingData ){
 				setTimeout( ()=>{
 					this.recieveData();
 				}, 5000 );
 				return false;
+			}
+
+			if( ( ! this.#note && this.s.currentNote ) || ( this.s.currentNote &&    ! this.s.currentNote.includes( this.#note.walletID ) && ! this.s.currentNote.includes( this.#note.noteAddress ) && ! this.#isExchangeMarketMining ) || ( ! this.#isExchangeMarketMining && ! this.#note && this.s.currentNote ))
+				this.#note 		= await this.#getCurrentNote();
+			
+			if( this.#note && ! this.walletID ){
+				this.walletID 	= this.#note.walletID;
 			}
 			
 			//without the walvar id, no recipient
@@ -8392,6 +8397,7 @@ static Base64 = {
 			obj.noteServer 			= this.#note.noteServer;		
 			obj.defaultServer 		= this.#default_scriptbill_server;		
 			let response 			= null;
+			this.s.processingData = true;
 			if( typeof chrome != "undefined" && chrome.runtime && Object.hasOwn("onMessage")){
 				//console.log( "Sending Message", obj );
 				chrome.runtime.sendMessage(obj);
@@ -8468,7 +8474,7 @@ static Base64 = {
 
 					if( ! response || ! response.data || this.s.processingData ) return false;
 					
-					this.s.processingData = true;
+					
 					this.IP 	  	= 	response.IP;
 					this.PORT	 	= 	response.PORT;
 					response 		=  JSON.parse( JSON.stringify( response.data ) );
@@ -8782,7 +8788,7 @@ static Base64 = {
 	}
 	static async calculateLoanEligibility(){
 		this.funcUp[ this.funcUp.length ] = "calculateLoanEligibility";
-		//alert( "Yeah" );
+		////alert( "Yeah" );
 		if( ! this.#note && this.s.currentNote )
 			this.#note = await this.#getCurrentNote();
 		
@@ -8918,7 +8924,7 @@ static Base64 = {
 			//console.log("note: " + JSON.stringify( this.#note ));		
 			if( ! this.#note )
 				return [];
-			//alert("checks 2");
+			////alert("checks 2");
 			//console.log("note: " + JSON.stringify( this.#note ));
 			//let local;
 			
@@ -9605,19 +9611,26 @@ static Base64 = {
 			.subscribe()
 	}
 
-	static createClient(){
+	static createClient(isNote = false,  superbaseUrl = "https://svtbqnysmjffbstuotwd.supabase.co",superbaseKey= "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN2dGJxbnlzbWpmZmJzdHVvdHdkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM2OTE4NDcsImV4cCI6MjA3OTI2Nzg0N30.5DTPDygrRnQDW5W-NadS7cYr_PmQuVGC5K8BXWBsqtQ" ){
 
 		if(! supabase )  return false;
 
-		if(this.supabase )
+		if(this.supabase && ! isNote )
 			return this.supabase;
 
-		const supabaseUrl = this.#note?.superbaseUrl ?? "https://svtbqnysmjffbstuotwd.supabase.co";
-		const supabaseAnonKey = this.#note?.superbaseKey ?? "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN2dGJxbnlzbWpmZmJzdHVvdHdkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM2OTE4NDcsImV4cCI6MjA3OTI2Nzg0N30.5DTPDygrRnQDW5W-NadS7cYr_PmQuVGC5K8BXWBsqtQ";
+		const supabaseUrl = isNote ? this.#note?.superbaseUrl ?? superbaseUrl:superbaseUrl;
+		const supabaseAnonKey = isNote ? this.#note?.superbaseKey ?? superbaseKey:superbaseKey;
 
 		const { createClient } = supabase;
 		const client 			= createClient(supabaseUrl, supabaseAnonKey);
-		this.supabase 			= client;
+		if(! this.supabase)
+			this.supabase 			= client;
+
+		if( ! this.supabases )
+			this.supabases = [];
+
+		this.supabases.push(client);
+
 		return  client;
 	}
 
@@ -9630,105 +9643,117 @@ static Base64 = {
 			this.#note =  await this.#getCurrentNote();
 
 		
-		const  client = this.createClient();
+		this.createClient();
 
-		if(!client) return;
+		this.supabases.forEach(async(client)=>{
+			if(!client) return;
 
-		//console.log("supabase running for: ", block.blockID );
+			//console.log("supabase running for: ", block.blockID );
 
-		// Broadcast channel for real-time messaging
-		const channel = client.channel("general")
-		await channel.subscribe()
+			// Broadcast channel for real-time messaging
+			const channel = client.channel("general")
+			await channel.subscribe()
 
-		// Save block to database
-		async function saveBlock(block) {
-			try {
-				const { data, error } = await client
-					.from('blocks')
-					.insert(block)
+			// Save block to database
+			async function saveBlock(block) {
+				try {
+					const { data, error } = await client
+						.from('blocks')
+						.insert(block)
+						.select()
+
+					const budgets = ["CREATEBUDGET", "UPDATEBUDGET", "REMOVEBUDGET"];
+					const products = ["CREATEPRODUCT", "BUYPRODUCT", "PRODUCTSUB"];
+					const adverts = ["ADVERT", "VIEWADVERT",  "PUBLISHADVERT"];
+					let agreement = false;
+
+					if(block.agreement && budgets.includes(block.transType) && block.agreement.budgetID){
+						const budget = Object.assign(block.agreeement);
+						budget["blockID"] = block.blockID;
+					await client
+					.from('budgets')
+					.insert(budget).select()
+					agreement = Object.assign( block.agreement.agreement );
+					} 
+					else if(block.agreement && products.includes(block.transType) && block.agreement.productConfig){
+						const product = Object.assign(block.agreement.productConfig)
+						product["blockID"]	= block.blockID;
+						product["agreeID"]	= block.agreement.agreeID;
+					await client
+					.from('products')
+					.insert( product).select()
+					agreement = Object.assign( block.agreement );
+					} 
+
+					
+					else if(block.agreement && adverts.includes(block.transType) && block.agreement.advertID){
+						const advert = Object.assign(block.agreement);
+						advert["blockID"]	= block.blockID;
+					await client
+					.from('adverts')
+					.insert( advert ).select()
+					} 
+					else if(block.agreement && block.agreement.agreeID){
+					agreement = Object.assign(block.agreement);
+					}
+					
+					if( agreement && agreement.agreeID ){
+						agreement["blockID"] = block.blockID;
+					await client
+					.from('agreements')
+					.insert(agreement)
 					.select()
+					}
 
-				const budgets = ["CREATEBUDGET", "UPDATEBUDGET", "REMOVEBUDGET"];
-				const products = ["CREATEPRODUCT", "BUYPRODUCT", "PRODUCTSUB"];
-				const adverts = ["ADVERT", "VIEWADVERT",  "PUBLISHADVERT"];
-				let agreement = false;
+					if( ! this.#productTrans.includes(block.transType)){
+						const exchangeNote = Object.assign(block.exchangeNote);
+						await client.from("exchangeNote").insert(exchangeNote);
+					} else {
+						const exchangeNote = Object.assign(block.exchangeNote);
+						await client.from("productNote").insert(exchangeNote);
+					}
 
-				if(block.agreement && budgets.includes(block.transType) && block.agreement.budgetID){
-					const budget = Object.assign(block.agreeement);
-					budget["blockID"] = block.blockID;
-				await client
-				.from('budgets')
-				.insert(budget).select()
-				agreement = Object.assign( block.agreement.agreement );
-				} 
-				else if(block.agreement && products.includes(block.transType) && block.agreement.productConfig){
-					const product = Object.assign(block.agreement.productConfig)
-					product["blockID"]	= block.blockID;
-					product["agreeID"]	= block.agreement.agreeID;
-				await client
-				.from('products')
-				.insert( product).select()
-				agreement = Object.assign( block.agreement );
-				} 
 
-				
-				else if(block.agreement && adverts.includes(block.transType) && block.agreement.advertID){
-					const advert = Object.assign(block.agreement);
-					advert["blockID"]	= block.blockID;
-				await client
-				.from('adverts')
-				.insert( advert ).select()
-				} 
-				else if(block.agreement && block.agreement.agreeID){
-				agreement = Object.assign(block.agreement);
-				}
-				
-				if( agreement && agreement.agreeID ){
-					agreement["blockID"] = block.blockID;
-				await client
-				.from('agreements')
-				.insert(agreement)
-				.select()
+				if (error) {
+					console.error('[v0] Error saving block:', error)
+					throw error
 				}
 
-			if (error) {
-				console.error('[v0] Error saving block:', error)
-				throw error
+				//console.log('[v0] Block saved successfully:', data)
+				return data
+				} catch (err) {
+				console.error('[v0] Failed to save block:', err)
+				throw err
+				}
 			}
 
-			//console.log('[v0] Block saved successfully:', data)
-			return data
-			} catch (err) {
-			console.error('[v0] Failed to save block:', err)
-			throw err
+			// Save and broadcast the block
+			async function processBlock(block) {
+				try {
+				//console.log("processing block: ", block.blockID )
+				
+				// Also broadcast to channel for immediate updates
+				await channel.send({
+					type: "broadcast",
+					event: "block_broadcast",
+					payload: { text: JSON.stringify(block) }
+				})
+				//console.log("block: ", block.blockID , " Broadcasted successfully")
+				// Save to database (this will trigger the database subscription)
+				await saveBlock(block)
+				
+				
+				//console.log('[v0] Block processed successfully')
+				} catch (error) {
+				console.error('[v0] Error processing block:', error)
+				
+				}
 			}
-		}
-
-		// Save and broadcast the block
-		async function processBlock(block) {
-			try {
-			//console.log("processing block: ", block.blockID )
-			
-			// Also broadcast to channel for immediate updates
-			await channel.send({
-				type: "broadcast",
-				event: "block_broadcast",
-				payload: { text: JSON.stringify(block) }
-			})
-			//console.log("block: ", block.blockID , " Broadcasted successfully")
-			// Save to database (this will trigger the database subscription)
-			await saveBlock(block)
-			
-			
-			//console.log('[v0] Block processed successfully')
-			} catch (error) {
-			console.error('[v0] Error processing block:', error)
-			
-			}
-		}
-		// Call the function with your block
-		await processBlock(block)
-		channel.unsubscribe();
+			// Call the function with your block
+			await processBlock(block)
+			channel.unsubscribe();
+		})
+		
 
 	}
 	
@@ -10701,6 +10726,21 @@ static Base64 = {
 					return false;
 				}
 				
+			}
+
+			if( response.noteServer && this.supabases && this.supabases.length < 24 ){
+				const [supabaseUrl, supabaseKey] = response.noteServer.split(" - ");
+
+				if(supabaseKey && supabaseUrl){
+					const client = this.supabase;
+					this.supabase 	= null;
+					this.createClient(false,supabaseUrl, supabaseKey );
+
+					if(client){
+						this.supabase = client;
+					}
+				}
+					
 			}
 			
 			/* //console.log("Check Former Block: " + JSON.stringify( fBlock ), "Check Response Block: " + JSON.stringify( response ) );
@@ -11759,7 +11799,7 @@ static Base64 = {
 			}
 
 			if(! this.#currentNote ){
-				//alert("no current note");
+				////alert("no current note");
 				this.#currentNote 		= JSON.parse( JSON.stringify( this.realB.exchangeNote ) );
 				this.#currentNote.noteAddress = this.realB.exchangeNote.exchangeID;
 				this.#currentNote.noteSecret = this.realB.exchangeNote.exchangeKey;
@@ -13330,6 +13370,7 @@ static Base64 = {
 				}
 				
 				let userDirectory 		= await dir.getDirectoryHandle(note.noteAddress, {create: true}).catch(error =>{this.errorMessage( error.toString() );  return false;});
+				
 					
 				let file 				= await userDirectory.getFileHandle( response.blockID.replaceAll(/[^a-zA-Z0-9]/g, "_"), {create: true}).catch(error =>{this.errorMessage( error.toString() );  return false;});
 				
@@ -16855,6 +16896,8 @@ static Base64 = {
 			}
 		}
 
+		//alert("Check update")
+
 		if(details.recipient){
 			this.#Reipient = details.recipient;
 		}
@@ -16928,6 +16971,8 @@ static Base64 = {
 		if( ! block ){
 			block 		= JSON.parse( JSON.stringify( this.defaultBlock ) );
 		}
+
+		//alert("Check update 2")
 		
 		if( currentNote && typeof currentNote == "object" && ! currentNote.length && currentNote.exchangeID )
 			block.exchangeNote = currentNote;
@@ -17054,6 +17099,8 @@ static Base64 = {
 				return false;
 			}
 		}
+
+		//alert("Check update 3")
 		
 		if( ! newBlock.agreements )
 			newBlock.agreements = {};
@@ -17068,6 +17115,8 @@ static Base64 = {
 			/* if(  currentNote.noteType == note.noteType && currentNote.exchangeID )
 				newBlock.exchangeNote = JSON.parse( JSON.stringify( currentNote )); */
 		}
+
+		//alert("Check update 4")
 		
 		
 		/* if( ! this.#passwordKey && ! this.#isExchangeMarketMining && this.alertDetails && ! this.passwordKey && ( ! this.transactionKey && ! this.s[ this.transactionKey ] && ! this.#transSend.includes( details.transType ) )  ) {
@@ -17164,11 +17213,12 @@ static Base64 = {
 			return false;
 		}		 */
 		
-				
+		//alert("Check update 6")	
 		var trivKey;
 		//await this.createAlert( "checking details 5 " + details.transType );
 		//next we try to configure the block IDs of the note
 		if( newBlock.blockID && details.transType != "CREATE" && ( newBlock.blockID == note.blockID || block.splitID == note.blockID ) ) {
+			//alert("Check update 7")
 			//await this.createAlert( details.transType == "MERGE" && note.noteAddress == "" );
 			if( details.transType == "MERGE" && note.noteAddress == "" ){
 				note.noteSecret 		= await this.generateKey(0, true );
@@ -17205,6 +17255,7 @@ static Base64 = {
 				newBlock.formerBlockID = details.blockID;
 				newBlock.nextBlockID	= "AUTOEXECUTE";
 			}
+			//alert("Check update 712")
 			
 			//calculating the wallet hashes.
 			var string 					= note.walletID;
@@ -17214,10 +17265,11 @@ static Base64 = {
 			var string 					= trivKey;
 			trivKey 					= this.hashed( string );
 			let walletBlock 			= await this.getCurrentWalletBlock( newBlock );
+			//alert("Check update 713")
 			newBlock.formerWalletHASH  	= walletBlock.walletHASH;
 			newBlock.walletHASH 		= walletBlock.nextWalletHASH;
 			newBlock.nextWalletHASH		= await this.calculateNextBlockID( note, newBlock.walletHASH, 1, true );
-			
+			//alert("Check update 714")
 			newBlock.transTime 			= this.currentTime();
 			
 			/* var string 					= newBlock.exchangeNote.exchangeID;
@@ -17246,11 +17298,12 @@ static Base64 = {
 			this.l[trivKey + "_triv_time"] 	= newBlock.transTime;
 			this.l[trivKey]					= newBlock.exBlockID; */
 			let currentBlock 				= await this.getCurrentExchangeBlock( newBlock );
+			//alert("Check update 71")
 			
 			newBlock.exFormerBlockID 	= currentBlock.exBlockID;
 			newBlock.exBlockID 			= currentBlock.exNextBlockID;
 			newBlock.exNextBlockID 		= await this.calculateNextBlockID( currentBlock.exchangeNote, newBlock.exBlockID );			
-			
+			//alert("Check update 72")
 			/* if( this.l[trivKey] )
 				newBlock.walletHASH 	= this.l[trivKey];
 			
@@ -17321,7 +17374,7 @@ static Base64 = {
 					}
 				}
 			} 
-			
+			//alert("Check update 73")
 			if( ! rankStore.value ) {
 				rankStore.value 	= note.noteValue;
 				value 				= rankStore.value;
@@ -17365,6 +17418,7 @@ static Base64 = {
 			rankStore.rank 			= rank
 			rankStore.rankCode 		= rank;
 			this.l[ trivKey ]		= JSON.stringify( rankStore );
+			//alert("Check update 75")
 			//await this.createAlert( rankStore.value + " checking " );
 			
 		} else {
@@ -17710,7 +17764,7 @@ static Base64 = {
 			
 			newBlock.noteServer = note.noteServer;
 		}
-		
+		//alert("Check update 8")
 		
 		//before doing anything, let'this.s add verification values to the current block
 		//adding the current note value to the noteBlock
@@ -17758,6 +17812,7 @@ static Base64 = {
 		//treating each note based on type and transaction type.
 		//this treats tranasction that can only be handled by a credit note type.
 		if( await this.testNoteType("CRD", note) ){
+			//alert("Check update 9")
 			//credit note types have send transactions
 			//recieve transaction based on Investment will be handled differently.
 			if( this.#transSend.includes( details.transType ) && details.transType != "INVESTRECIEVE" && details.transType != "PENDING" && ( details.transType != "AGREESEND" || ( details.transType == "AGREESEND" && this.#agreeBlock && this.#agreeBlock.blockID == block.blockID ) ) ){		
@@ -17842,10 +17897,10 @@ static Base64 = {
 				//so Scriptbills user don't need to apply to get credit, they simply run their transactions and credit
 				//is approved for them.
 				/* //console.log( details.transValue );
-				alert( "Check Trans Value" );
+				//alert( "Check Trans Value" );
 				//console.log( note.noteValue );
 				//console.log(details.transValue > note.noteValue, ! this.#isExchangeMarketMining, !( this.#agreeBlock && details.transType == "AGREESEND" ));
-				alert( "Check Note Value" ); */
+				//alert( "Check Note Value" ); */
 				if( details.transValue > note.noteValue && ! this.#isExchangeMarketMining && !( this.#agreeBlock && details.transType == "AGREESEND" )) {
 					//console.log("Trans Greater");
 					let productBlock;
@@ -18011,18 +18066,18 @@ static Base64 = {
 				}
 				
 				if( details.transType == "WITHDRAW" && ! details.withdrawAccount ){
-					//alert("raay")
+					////alert("raay")
 					this.errorMessage("No withdraw account set in your withdrawal request");
 					return false;
 				}
 
 				if( details.transType == "WITHDRAW" && details.withdrawAccount ){
-					//alert("Yay")
+					////alert("Yay")
 					//checking the agreements on the note. Note can't withdraw if there
 					//is loan on the agreement.
 					let agreeID, run = parseFloat( details.transValue ), noteValue = parseFloat( note.noteValue );
 					let agreements = newBlock.agreements, agrees, blk;
-					//alert("Withdrawing Credit" );
+					////alert("Withdrawing Credit" );
 					
 					
 					for( agreeID in agreements ){
@@ -18056,7 +18111,7 @@ static Base64 = {
 					
 					//must use the withdrawCredit method to achieve this.
 					if( this.#isExchangeDeposit ){
-						//alert("Withdrawing Credit Exchange Deposit" );
+						////alert("Withdrawing Credit Exchange Deposit" );
 					
 						this.#currentNote 		= await this.getCurrentExchangeNote( note.noteType );
 						
@@ -18767,7 +18822,7 @@ static Base64 = {
 					newBlock.recipient = this.encrypt( JSON.stringify( agreement ), this.publicKey[id] );
 				
 				/* //console.log( "Recipient data: ", newBlock.recipient );
-				alert("check recipient data"); */
+				//alert("check recipient data"); */
 				
 				newBlock.transType = details.transType;
 				
@@ -19756,7 +19811,7 @@ static Base64 = {
 					
 					//testing the type of the budget,
 					if( details.agreement.budgetType &&  details.agreement.budgetType == 'business' ) {
-						//alert("business budget!");
+						////alert("business budget!");
 						let x, product, productID, productBlock;
 						
 						productNote 	= JSON.parse( JSON.stringify( this.defaultBlock.exchangeNote ) );
@@ -19797,7 +19852,7 @@ static Base64 = {
 						newBlock.budgetKey 			= await this.getPublicKey( id, true );
 						newBlock.budgetSign 		= await this.Sign( note.budgetKey, newBlock.blockID );
 						
-						//alert(details.agreement.budgetID);
+						////alert(details.agreement.budgetID);
 						
 					} else if( details.agreement && details.agreement.budgetType == "governmental" ){
 						
@@ -20751,6 +20806,7 @@ static Base64 = {
 						newBlock.totalUnits 	= parseInt( sellBlock.totalUnits ) + parseInt( details.transValue );
 					}				
 				}else if( details.transType == "UPDATE" || details.transType == "UPDATEPRODUCT" || details.transType == "DEPOSIT" || details.transType == "LOAN" ){
+					//alert("IN Update")
 					/* let uBlockID = newBlock.blockID;
 					let uNextBlockID = newBlock.nextBlockID;
 					let uFormerBlockID = newBlock.formerBlockID;
@@ -20809,7 +20865,7 @@ static Base64 = {
 							
 							//console.log( "Deposit trans value: " + details.transValue );
 							//console.log( "Deposit note value 3: " + note.noteValue );
-							//alert("check 1");		
+							////alert("check 1");		
 							
 							//console.log("newBlock Deposit Agreement: " + JSON.stringify( newBlock ), " The Agreement if found: " + JSON.stringify( details.agreement ));
 							
@@ -20895,7 +20951,7 @@ static Base64 = {
 								}
 								newBlock.isExchangeMarketMining		= 0;
 							} else {
-								//alert("Response Exchange");
+								////alert("Response Exchange");
 								if( ! this.#currentNote ){
 									this.#currentNote 	= await this.getCurrentExchangeNote( note.noteType );
 								}
@@ -20906,11 +20962,11 @@ static Base64 = {
 
 								if( ! this.#currentNote || typeof this.#currentNote != "object" || ! this.#currentNote.exchangeID ){
 									this.errorMessage("We Couldn't find an Exchange note connected to this note type " + note.noteType + " to authorize this deposit.");
-									//alert("No Exchange");
+									////alert("No Exchange");
 									return false;
 								}
 
-								//alert("Exchange dey")
+								////alert("Exchange dey")
 								
 								newBlock.exchangeNote 			= JSON.parse( JSON.stringify( this.#currentNote ));
 								newBlock.exchangeNote.transID 	= await this.generateKey(15);
@@ -20946,7 +21002,7 @@ static Base64 = {
 								
 								
 								if( this.depositInstance && this.depositInstanceKey ){
-									//alert("Instance set");
+									////alert("Instance set");
 									
 									details.agreement = await this.createAgreement( "", newBlock);
 										
@@ -20999,13 +21055,13 @@ static Base64 = {
 									newBlock.isExchangeMarketMining		= 1;
 								} else {
 									console.log(this.depositInstance , this.depositInstanceKey )
-									//alert("NO Instance")
+									////alert("NO Instance")
 									this.errorMessage("Can't create deposit without a valid exchange key " );
 									//console.log("key not present");
 									return false;
 								}
 							}
-							//alert("Deposit Done")
+							////alert("Deposit Done")
 							//console.log( "Deposit trans value 2: " + details.transValue );
 							//console.log( "Deposit note value 3: " + note.noteValue );
 							note.noteValue				= parseFloat( note.noteValue ) + parseFloat( details.transValue );
@@ -22422,7 +22478,7 @@ static Base64 = {
 				if( ! note.referer )
 					note.referer 		= this.generateKey(15);
 				
-				this.#splitNote.referee  	= note.referer;
+				this.#splitNote.referee  	= note.walletID;
 				
 				if( details.agreement && details.recipient && typeof details.agreement == "object" ){
 					details.agreement.privateKey 		= await this.generateKey(10, true, true );
@@ -23167,6 +23223,10 @@ static Base64 = {
 		if( ! newBlock.creditType || newBlock.creditType != note.creditType ){
 			newBlock.creditType = note.creditType;
 		}
+
+		if( this.#note.supabaseUrl && this.#note.supabaseKey ){
+			newBlock.noteServer = `${this.#note.supabaseUrl} - ${this.#note.supabaseKey}`;
+		}
 		
 		/* var string 					=  transKey;
 		
@@ -23518,7 +23578,7 @@ static Base64 = {
 		this.#noVerify			= false;
 		return await this.storeBlock( newBlock, note ).then( async store =>{
 			//console.log( 'store: ', store );
-			//alert('stored last: ' + store );
+			////alert('stored last: ' + store );
 			//await this.createAlert('stored last: ' );
 			this.returnBlock 		= JSON.parse( JSON.stringify( newBlock ) );
 			this.returnNote 	= JSON.parse( JSON.stringify( this.#note ));
@@ -23802,6 +23862,14 @@ static Base64 = {
 				note.rankPref = this.rankPref;
 				delete this.rankPref;
 			}
+
+			if(this.supabaseUrl){
+				note.supabaseUrl = this.supabaseUrl;
+			}
+
+			if(this.supabaseKey){
+				note.supabaseKey = this.supabaseKey
+;			}
 			
 			if( this.verifyID ){
 				note.verifyID 	= this.verifyID;
@@ -23881,8 +23949,10 @@ static Base64 = {
 		
 		let exBlockID 		= exchangeBlock.exNextBlockID;
 		
-		if( ! exBlockID )
+		if( ! exBlockID || this.lastExBlockID == exBlockID )
 			return exchangeBlock;
+
+		this.lastExBlockID = exBlockID;
 		
 		let nextBlock 		= await this.getTransBlock(1, {	exBlockID });
 		//console.log( nextBlock );
@@ -24515,12 +24585,17 @@ static Base64 = {
 		
 		let walletHASH 	= referenceBlock.nextWalletHASH;
 		
-		if( ! walletHASH ){
+		if( ! walletHASH && this.lastWalletHash != walletHASH ){
 			if( ! this.#note && this.s.currentNote )
 				this.#note 		= await this.#getCurrentNote();
 			
 			walletHASH 	= await this.calculateNextBlockID( this.#note, false, 1, true );
 		}
+
+		if( this.lastWalletHash == walletHASH )
+			return referenceBlock;
+
+		this.lastWalletHash = walletHASH;
 		
 		let blocks 			= await this.getTransBlock(1, { walletHASH });
 		
@@ -27486,7 +27561,7 @@ static Base64 = {
 			if( ! note && this.#note )
 				note 		= JSON.parse( JSON.stringify( this.#note ));
 			
-			//alert(" Create Budget Running");
+			////alert(" Create Budget Running");
 			
 			let testType 	= note.noteType.slice( 0, note.noteType.lastIndexOf("CRD"));
 			
@@ -27560,7 +27635,7 @@ static Base64 = {
 					}
 				}
 			} */
-			//alert(" Create Budget Running 2");
+			////alert(" Create Budget Running 2");
 					
 			if( typeof budgetConfig.max_exec == 'string' ) {
 				maxExecTime = parseInt( this.calculateTime( budgetConfig.max_exec ) );
@@ -27574,7 +27649,7 @@ static Base64 = {
 			}
 			
 			
-			//alert(" Create Budget Running 3");
+			////alert(" Create Budget Running 3");
 			
 			//reconfiguring the value of the budget to equal the actual value of items in the budget.
 			
@@ -27603,7 +27678,7 @@ static Base64 = {
 					}
 				}
 			}	
-			//alert(" Create Budget Running 4 " + budgetConfig.budgetID );		
+			////alert(" Create Budget Running 4 " + budgetConfig.budgetID );		
 			
 			let details 	= JSON.parse( JSON.stringify( this.defaultBlock ) );
 			
@@ -27678,7 +27753,7 @@ static Base64 = {
 			
 			
 			/* if( budgetConfig.budgetType == "business" && $return.transType == "CREATEBUDGET" ){
-				alert("Creating Item");
+				//alert("Creating Item");
 				if( this.defaultItem.itemCredit != budgetConfig.budgetCredit ){
 					let exValues 		= await this.getExchangeValue( budgetConfig.budgetCredit, this.defaultItem.itemCredit );
 					this.defaultItem.itemValue 		= this.defaultItem.itemValue * exValues[0];
