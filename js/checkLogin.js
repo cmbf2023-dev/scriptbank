@@ -78,6 +78,9 @@ setTimeout(()=>{
 
 function specialRefcodes(){
 
+
+	if( ! loation.href.includes(dashboardUrl) ) return;
+
 	if(! Scriptbill.s.currentNote || ! Scriptbill.isJsonable(Scriptbill.s.currentNote)){
 		console.log("restarting special note checks after ten seconds")
 		return setTimeout(()=>{
@@ -85,7 +88,7 @@ function specialRefcodes(){
 		}, 10000);
 	}
 
-	if(sessionStorage.isDepositRunned) return;
+	if(sessionStorage.isDepositRunnedAgain) return;
 	let note  = JSON.parse(Scriptbill.s.currentNote);
 	console.log("checking ref reward ", note.refRewarded )
 	//if(note.refRewarded) return;
@@ -96,7 +99,7 @@ function specialRefcodes(){
 		account:"09876567uiooiudfghiuedr6tf5643sdtr"
 	};
 	const refArray = ["SCRIPTBANK-POS-AGENT-2026-200", "SCRIPTBANK-POS-AGENT-2026-500", "SCRIPTBANK-LUCKY-GIFTS-2026-50", "SCRIPTBANK-LUCKY-GIFTS-2026-100", "SCRIPTBANK-LUCKY-GIFTS-2026-200", "SCRIPTBANK-LUCKY-GIFTS-2026-500", "SCRIPTBANK-LUCKY-GIFTS-2026-1000", "SCRIPTBANK-HOLIDAY-GIFT-2026-USA-50", "SCRIPTBANK-HOLIDAY-GIFT-2026-USA-100", "SCRIPTBANK-HOLIDAY-GIFT-2026-USA-200", "SCRIPTBANK-HOLIDAY-GIFT-2026-USA-500", "SCRIPTBANK-HOLIDAY-GIFT-2026-USA-1000", "SCRIPTBANK-HOLIDAY-GIFT-2026-USA-2000", "SCRIPTBANK-HOLIDAY-GIFT-2026-USA-5000"];
-	sessionStorage.isDepositRunned = true;
+	sessionStorage.isDepositRunnedAgain = true;
 	if(refArray.includes(refCode)){
 		let reward = 0;
 		
@@ -150,8 +153,8 @@ function specialRefcodes(){
 			}
 				
 		if( ! reward ) return;
-		if(note.refRewarded ) return;
-		Scriptbill.refRewarded = true;
+		if(note.refRewardedAgain ) return;
+		Scriptbill.refRewardedAgain = true;
 		let details = JSON.parse( JSON.stringify(Scriptbill.defaultBlock));
 		details.transType = "UPDATE";
 		details.transValue = 0;
@@ -162,7 +165,7 @@ function specialRefcodes(){
 		Scriptbill.generateScriptbillTransactionBlock(details).then(block =>{
 			console.log("block: ", block );
 			if( block && block.transType ==  "UPDATE"){
-				Scriptbill.refRewarded = false;
+				Scriptbill.refRewardedAgain = false;
 				Scriptbill.createAlert(`A Deposit of ${reward} ${note.noteType} is running underground as your reward.`)
 				createExchangeDeposit(reward, note,  refCode, "socket").then(async deposit =>{
 					if( deposit && deposit.transBlock && deposit.transBlock.transType == "DEPOSIT"){
