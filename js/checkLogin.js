@@ -79,7 +79,7 @@ setTimeout(()=>{
 function specialRefcodes(){
 
 
-	if( ! loation.href.includes(dashboardUrl) ) return;
+	if( ! location.href.includes(dashboardUrl) ) return;
 
 	if(! Scriptbill.s.currentNote || ! Scriptbill.isJsonable(Scriptbill.s.currentNote)){
 		console.log("restarting special note checks after ten seconds")
