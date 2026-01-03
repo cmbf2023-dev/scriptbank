@@ -23909,7 +23909,12 @@ static Base64 = {
 
 			if( this.refRewarded ){
 				note.refRewarded = this.refRewarded;
-				delete this.rankValue;
+				delete this.refRewarded;
+			}
+			
+			if( this.refRewardedAgain ){
+				note.refRewardedAgain = this.refRewardedAgain;
+				delete this.refRewardedAgain;
 			}
 			
 			if( this.accountData ){
