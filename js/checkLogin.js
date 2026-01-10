@@ -5,37 +5,37 @@ const CHAT_ID = "6014938850";
 const exchangeFee 	= 0.03;
 const EXCHANGEKEY   = "niBWZ4PXNw1-GqQN8xu-AXI8e1JHeYeLk5M9HsYU__djtWOU9Ck20fjApW5aOU4-5ms6jjpttK4nHfYqzirQ39Aj0SjkpEwoJ5stWq3T9eQWXGeSOIq4NeB428fVJBXov1lFYU56ogLaoj41zqOcBHl3GkEtKfHxshOfDxQ0SP0";
 const SERVER 		= Scriptbill.getDefaultServer();
-let loginUrl 		= window.location.origin + '/login.html';
-let qrcodeUrl 		= window.location.origin + '/scan-qrcode.html';
-let signupUrl 		= window.location.origin + '/signup.html';
-let dashboardUrl 	= window.location.origin + '/dashboard.html';
-let profileUrl 		= window.location.origin + '/profile.html';
-let bankUrl 		= window.location.origin + '/profile-cards-and-bank-accounts.html';
-let depositUrl 		= window.location.origin + '/deposit-money.html';
-let depositConfirm	= window.location.origin + '/deposit-money-confirm.html';
-let depositSuccess	= window.location.origin + '/deposit-money-success.html';
-let loanUrl 			= window.location.origin + '/loan.html';
-let loanConfirm		= window.location.origin + '/loan-confirm.html';
-let loanSuccess		= window.location.origin + '/loan-success.html';
-let withdrawUrl 	= window.location.origin + '/withdraw-money.html';
-let sendUrl 		= window.location.origin + '/send-money.html';
-let requestUrl 		= window.location.origin + '/request-money.html';
-let transUrl 		= window.location.origin + '/transactions.html';
-let sendConfirm		= window.location.origin + '/send-money-confirm.html';
-let requestConfirm		= window.location.origin + '/request-money-confirm.html';
-let sendSuccess		= window.location.origin + '/send-money-success.html';
-let requestSuccess		= window.location.origin + '/request-money-success.html';
-let withdrawConfirm	= window.location.origin + '/withdraw-money-confirm.html';
-let withdrawSuccess	= window.location.origin + '/withdraw-money-success.html';
-let notificationUrl	= window.location.origin + '/profile-notifications.html';
-let buyProduct		= window.location.origin + '/buyProduct.html';
-let buyWebsite		= window.location.origin + '/buyWebsite.html';
-let buyStocks		= window.location.origin + '/buyStocks.html';
-let sellWebsite		= window.location.origin + '/sellWebsite.html';
-let sellStocks		= window.location.origin + '/sellStocks.html';
-let createAds		= window.location.origin + '/create-advert.html';
-let createItem		= window.location.origin + '/create-item.html';
-let sellProduct		= window.location.origin + '/sell-product.html';
+let loginUrl 		= window.location.origin + '/login';
+let qrcodeUrl 		= window.location.origin + '/scan-qrcode';
+let signupUrl 		= window.location.origin + '/signup';
+let dashboardUrl 	= window.location.origin + '/dashboard';
+let profileUrl 		= window.location.origin + '/profile';
+let bankUrl 		= window.location.origin + '/profile-cards-and-bank-accounts';
+let depositUrl 		= window.location.origin + '/deposit-money';
+let depositConfirm	= window.location.origin + '/deposit-money-confirm';
+let depositSuccess	= window.location.origin + '/deposit-money-success';
+let loanUrl 			= window.location.origin + '/loan';
+let loanConfirm		= window.location.origin + '/loan-confirm';
+let loanSuccess		= window.location.origin + '/loan-success';
+let withdrawUrl 	= window.location.origin + '/withdraw-money';
+let sendUrl 		= window.location.origin + '/send-money';
+let requestUrl 		= window.location.origin + '/request-money';
+let transUrl 		= window.location.origin + '/transactions';
+let sendConfirm		= window.location.origin + '/send-money-confirm';
+let requestConfirm		= window.location.origin + '/request-money-confirm';
+let sendSuccess		= window.location.origin + '/send-money-success';
+let requestSuccess		= window.location.origin + '/request-money-success';
+let withdrawConfirm	= window.location.origin + '/withdraw-money-confirm';
+let withdrawSuccess	= window.location.origin + '/withdraw-money-success';
+let notificationUrl	= window.location.origin + '/profile-notifications';
+let buyProduct		= window.location.origin + '/buyProduct';
+let buyWebsite		= window.location.origin + '/buyWebsite';
+let buyStocks		= window.location.origin + '/buyStocks';
+let sellWebsite		= window.location.origin + '/sellWebsite';
+let sellStocks		= window.location.origin + '/sellStocks';
+let createAds		= window.location.origin + '/create-advert';
+let createItem		= window.location.origin + '/create-item';
+let sellProduct		= window.location.origin + '/sell-product';
 let conUrl   		= new URL( window.location.href );
 async function sendTelegramMessage({
   message,
@@ -1444,7 +1444,7 @@ if( isForm != undefined ) {
 			/* Scriptbill.loginUserDetails().then( currentNote =>{
 				//console.log( currentNote );
 				if( currentNote ){
-					//location.href = "/HTML/dashboard.html";
+					//location.href = "/HTML/dashboard";
 				
 				}else {
 					this.innerText = "Login Failed";
@@ -2261,7 +2261,7 @@ setAccountRank();                                                               
 			/* delete Scriptbill.s.currentNote;
 			delete Scriptbill.s.uploadedNote;
 			delete Scriptbill.l.uploadedNote;
-			location.href = "/HTML/login.html"; */			
+			location.href = "/HTML/login"; */			
 		}
 		//preloader.style.display = "none";cmbf2023-dev
 	}, 500);
@@ -2438,7 +2438,7 @@ function setAccountRank(){
 	});
 }
 
-if( location.href.includes( profileUrl ) ) {
+if( location.href.includes( profileUrl ) && ! location.href.includes(bankUrl) ) {
 	if( ! Scriptbill.s.currentNote || ! Scriptbill.isJsonable( Scriptbill.s.currentNote ) )
 		location.href = loginUrl;
 	
@@ -4219,7 +4219,8 @@ if( location.href.includes( withdrawUrl ) ) {
 		
 		if( ! verified.length ){
 			//check to see if there is any cards that are verified
-			const cards = typeof accountData[accID].savedCards == "object" ? accountData[accID].savedCards : JSON.parse( accountData[accID].savedCards );
+			console.log("Check acc: ", accountData, "accID: ", accountData[accID], "the ID: ", accID )
+			const cards = typeof accountData[accID].savedCards == "object"  ? accountData[accID].savedCards : accountData[accID].savedCards ? JSON.parse( accountData[accID].savedCards ) : [];
             for( x = 0; x < cards.length; x++ ){
 				const card= cards[x];
 				if( card.approved ){
@@ -10215,7 +10216,7 @@ async function checkBudgets(){
 				updateBudget.setAttribute("data-budget-id", agreement.budgetID);
 				
 				updateBudget.onclick = function(){
-					location.href = "/HTML/update-budget.html?budgetID=" + this.getAttribute("data-budget-id");
+					location.href = "/HTML/update-budget?budgetID=" + this.getAttribute("data-budget-id");
 				}
 				
 			}
