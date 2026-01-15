@@ -10620,9 +10620,9 @@ static Base64 = {
 			}
 			let fBlock = false;
 			if( ! this.formerBlock || ! this.formerBlock.blockID ){
-				fBlock 				= await this.getTransBlock(1, {blockID: response.formerBlockID});
+				fBlock 				= await this.getTransBlock(1, {nextBlockID: this.hashed(response.blockID)});
 				//console.log("Fblock getting, not former block: " , fBlock );
-			} else if( this.formerBlock.blockID == response.formerBlockID || this.formerBlock.splitID == response.formerBlockID ) {
+			} else if( this.hashed( this.formerBlock.blockID ) == response.formerBlockID || this.hashed( this.formerBlock.splitID ) == response.formerBlockID ) {
 				fBlock 				= [ JSON.parse( JSON.stringify( this.formerBlock ) ) ];
 				//console.log("Fblock getting, former: " , fBlock );
 				this.formerBlock 	= false;
