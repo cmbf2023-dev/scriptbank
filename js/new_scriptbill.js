@@ -11385,7 +11385,7 @@ static Base64 = {
 						
 						//we will only allow this node to verify blocks if the node too has been
 						//verified by other nodes.
-						if( isVerified ){
+						if( isVerified || block.transType == "CREATE"){
 							//set the new verify time.
 							verify.verifyTime 		= this.currentTime();
 							verify.verifyID 		= block.blockID;
