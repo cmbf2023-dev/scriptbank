@@ -10627,7 +10627,7 @@ static Base64 = {
 				//console.log("Fblock getting, former: " , fBlock );
 				this.formerBlock 	= false;
 			} else {
-				fBlock 				= await this.getTransBlock(1, {blockID: response.formerBlockID});
+				fBlock 				= await this.getTransBlock(1, {nextBlockID: this.hashed( response.blockID)});
 				//console.log("Fblock getting, former block bur from formerBlockID: " , fBlock );
 			}
 			
@@ -10651,7 +10651,7 @@ static Base64 = {
 			}
 			
 			if( ( ! fBlock.length || ! fBlock[0].blockID ) ){
-				fBlock 				= await this.getTransBlock(1, {splitID:response.formerBlockID});
+				fBlock 				= await this.getTransBlock(1, {nextSplitID:this.hashed(response.formerBlockID)});
 				//console.log("Fblock getting, spliti: " , fBlock );
 				this.splitBlock 	= fBlock[0];
 			}
@@ -10678,7 +10678,7 @@ static Base64 = {
 				//await this.createAlert("Verifying Data 2 Former Block Not Directly Found");
 				//checking if the current block is an exchange note block.
 				if( response.noteValue != 0 && ! isExchangeTrans ){
-					fBlock 	= await this.getTransBlock(1, {blockID: response.formerBlockID});
+					fBlock 	= await this.getTransBlock(1, {nextBlockID: this.hashed(response.blockID)});
 					fBlock	= fBlock[0];
 					//console.log("Fblock getting, last: " , fBlock );
 					
@@ -10895,6 +10895,7 @@ static Base64 = {
 				}
 			}
 			
+			//verifying deposits
 			if( response.transType == "DEPOSIT" && response.agreement && response.agreement.depositServer && response.agreement.depositInstanceKey ){
 				let url;
 				
@@ -10968,7 +10969,7 @@ static Base64 = {
 				//verifying the blocks.
 				//verifying the block id, the next block ID test will ensure that the current note secret was used to calculate
 				//the block IDs
-				if( fBlock.blockID != response.formerBlockID || fBlock.nextBlockID != response.blockID ) {
+				if( this.hashed( fBlock.blockID ) != response.formerBlockID || fBlock.nextBlockID != this.hashed(response.blockID) ) {
 					this.response     = JSON.parse( JSON.stringify( response ) );					
 					this.#rejectResponse('Block ID not Matched!!!', response );
 					delete this.s.processingID;
@@ -11040,7 +11041,7 @@ static Base64 = {
 					}
 					
 				}
-				else if( this.splitBlock && this.splitBlock.blockID && this.splitBlock.splitID == response.formerBlockID ){
+				else if( this.splitBlock && this.splitBlock.blockID && this.splitBlock.splitID == this.hashed( response.blockID) ){
 					let verify 	= await this.verifyData( this.splitBlock );
 					
 					if( ! verify ){
@@ -11095,7 +11096,8 @@ static Base64 = {
 						} else if( revBlocks[x] && this.#transSend.includes( revBlocks[x].transType ) ){
 							sendBlocks.push( revBlocks[x] );
 							
-						}else if( revBlock && sendBlocks.length > 1 ){
+						}
+						if( revBlock && sendBlocks.length > 1 ){
 							break;
 						}					
 					}
@@ -11175,7 +11177,9 @@ static Base64 = {
 							sendBlockIDs.push( sendBlocks[x].blockID );
 							revBlocks.push( sendBlocks[x] );
 							
-						}else if( sendBlock && revBlocks.length > 1 ){
+						}
+						
+						if( sendBlock && revBlocks.length > 1 ){
 							break;
 						}					
 					}
@@ -11217,7 +11221,7 @@ static Base64 = {
 					//we don't expect more than one recieve block in a transaction
 					//if any exist, then it should be the current response block
 					if( revBlocks.length > 0 && revBlocks[0].blockID != response.blockID ){
-						if( revBlocks[0].nextBlockID == response.blockID ){
+						if( revBlocks[0].nextBlockID == this.hashed(response.blockID) ){
 							this.response     = JSON.parse( JSON.stringify( response ) );
 							this.#rejectResponse("Can't Recieve a Transaction More Than Once", response );
 							delete this.s.processingID;
