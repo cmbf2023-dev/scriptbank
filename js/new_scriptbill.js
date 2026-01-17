@@ -16263,7 +16263,8 @@ static Base64 = {
 			
 			this.#note.referer 		= await this.generateKey(20);
 			this.#note.referer 		= this.#note.referer.replaceAll(/[^a-zA-Z0-9]/g, "");
-			
+			this.#note.noteSalt 			= await this.generateKey(256);
+			this.#note.noteFormular			= this.generateRandomNumberAsString(32);
 			
 			//console.log("note type before generate Scriptbill", this.#note.noteType );
 			
