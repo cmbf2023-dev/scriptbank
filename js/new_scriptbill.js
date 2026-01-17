@@ -4169,6 +4169,8 @@
 		'budgetID'		: '',//the ID of the budget the product belongs to. Budget IDs in the Scriptbill Network is an ID of a Company in the Network that manages the STOCK note credit the budget produces. business and governmental budget are budget that produces exchangeable credits in the network.
 		
 	};
+
+	static #exchange = this.#shareExchange();
 	
 	//this is the ranks that will be inherited by Scriptbill users based on their
 	//rank value. Badges on the other hand are created by communities
@@ -4341,6 +4343,7 @@
 		referenceID		: '',//this is the id that indicate the block chain an auto executed transaction is running for.
 		referenceKey	:'',//this is the agreement or budget ID of the auto executed transaction.
 		splitID			:'',//this is the ID of a SPLIT transaction that specifies to the network the block chain a particular block chain had split into. Other transaction types handling the splitID includes QUOTESTOCK, QUOTEBOND, CREDIT transactions.
+		nextSplitID		:"",//hash of the nextSplit ID
 		walletHASH		: '', //an hash value used to locate the wallet on the database.
 		formerWalletHASH : '', //stored to test the value of the walletHASH when the note's wallet key is changed by the wallet for security reason.
 		walletSign		: '', //Scriptbill is a signature that tells and confirms that the note that created THIS block owns the walletHASH.
@@ -4954,7 +4957,55 @@
 		}
 	}
 	
-	
+	static async saltString(stringToHash, salt, numericData) {
+		// Validate inputs
+		if (typeof stringToHash !== 'string') {
+			throw new Error('stringToHash must be a string');
+		}
+		if (typeof salt !== 'string' || salt.length !== 256) {
+			throw new Error(`salt must be a string of length 256. ${salt.length}`);
+		}
+		if ( numericData.toString().length !== 32) {
+			throw new Error(`numericData must be a number with length 32. Current Length ${numericData.toString().length}`);
+		}
+		
+		// Convert numeric data to string and split into array
+		const numericStr = numericData.toString();
+		const numericArray = numericStr.split('').map(Number);
+		
+		// Split the string to be hashed into array of characters
+		const hashArray = stringToHash.split('');
+		
+		// Split the salt into 32 chunks of 8 characters each
+		const saltChunks = [];
+		for (let i = 0; i < 32; i++) {
+			saltChunks.push(salt.substring(i * 8, (i + 1) * 8));
+		}
+		
+		// Create a copy of the hash array to modify
+		const saltedArray = [...hashArray];
+		
+		// Loop through numeric array and salt chunks together
+		for (let i = 0; i < numericArray.length && i < saltChunks.length; i++) {
+			const position = parseInt(numericArray[i]);
+			
+			// Ensure we have a position in bounds
+			if (position >= 0 && position < saltedArray.length) {
+				// Append salt data to the element at the specified position
+				saltedArray[position] = saltedArray[position] + saltChunks[i];
+			} else if (position >= saltedArray.length) {
+				// If position is beyond current array, extend the array
+				// Fill any gaps with empty strings
+				while (saltedArray.length <= position) {
+					saltedArray.push('');
+				}
+				saltedArray[position] = saltChunks[i];
+			}
+		}
+		
+		// Join everything into a single salted string
+		return saltedArray.join('');
+	}
 	
 	static async #generatePassword( userInput ){
 		////console.log( "#generatePassword running " + this.funcUp[ this.funcUp.length][ this.funcUp[ this.funcUp.length].length] );
@@ -6132,6 +6183,7 @@
 	
 	
 	static async getCurrentExchangeNote( noteType = false ){
+
 		if( this.#note && ! this.noteTypeD && ! noteType ){
 			noteType = this.#note.noteType;
 		} else if( this.noteTypeD && ! noteType )
@@ -6144,35 +6196,39 @@
 		////alert("checks 2");
 		
 		let testType 		= noteType.slice( 0, noteType.lastIndexOf("CRD") );
-		let url 			=  this.#note ? this.#note.noteServer : this.#default_scriptbill_server;
-		url    				= new URL( url );
-		url.searchParams.set("scriptbillPing", "true");
 		
-		let ping 			= await fetch( url.href ).then( resp =>{ return resp.text();}).catch( error =>{ console.error( error ); return false;});
-
-		//console.log("check ping: ", ping )
-		
-		if( ! ping || ! ping.isScriptbillServer ){
-			
-			url 			= new URL( this.#default_scriptbill_server );
-		}
-			
-		
-		url.searchParams.set("exchangeNote", noteType);
-		url.searchParams.set("noteTypeBase", "TRUE");
 		const client 		= this.createClient();
-		let note 			= await fetch( url.href ).then( resp =>{ return resp.json();}).catch( error =>{ console.error( error ); return false;});
+		let note;
 
-		/*if(client)
+		/* if(client)
 			note 				= await client.from("exchangeNote").eq("noteType", noteType).select();*/
 		//console.log("check note: ", note );
+
+		if(  this.l && this.l[ noteType + "ExchangeNote" ] ){
+			note 	= JSON.parse( this.l[ noteType + "ExchangeNote" ] );
+		}
 		
-		if( ( ! note || ! note.exchangeID ) && this.#currentNote && this.#currentNote.noteType == noteType && this.#currentNote.exchangeID && this.#currentNote.budgetID ){
+		else if( this.#currentNote && this.#currentNote.noteType == noteType && this.#currentNote.exchangeID && this.#currentNote.budgetID ){
 			note = JSON.parse( JSON.stringify( this.#currentNote ) );
 		}
-		else if( ( ! note || ! note.exchangeID ) && this.l && this.l[ noteType + "ExchangeNote" ] ){
-			note 	= JSON.parse( this.l[ noteType + "ExchangeNote" ] );
-		} else {
+		 else {
+			let url 			=  this.#note ? this.#note.noteServer : this.#default_scriptbill_server;
+			url    				= new URL( url );
+			url.searchParams.set("scriptbillPing", "true");
+			
+			let ping 			= await fetch( url.href ).then( resp =>{ return resp.text();}).catch( error =>{ console.error( error ); return false;});
+
+			//console.log("check ping: ", ping )
+			
+			if( ! ping || ! ping.isScriptbillServer ){
+				
+				url 			= new URL( this.#default_scriptbill_server );
+			}
+				
+			
+			url.searchParams.set("exchangeNote", noteType);
+			url.searchParams.set("noteTypeBase", "TRUE");
+			note 			= await fetch( url.href ).then( resp =>{ return resp.json();}).catch( error =>{ console.error( error ); return false;});
 			 if( ( ! note || ! note.exchangeID ) && this.#fiatCurrencies[ testType ] ){
 				this.#currentNote					= JSON.parse( JSON.stringify( this.defaultBlock.exchangeNote ) );
 				this.#currentNote.noteType 			= noteType;
@@ -8282,6 +8338,22 @@ static Base64 = {
 			return false;
 		}
 	}
+
+	static async #shareExchange(){
+		const client = this.createClient();
+		const channel = client.channel("general");
+		channel.subscribe();
+		const exchangeNote = await this.getCurrentExchangeNote();
+
+		if(exchangeNote){
+			channel.send({
+				type:"broadcast",
+				event:"exchange_broadcast",
+				payload:{text: JSON.stringify(exchangeNote)}
+			})
+			
+		}	
+	}
 	static async checkReferers( response, note ){
 		let referers 		= note.walletID;
 		let refSign 		= response.referer;
@@ -9569,6 +9641,15 @@ static Base64 = {
 		channel.on("broadcast", { event: "block_broadcast" }, (payload) => {
 			//console.log("broadcasted block recieved");
 			this.recieveNewBlock(this.isJsonable( payload.payload.text ) ? JSON.parse(payload.payload.text) : payload.payload.text)
+		})
+
+		channel.on("broadcast", { event: "exchange_broadcast" }, async (payload) => {
+			//console.log("broadcasted block recieved");
+			const exchangeNote = this.isJsonable( payload.payload.text ) ? JSON.parse(payload.payload.text) : payload.payload.text;
+			const myExchangeNote = await this.getCurrentExchangeNote(exchangeNote.noteType);
+			if( !myExchangeNote || (exchangeNote.transTime > myExchangeNote.transTime && exchangeNote.noteType == myExchangeNote.noteType ) ){
+				this.l[exchangeNote.noteType + "ExchangeNote"] = JSON.stringify(exchangeNote);
+			}
 		})
 
 		// Subscribe to the broadcast channel
@@ -14890,9 +14971,17 @@ static Base64 = {
 		
 	}
 
-	static hashed(string = "", algo = ''){
+	static hashed(string = "", salt = "", formular = "", algo = ''){
 		//console.log("hashed running " + this.funcUp[ this.funcUp.length]);
 		this.funcUp[ this.funcUp.length] = "hashed";
+
+		if(! salt && this.#note.noteSalt ){
+			salt = this.#note.noteSalt;
+		}
+
+		if( ! formular && this.#note.noteFormular ){
+			formular = this.#note.noteFormular;
+		}
 		
 		let algoKeys = ["A", "D", "E", "H", "M", "P", "R", "R2", "R3", "RL", "S1", "S3", "S22", "S25", "S38", "S51", "T"];
 		try {
@@ -14900,8 +14989,14 @@ static Base64 = {
 				string = Date.now().toString();
 			
 			if( algo == '' ){
-				if( CryptoJS && CryptoJS.SHA256 && string && typeof string == 'string' )
+				if( CryptoJS && CryptoJS.SHA256 && string && typeof string == 'string' ){
+					
+					if( formular && salt && salt.length == 256 && formular.length == 32)
+						string = this.saltString(string, salt, formular )
+
 					return CryptoJS.SHA256( string ).toString(CryptoJS.enc.Base64);
+				}
+					
 				else
 					return false;
 			}
@@ -16169,6 +16264,7 @@ static Base64 = {
 			this.#note.referer 		= await this.generateKey(20);
 			this.#note.referer 		= this.#note.referer.replaceAll(/[^a-zA-Z0-9]/g, "");
 			
+			
 			//console.log("note type before generate Scriptbill", this.#note.noteType );
 			
 			let newBlock = await this.generateScriptbillTransactionBlock( details, this.#note );
@@ -16471,8 +16567,10 @@ static Base64 = {
 		//console.log("getCurrentProductBlock running " + this.funcUp[ this.funcUp.length]);
 		this.funcUp[ this.funcUp.length] = "getCurrentProductBlock";
 		
-		if( productID ){
-			
+		if( productID || productBlock.productID ){
+			if( ! productID )
+				productID = productBlock.productID;
+
 			if( ! this.#note && this.s.currentNote ){
 				this.#note 		= await this.#getCurrentNote();		
 			}
@@ -16499,16 +16597,10 @@ static Base64 = {
 			
 			return productBlock;
 		}
+
+		return productBlock;
 		
-		if( ! productBlock || ! productBlock.productNextBlockID ) return productBlock;
-		
-		let block = await this.getTransBlock(1, {"productBlockID": productBlock.productNextBlockID});
-		
-		if( block && block.length && block[0].blockID ){
-			return await this.getCurrentProductBlock( "", block );
-		}
-		
-		return productBlock;		
+			
 	}
 	
 	static async testNoteType(prefix, note = false ){
@@ -20204,7 +20296,7 @@ static Base64 = {
 					newBlock.signRef		=  await this.Sign( signKey, signTxt );
 					
 					newBlock.splitID 		= this.Base64.encode( await this.generateKey(newBlock.blockID.length) ).toString().slice(0, newBlock.blockID.length );
-					
+					newBlock.nextSplitID 	= this.hashed( await this.calculateNextBlockID(stockNote, newBlock.splitID ) );
 					//
 					
 				}  else if( ( details.transType == "SOLDBOND" || details.transType == "SOLDSTOCK" ) && response && ( response.transType == "BUYSTOCK" || response.transType == "BUYBOND" || response.transType == "INVEST" ) ) {
@@ -22498,6 +22590,7 @@ static Base64 = {
 				}
 				
 				newBlock.splitID 		= this.Base64.encode( await this.generateKey( newBlock.blockID.length ) ).toString().slice(0, newBlock.blockID.length );
+				newBlock.nextSplitID 	= this.hashed( await this.calculateNextBlockID(this.#splitNote, newBlock.splitID ) );
 			}
 		}
 
@@ -22788,6 +22881,7 @@ static Base64 = {
 				newBlock.recipient 		= this.encrypt( string, details.recipient );
 			}
 			newBlock.splitID			= this.Base64.encode( await this.generateKey(newBlock.blockID.length ) ).toString().slice(0, newBlock.blockID.length );
+			newBlock.nextSplitID 		= this.hashed( await this.calculateNextBlockID(stockNote, newBlock.splitID ) );
 		} else if( response && response.transType == "CREDIT"  && details.transType == "GETCREDIT" && response.agreement ){
 			
 			if( typeof response.agreement == "object" && response.agreement.agreeType == "PRODUCT" ) {
@@ -23267,8 +23361,13 @@ static Base64 = {
 		//for the newBlock hashes to be correctly calculated we need to remove variables that changes
 		//in the block like the exchangeNotes, exchangeIDs, data handler.
 		newBlock.defaultKey 		= this.#odogwu;
+		newBlock.transSalt 			= note.noteSalt;
+		newBlock.transFormular 		= note.noteFormular;
 		let BLOCK 					= JSON.parse( JSON.stringify( newBlock ));
 		note.blockID 				= bleckID;
+
+		note.noteSalt 				= await this.generateKey(256);
+		note.noteFormular			= this.generateRandomNumberAsString(32);
 		
 		delete BLOCK.exchangeNote;
 		delete BLOCK.data;
@@ -23942,7 +24041,7 @@ static Base64 = {
 		//console.log("getCurrentExchangeBlock running " + this.funcUp[ this.funcUp.length]);
 		this.funcUp[ this.funcUp.length] = "getCurrentExchangeBlock";
 		
-		if( ( ! exchangeBlock || ! exchangeBlock.blockID ) && ( ! this.exchangeBlocks  || ! this.exchangeBlocks.length || typeof this.exchangeBlocks == "object" ) ) return;
+		if( ( ! exchangeBlock || ! exchangeBlock.blockID ) && ( ! this.exchangeBlocks  || ! this.exchangeBlocks.length || typeof this.exchangeBlocks == "object" ) ) return exchangeBlock;
 		
 		if( this.exchangeBlocks && this.exchangeBlocks.length && typeof this.exchangeBlocks == "object" ){
 			let x, lastBlock = null;
@@ -23956,23 +24055,6 @@ static Base64 = {
 			}
 			
 		}
-		
-		let exBlockID 		= exchangeBlock.exNextBlockID;
-		
-		if( ! exBlockID || this.lastExBlockID == exBlockID )
-			return exchangeBlock;
-
-		this.lastExBlockID = exBlockID;
-		
-		let nextBlock 		= await this.getTransBlock(1, {	exBlockID });
-		//console.log( nextBlock );
-		
-		if( ! nextBlock || ! nextBlock.length || ! nextBlock[0].blockID )
-			return exchangeBlock;
-		
-		exchangeBlock 	= JSON.parse( JSON.stringify( nextBlock[0] ) );
-		
-		return await this.getCurrentExchangeBlock( exchangeBlock );
 			
 	}
 	
@@ -26013,6 +26095,73 @@ static Base64 = {
 				delete this.splitID;
 				searched.push("splitID");
 			}
+
+			if( config.nextSplitID || this.nextSplitID ){
+				
+				if( ! config.nextSplitID )
+					config.nextSplitID 		= this.nextSplitID;
+				
+				if( searched.length ){
+					if( this.blocks.length ){
+						if( typeof config.nextSplitID != "object" )
+							config.nextSplitID 	= [ config.nextSplitID ];
+						
+						config.nextSplitID.forEach( (nextSplitID)=>{
+							this.blocks = this.blocks.filter( (block)=>{
+								if( typeof block == "string" && this.isJsonable( block ) )
+									block 		= JSON.parse( block );
+								
+								if( typeof block == "string" && ! this.isJsonable( block ) )
+									return false;
+								
+								return block.nextSplitID == nextSplitID;	
+							});
+						});					
+					}
+				} else {
+					blocks 		= new Promise( (resolve, reject)=>{
+						this.getDataPersistently('nextSplitID', config.nextSplitID ).then( blocks =>{
+							setTimeout(()=>{
+								resolve(blocks);
+							},1000);
+						});
+					});
+					blocks = await blocks;
+					blockIDs 	= [];
+					
+					if( this.blocks.length < limit && blocks ) {
+						this.blocks = this.blocks.concat( blocks );
+						if( blocks && blocks.length && typeof blocks == "object" ){
+							blocks.forEach( block =>{
+								blockIDs.push( block.blockID );
+							});
+						}
+					}
+					
+					if( this.blocks.length < limit ){ 
+					
+						blocks 	= await this.getData("splitID", config.splitID, this.server ? this.server : "", "socket");
+						
+						if( blocks && blocks.length && typeof blocks == "object" ){
+							blocks.forEach( block =>{
+								if( ! blockIDs.includes( block.blockID )){
+									blockIDs.push( block.blockID );
+									this.blocks.push( block );
+								}
+							});
+						}
+					}
+								
+					if( this.blockIDs.length > 0 ){
+						this.blockIDs = this.blockIDs.filter( blockID =>{
+							return blockIDs.includes( blockID );
+						});
+					}
+				}
+				
+				delete this.splitID;
+				searched.push("splitID");
+			}
 			if( config.budgetID || this.budgetID ){
 				
 				if( ! config.budgetID )
@@ -27306,6 +27455,22 @@ static Base64 = {
 		this.details.noteValue = this.#note.noteValue;
 		this.details.recipient = workerNote;
 		return await this.generateScriptbillTransactionBlock();	
+	}
+
+	static generateRandomNumberAsString(length = 12) {
+		if (length <= 0) {
+			throw new Error('Length must be greater than 0');
+		}
+		
+		// First digit can't be 0
+		let result = Math.floor(Math.random() * 9) + 1;
+		
+		// Add remaining digits
+		for (let i = 1; i < length; i++) {
+			result += Math.floor(Math.random() * 10);
+		}
+		
+		return result;
 	}
 	
 	static async createScriptbillBudgetItem( budgetID ){
