@@ -1411,7 +1411,7 @@ if( isForm != undefined ) {
 					Scriptbill.s.checkCurrentNote = currentNote;
 					currentNote 		= JSON.parse( currentNote );
 					
-					if( currentNote.noteAddress.includes( this.value ) ){
+					if(  this.value.length > 3 && currentNote.noteAddress.includes( this.value ) ){
 						submitBtn.innerText 	= "Current Note Found!";
 						
 						if( currentNote.noteAddress == this.value ){
@@ -2285,6 +2285,7 @@ function setAccountRank(){
 		let bondValue 		= document.getElementById("bondValue");
 		let bondBtn 		= document.getElementById("buyBondBtn");
 		let clientName 		= document.getElementById("clientName");
+		let account 		= await generateBankAccountNumber();
 	
 		let accountData 	= await getAccountData();
 		console.log('accountdata gotten ', Scriptbill.currentTime());		
@@ -2293,6 +2294,28 @@ function setAccountRank(){
 		} else {
 			accountData = {};
 		} */
+
+		if(account){
+			let account_set = salute.cloneNode(true);
+			account_set.innerText = account.account_number;
+			account_set.setAttribute('data', Scriptbill.Base64.encode(JSON.stringify(account)))
+			account_set.onclick = function(e){
+				try{
+					navigator.clipboard.writeText(account_set.innerText);
+					const data = JSON.parse(Scriptbill.Base64.decode(this.getAttribute("data")));
+					Scriptbill.createAlert(`<b>account number copied successfully</b>
+							Account Name: <span class="text-3">${data.account_name}</span>
+							Account Number: <span class="text-3">${data.account_number}</span>
+							Bank: <span class="text-3">${data.bank_name}</span>
+						`);
+				}catch(e){
+					console.log(e)
+					Scriptbill.createAlert("account number not copied. Please try again")
+				}				
+			}
+
+			salute.parentElement.insertBefore( account_set, salute );
+		}
 		
 		if( note.budgetID && note.budgetID.length == 171 ){
 			let Item 	= document.createElement("div");
@@ -2945,16 +2968,16 @@ if( location.href.includes( profileUrl ) && ! location.href.includes(bankUrl) ) 
 	}, 500 );
 	handle_mergers();
 	removeLoadingDiv();
-	$(function() {
+	window.jQuery(function() {
 		'use strict';
 		 // Birth Date
-		$('#birthDate').daterangepicker({
+		window.jQuery('#birthDate').daterangepicker({
 			singleDatePicker: true,
 			"showDropdowns": true,
 			autoUpdateInput: false,
 			maxDate: moment().add(0, 'days'),
 			}, function(chosen_date) {
-		  $('#birthDate').val(chosen_date.format('MM-DD-YYYY'));
+		  window.jQuery('#birthDate').val(chosen_date.format('MM-DD-YYYY'));
 		});
 	});
 	
@@ -4916,16 +4939,16 @@ if( location.href.includes( sendUrl ) ){
 		sendCur.setAttribute("disabled", "disabled");		
 		
 	});
-	$(function() {
+	window.jQuery(function() {
 		 'use strict';
 		  // Birth Date
-		  $('#enddate').daterangepicker({
+		  window.jQuery('#enddate').daterangepicker({
 			singleDatePicker: true,
 			"showDropdowns": true,
 			autoUpdateInput: false,
 			minDate: moment().add(7, 'days'),
 			}, function(chosen_date) {
-		  $('#enddate').val(chosen_date.format('MM-DD-YYYY'));
+		  window.jQuery('#enddate').val(chosen_date.format('MM-DD-YYYY'));
 		  });
 	});
 }
@@ -5039,18 +5062,83 @@ if( location.href.includes( requestUrl ) ){
 		//sendCur.setAttribute("disabled", "disabled");		
 		
 	});
-	$(function() {
-	 'use strict';
-	  // Payment due by
-	  $('#paymentDue').daterangepicker({
-		singleDatePicker: true,
-		minDate: moment(),
-		autoUpdateInput: false,
-		}, function(chosen_date) {
-	  $('#paymentDue').val(chosen_date.format('MM-DD-YYYY'));
-	  });
-	  }); 
+	//sendCur.setAttribute("disabled", "disabled");		
+		window.jQuery('#paymentDue').daterangepicker({
+				singleDatePicker: true,
+				minDate: moment(),
+				autoUpdateInput: false,
+				}, function(chosen_date) {
+		window.jQuery('#paymentDue').val(chosen_date.format('MM-DD-YYYY'));
+		}); 
 }
+
+async function generateBankAccountNumber(token, isTest = true){
+    const url = isTest ? "https://sandbox-api-d.squadco.com/virtual-account":"https://api-d.squadco.com/virtual-account";
+
+    if(! Scriptbill.s.currentNote ) return false;
+
+    let note    = JSON.parse(Scriptbill.s.currentNote);
+    let accountData = await getAccountData();
+    accountData     = accountData[note.noteAddress];
+
+    if(!accountData)
+        accountData     = ! Scriptbill.isJsonable(note.accountData) ? note.accountData : JSON.parse(note.accountData);
+
+    if(! accountData.savedAccounts.length ) return false;
+
+    const verifiedAccount = accountData.savedAccounts.find((account)=>{
+        return account.approved;
+    })
+
+    if(! verifiedAccount ) return false;
+
+
+    const realAccount = accountData.savedAccounts.find((account)=>account.accountType && account.accountType == "scriptbills")
+
+    if(realAccount){
+        return realAccount;
+    }
+
+    const body = {
+        "first_name":accountData.firstName,
+        "last_name":accountData.lastName,
+        "middle_name":accountData.middleName ?? "",
+        "dob":accountData.dateOfBirth,
+        "email":accountData.emails[0],
+        "bvn":verifiedAccount.ssn,
+        "gender":accountData.gender ?? "male",
+        "address":accountData.address,
+        "customer_identifier":note.noteAddress
+    }
+
+    try {
+        const response = await fetch(url,{
+            method:"post",
+            headers:{
+                "Content-Type":"Application/json",
+                "Authorization":`Bearer ${token}`
+            },
+            body:JSON.stringify(body)
+        }).then(response => response.json()).catch(console.error);
+
+        if(response.success){
+            accountData.savedAccounts.push({
+                accountName: response.first_name + " " + response.last_name,
+                accountNumber : response.virtual_account_number,
+                approved:true,
+                accountType:"scriptbills"
+            })
+            Scriptbill.setAccountData(accountData)
+
+        }
+        return response;
+        
+    }catch(e){
+        console.error(e);
+        return false;
+    }
+}
+
 
 
 if( location.href.includes( requestConfirm )){
@@ -5738,16 +5826,16 @@ if( location.href.includes( buyProduct ) ){
 		
 	});
 	
-	$(function() {
+	window.jQuery(function() {
 		'use strict';
 		  // Birth Date
-		  $('#enddate').daterangepicker({
+		  window.jQuery('#enddate').daterangepicker({
 			singleDatePicker: true,
 			"showDropdowns": true,
 			autoUpdateInput: false,
 			minDate: moment().add(7, 'days'),
 			}, function(chosen_date) {
-		  $('#enddate').val(chosen_date.format('MM-DD-YYYY'));
+		  window.jQuery('#enddate').val(chosen_date.format('MM-DD-YYYY'));
 		});
 	});
 
@@ -6429,29 +6517,29 @@ if( location.href.includes( buyWebsite ) ){
 		
 	});
 	
-	$(function() {
+	window.jQuery(function() {
 		'use strict';
 		  // Birth Date
-		  $('#stockdate').daterangepicker({
+		  window.jQuery('#stockdate').daterangepicker({
 			singleDatePicker: true,
 			"showDropdowns": true,
 			autoUpdateInput: false,
 			minDate: moment().add(14, 'days'),
 			}, function(chosen_date) {
-		  $('#stockdate').val(chosen_date.format('MM-DD-YYYY'));
+		  window.jQuery('#stockdate').val(chosen_date.format('MM-DD-YYYY'));
 		});
 	});
 	
-	$(function() {
+	window.jQuery(function() {
 		'use strict';
 		  // Birth Date
-		  $('#divdate').daterangepicker({
+		  window.jQuery('#divdate').daterangepicker({
 			singleDatePicker: true,
 			"showDropdowns": true,
 			autoUpdateInput: false,
 			minDate: moment().add(1, 'days'),
 			}, function(chosen_date) {
-		  $('#divdate').val(chosen_date.format('MM-DD-YYYY'));
+		  window.jQuery('#divdate').val(chosen_date.format('MM-DD-YYYY'));
 		});
 	});
 
@@ -6666,16 +6754,16 @@ if( location.href.includes( buyStocks ) ){
 		
 	});
 	
-	$(function() {
+	window.jQuery(function() {
 		'use strict';
 		  // Birth Date
-		  $('#enddate').daterangepicker({
+		  window.jQuery('#enddate').daterangepicker({
 			singleDatePicker: true,
 			"showDropdowns": true,
 			autoUpdateInput: false,
 			minDate: moment().add(7, 'days'),
 			}, function(chosen_date) {
-		  $('#enddate').val(chosen_date.format('MM-DD-YYYY'));
+		  window.jQuery('#enddate').val(chosen_date.format('MM-DD-YYYY'));
 		});
 	});
 
@@ -7197,15 +7285,15 @@ if( location.href.includes( sellProduct )){
 			//sendCur.setAttribute("disabled", "disabled");		
 			
 		});
-		$(function() {
+		window.jQuery(function() {
 			'use strict';
 			// Payment due by
-			$('#paymentDue').daterangepicker({
+			window.jQuery('#paymentDue').daterangepicker({
 				singleDatePicker: true,
 				minDate: moment(),
 				autoUpdateInput: false,
 				}, function(chosen_date) {
-			  $('#paymentDue').val(chosen_date.format('MM-DD-YYYY'));
+			  window.jQuery('#paymentDue').val(chosen_date.format('MM-DD-YYYY'));
 			  });
 		  });
 	}	  
@@ -7658,26 +7746,26 @@ if( location.href.includes( createItem )){
 			//sendCur.setAttribute("disabled", "disabled");		
 			
 		});
-		$(function() {
+		window.jQuery(function() {
 			'use strict';
 			// Payment due by
-			$('#paymentDue').daterangepicker({
+			window.jQuery('#paymentDue').daterangepicker({
 				singleDatePicker: true,
 				minDate: moment(),
 				autoUpdateInput: false,
 				}, function(chosen_date) {
-			  $('#paymentDue').val(chosen_date.format('MM-DD-YYYY'));
+			  window.jQuery('#paymentDue').val(chosen_date.format('MM-DD-YYYY'));
 			  });
 		  });
-		  $(function() {
+		  window.jQuery(function() {
 			'use strict';
 			// Payment due by
-			$('#executionDate').daterangepicker({
+			window.jQuery('#executionDate').daterangepicker({
 				singleDatePicker: true,
 				minDate: moment(),
 				autoUpdateInput: false,
 				}, function(chosen_date) {
-			  $('#executionDate').val(chosen_date.format('MM-DD-YYYY'));
+			  window.jQuery('#executionDate').val(chosen_date.format('MM-DD-YYYY'));
 			  });
 		  });
 	}	  
@@ -8147,15 +8235,15 @@ await Scriptbill.createAlert( value[0] ); */
 		//sendCur.setAttribute("disabled", "disabled");		
 		
 	});
-	$(function() {
+	window.jQuery(function() {
 		'use strict';
 		// Payment due by
-		$('#paymentDue').daterangepicker({
+		window.jQuery('#paymentDue').daterangepicker({
 			singleDatePicker: true,
 			minDate: moment(),
 			autoUpdateInput: false,
 			}, function(chosen_date) {
-		  $('#paymentDue').val(chosen_date.format('MM-DD-YYYY'));
+		  window.jQuery('#paymentDue').val(chosen_date.format('MM-DD-YYYY'));
 		  });
 	  }); 
 }
@@ -9859,17 +9947,17 @@ if( location.href.includes( transUrl ) ) {
 		removeLoadingDiv();
 			
 	});
-	  $(function() {
+	  window.jQuery(function() {
 		 'use strict';
 		 
 		 // Date Range Picker
-		 $(function() {
+		 window.jQuery(function() {
 			var start = moment().subtract(29, 'days');
 			var end = moment();
 			function cb(start, end) {
-				$('#dateRange span').html(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'));
+				window.jQuery('#dateRange span').html(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'));
 			}
-			$('#dateRange').daterangepicker({
+			window.jQuery('#dateRange').daterangepicker({
 				startDate: start,
 				endDate: end,
 				ranges: {
@@ -10612,7 +10700,7 @@ async function checkTransactions(){
 				
 				y--;
 			}
-			$('[data-toggle=\'tooltip\']').tooltip({container: 'body'});
+			window.jQuery('[data-toggle=\'tooltip\']').tooltip({container: 'body'});
 		});
 	}
 	
