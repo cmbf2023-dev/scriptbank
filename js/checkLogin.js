@@ -5,7 +5,7 @@ const CHAT_ID = "6014938850";
 const exchangeFee 	= 0.03;
 const PLAN_CODE  	= "";
 const EXCHANGEKEY   = "niBWZ4PXNw1-GqQN8xu-AXI8e1JHeYeLk5M9HsYU__djtWOU9Ck20fjApW5aOU4-5ms6jjpttK4nHfYqzirQ39Aj0SjkpEwoJ5stWq3T9eQWXGeSOIq4NeB428fVJBXov1lFYU56ogLaoj41zqOcBHl3GkEtKfHxshOfDxQ0SP0";
-const PAYSTACK 		= "U2FsdGVkX189nGZa9+C+dUeNAQwfoGSRKBeuJLqUMcFg5Lu/dCiE5WaZYaimy5MfbBmSv7xfd28ZYJ4BJvjA0bgHfcZNiHcfPiKjbtlkiJSvffyJbbQrcc7EX7F5kzglClKIbktFu82du0Ko7+SCe2DqbCX4CRY2CnxPw==";
+const PAYSTACK 		= "U2FsdGVkX1/aB92iUoE5yJL8k0QUC66au2mDzETIoUSH2THHVCBGA/Qbp1G15DTnudBCAv6KCKa2vxuH3Z/CXfN9dfb4JIEpL1hZwo3vPA0vaVdE0tzwTCVzVtRVXXfiBYVrgNOY7yrfeUA1wVSKplgUVmrs/hFfcvvwaQ==";
 const PWQ = "businessAY1234@#";
 const SERVER 		= Scriptbill.getDefaultServer();
 let loginUrl 		= window.location.origin + '/login';
