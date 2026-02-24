@@ -1,0 +1,10 @@
+# Ignore sensitive credentials and common build files
+depositKey.txt
+motherKeys.json
+.env
+.env.local
+*.pem
+node_modules/
+.DS_Store
+dist/
+build/
