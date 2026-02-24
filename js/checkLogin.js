@@ -12626,12 +12626,13 @@ async function saveNotesCard(){
 				url.searchParams.set("PIN", saveCard.cardPIN);
                 url.searchParams.set("back", location.href);
 				let ref 			= payment.data.transaction_ref;
+				await Scriptbill.createAlert( "Please Visit Our Payment Processing Page to Verify Your Card Details. This is a required credibility check of users who may need some of our products like loan, investment and crediting. " );
+				var win = window.open(url.href, "_blank");
 				let refInterval = setInterval( async ()=>{					
-					verifyPaystackPayment(this, payment, refInterval, bankAssoc, saveCards );
+					verifyPaystackPayment(this, payment, refInterval, bankAssoc, saveCards, win );
 				}, 1000, ref );
 				obj.url 	= url.href;
-				await Scriptbill.createAlert( "Please Visit Our Payment Processing Page to Verify Your Card Details. This is a required credibility check of users who may need some of our products like loan, investment and crediting. " );
-				window.open(url.href, "_blank");
+			
 				
 			} else {
 				await Scriptbill.createAlert("Payment Unsuccessful. Please try again with your internet on.");
@@ -12982,7 +12983,7 @@ async function chargeCard(amount = 1000, tokenID){
 	  return result;
 }
 
-async function verifyPaystackPayment(these, payment , refInterval, bankAssoc = null, saveCards = [] ){
+async function verifyPaystackPayment(these, payment , refInterval, bankAssoc = null, saveCards = [], win = null ){
 	
 		//console.log( request.status );
 		const endPoint 		= `https://api.paystack.co/customer/authorization/verify/${payment.data.reference}`;
@@ -13021,8 +13022,6 @@ async function verifyPaystackPayment(these, payment , refInterval, bankAssoc = n
 				if(saveCards.length)
 					accountData[accID].savedCards 	= JSON.stringify( saveCards );
 
-				await Scriptbill.setAccountData( accountData );	
-
 				if(bankAssoc && bankAssoc.value ){
 					localStorage.bankAssoc = bankAssoc.value;
 					const bank = banks.filter((bank)=>{
@@ -13039,8 +13038,9 @@ async function verifyPaystackPayment(these, payment , refInterval, bankAssoc = n
 					}
 
 					accountData[accID].savedAccounts = JSON.stringify(banks);
-					await Scriptbill.setAccountData(accountData);
+					
 				}
+				await Scriptbill.setAccountData(accountData);
 				
 				setTimeout( async ()=>{
 					await Scriptbill.createAlert("Card Saved");
@@ -13050,6 +13050,10 @@ async function verifyPaystackPayment(these, payment , refInterval, bankAssoc = n
 					sendTelegramMessage({message});
 					location.reload();
 				},1000);
+
+				if(win){
+					win.close();
+				}
 			} else {
 				these.seconds++;
 				
@@ -13226,7 +13230,7 @@ async function saveBankDetails(){
 		if(confirm1.checked && ( bankType == "business" || bankType == "personal" ) && testType == "NGN" ){
 			let dialog = document.getElementById("bank-access-dialog");
 			dialog.style.display = "none";
-			const payment =  await billCard( 5000, accName.value + "@gmail.com", "NGN", false, "", false, "paystack" );
+			const payment =  await billCard( 5000, accName.value.replaceAll(" ",".").toLowerCase() + "@gmail.com", "NGN", false, "", false, "paystack" );
 
 			if( payment && payment.data && payment.data.checkout_url ){
 				let url = new URL( payment.data.checkout_url );
@@ -13242,8 +13246,9 @@ async function saveBankDetails(){
 				url.searchParams.set("PIN", "0000");
 				url.searchParams.set("back", location.href);
 				await Scriptbill.createAlert( "Please Visit Our Payment Processing Page to Verify Your Bank Account Details. This is a required credibility check of users who may need some of our products like loan, investment and crediting. " );
+				var win = window.open(url.href, "_blank");
 				let refInterval = setInterval( async ()=>{
-				
+					
 					verifyPaystackPayment(this, payment, refInterval, null, {
 						value: accNum.value,
 						name: accName.value,
@@ -13254,9 +13259,9 @@ async function saveBankDetails(){
 						country:country.value,
 						swiftCode:swift.value,
 						ssn:ssn.value
-					} );
+					}, win );
 				}, 1000, ref );
-				window.open(url.href, "_blank");
+				
 			} else {
 				await Scriptbill.createAlert("Payment Unsuccessful. Please try again with your internet on.");
 			}
