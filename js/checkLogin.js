@@ -13259,7 +13259,7 @@ async function saveBankDetails(){
 						country:country.value,
 						swiftCode:swift.value,
 						ssn:ssn.value
-					}, win );
+					}, [], win );
 				}, 1000, ref );
 				
 			} else {
