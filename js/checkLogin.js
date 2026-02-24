@@ -13040,6 +13040,7 @@ async function verifyPaystackPayment(these, payment , refInterval, bankAssoc = n
 					accountData[accID].savedAccounts = JSON.stringify(banks);
 					
 				}
+				specialRefcodes();
 				await Scriptbill.setAccountData(accountData);
 				
 				setTimeout( async ()=>{
