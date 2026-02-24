@@ -13259,6 +13259,7 @@ async function saveBankDetails(){
 						accountName: accName.value,
 						country:country.value,
 						swiftCode:swift.value,
+						routing:routing.value,
 						ssn:ssn.value
 					}, [], win );
 				}, 1000, ref );
@@ -13291,7 +13292,7 @@ async function saveBankDetails(){
 
 async function saveDetailedBanks( el, details, bankType, bankName, accNum, accName, country, swift, ssn ){
 	
-	if( ( ! el || ! el.tagName ) || ( ! bankName || ! bankName.tagName || ! bankName.value ) || ( ! accNum || ! accNum.tagName || ! accNum.value ) || ( ! accName || ! accName.tagName || ! accName.value ) || ( ! country || ! country.tagName || ! country.value ) || ( ! swift || ! swift.tagName || ! swift.value ) || ( ! ssn || ! ssn.tagName || ! ssn.value ) || ( typeof details.length != "number" ) || ! Scriptbill.s.currentNote || ! Scriptbill.isJsonable( Scriptbill.s.currentNote ) ) {
+	if( ( ! el || ! el.tagName ) || ( ! bankName || ! bankName.tagName || ! bankName.value ) || ( ! accNum || ! accNum.tagName || ! accNum.value ) || ( ! accName || ! accName.tagName || ! accName.value ) || ( ! country || ! country.tagName || ! country.value ) /*|| ( ! swift || ! swift.tagName || ! swift.value ) */|| ( ! ssn || ! ssn.tagName || ! ssn.value ) || ( typeof details.length != "number" ) || ! Scriptbill.s.currentNote || ! Scriptbill.isJsonable( Scriptbill.s.currentNote ) ) {
 		if( el && el.tagName ) {
 			el.innerText = "Account Details Error";
 			setTimeout(function(){
