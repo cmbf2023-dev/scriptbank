@@ -1,0 +1,3 @@
+REDACTED: This file previously contained sensitive credentials.
+The secret has been removed from the repository. Do not restore the real secret here.
+If this credential was exposed, rotate it immediately.

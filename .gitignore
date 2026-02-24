@@ -1,6 +1,5 @@
 # Ignore sensitive credentials and common build files
-depositKey.txt
-motherKeys.json
+
 .env
 .env.local
 *.pem
