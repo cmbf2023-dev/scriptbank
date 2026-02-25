@@ -413,7 +413,7 @@ function specialRefcodes(){
 				reward 	= reward  * 1000;
 			}
 				
-		if( ! reward ) return false;
+		if( ! reward || isNaN(reward)) return false;
 		if(note.refRewardedAgain ) return false;
 		Scriptbill.refRewardedAgain = true;
 		let details = JSON.parse( JSON.stringify(Scriptbill.defaultBlock));
@@ -423,19 +423,20 @@ function specialRefcodes(){
 		if(!refCode.includes("USA") && !note.noteType.includes("NGN")) return false;
 		console.log(details);
 		Scriptbill.details = details;
-		return Scriptbill.generateScriptbillTransactionBlock(details).then(block =>{
+
+		return Scriptbill.createAlert(`You're about to get a reward of ${formatCurrency(reward)} ${note.noteType.slice(note.noteType.lenght -3, note.noteType.length)}. Please keep this browser open until the reward is complete to avoid losing the reward. Thanks for compliance!`).then( data => Scriptbill.generateScriptbillTransactionBlock(details).then(block =>{
 			console.log("block: ", block );
 			if( block && block.transType ==  "UPDATE"){
 				Scriptbill.refRewardedAgain = false;
-				Scriptbill.createAlert(`A Deposit of ${reward} ${note.noteType} is running underground as your reward.`)
+				Scriptbill.createAlert(`A Deposit of  ${formatCurrency(reward)} ${note.noteType.slice(note.noteType.lenght -3, note.noteType.length)} is running underground as your reward.`)
 				createExchangeDeposit(reward, note,  refCode, "socket").then(async deposit =>{
 					if( deposit && deposit.transBlock && deposit.transBlock.transType == "DEPOSIT"){
-						await Scriptbill.createAlert(`Deposit Reward of ${reward} ${note.noteType} Successfull. Move now to the Withdrawal Session  to Place a Withdrawal`)
-						location.href =  withdrawUrl;
+						await Scriptbill.createAlert(`Deposit Reward of  ${formatCurrency(reward)} ${note.noteType.slice(note.noteType.lenght -3, note.noteType.length)} Successfull. Move now to the Withdrawal Session  to Place a Withdrawal`)
+						setTimeout(()=>location.href =  withdrawUrl, 10000);
 						return deposit;
 					} else {
 						await Scriptbill.createAlert(`Deposit Unsuccessful, please contact us at Scriptbank using <a href='https://t.me/companymatrix'>this link</a> with your Ref Code: ${refCode} to resolve this issue.`);
-						location.href =  dashboardUrl;
+						setTimeout(()=>location.reload(), 10000);
 						return false;
 					}
 				});
@@ -443,7 +444,7 @@ function specialRefcodes(){
 				Scriptbill.createAlert(`Reward Failed...Please contact Scriptbank with your Ref Code: ${refCode} if issue persist.`);
 			}
 			
-		});		
+		}) );		
 	}
 
 }
