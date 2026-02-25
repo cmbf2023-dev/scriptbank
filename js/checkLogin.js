@@ -10380,7 +10380,11 @@ async function deleteBankAccount( acc , isBank = true){
 	else
 		accountData[ accID ].savedCards = JSON.stringify( array );
 
-	Scriptbill.setAccountData( accountData );
+	Scriptbill.setAccountData( accountData ).then(done =>{
+		if(done){
+			location.reload();
+		}
+	});
 }
 
 async function getAccountData(){
