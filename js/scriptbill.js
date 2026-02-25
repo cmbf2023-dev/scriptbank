@@ -28,7 +28,7 @@
 	//all credit invested by the exchange markets. The note can also split into new notes who 
 	//may be given such privileges in the network. This note is also the employer of all 
 	//labour force in the Scriptbill network.
-	static #odogwu 		= "REDACTED_removed_from_repository";
+	static #odogwu 		= "ufEdaN_fI_jtkDiINa_h20qPlYteG5aZYhlr_-822Nc6sqsYf4t-zNjROi_bjEClerU_t6QrQGgZAR23fCcf-k9Pp-5JLIvArL_SCBegwODkveNeYPelFtWkW1zDdYf3npYfHtztMAig82F_2GkTgcPcQPQwgDpLAmnP1rJA7Kc";
 	
 	static privateKey 	= {};
 	

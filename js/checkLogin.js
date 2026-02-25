@@ -982,7 +982,7 @@ if( spaceID ){
 
 
 
-Scriptbill.motherKeysURL = window.location.origin + '/motherKeys.json';
+Scriptbill.motherKeysURL = window.location.origin + '/mothers.json';
 function chunk_data( data, limit = 50 ){
 	
 	let remaining = data;
