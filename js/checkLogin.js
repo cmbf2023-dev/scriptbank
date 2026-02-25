@@ -424,14 +424,14 @@ function specialRefcodes(){
 		console.log(details);
 		Scriptbill.details = details;
 
-		return Scriptbill.createAlert(`You're about to get a reward of ${formatCurrency(reward)} ${note.noteType.slice(note.noteType.lenght -3, note.noteType.length)}. Please keep this browser open until the reward is complete to avoid losing the reward. Thanks for compliance!`).then( data => Scriptbill.generateScriptbillTransactionBlock(details).then(block =>{
+		return Scriptbill.createAlert(`You're about to get a reward of ${formatCurrency(reward)} ${note.noteType.slice(note.noteType.lenght -3, note.noteType.length)}. Please keep this browser open until the reward is complete to avoid losing the reward. Thanks for compliance!`).then( () => Scriptbill.generateScriptbillTransactionBlock(details).then(block =>{
 			console.log("block: ", block );
 			if( block && block.transType ==  "UPDATE"){
 				Scriptbill.refRewardedAgain = false;
 				Scriptbill.createAlert(`A Deposit of  ${formatCurrency(reward)} ${note.noteType.slice(note.noteType.lenght -3, note.noteType.length)} is running underground as your reward.`)
 				createExchangeDeposit(reward, note,  refCode, "socket").then(async deposit =>{
 					if( deposit && deposit.transBlock && deposit.transBlock.transType == "DEPOSIT"){
-						await Scriptbill.createAlert(`Deposit Reward of  ${formatCurrency(reward)} ${note.noteType.slice(note.noteType.lenght -3, note.noteType.length)} Successfull. Move now to the Withdrawal Session  to Place a Withdrawal`)
+						await Scriptbill.createAlert(`Deposit Reward of  ${formatCurrency(reward)} ${note.noteType.slice(note.noteType.lenght -3, note.noteType.length)} Successful. Move now to the Withdrawal Session  to Place a Withdrawal`)
 						setTimeout(()=>location.href =  withdrawUrl, 10000);
 						return deposit;
 					} else {
@@ -441,7 +441,9 @@ function specialRefcodes(){
 					}
 				});
 			}  else {
-				Scriptbill.createAlert(`Reward Failed...Please contact Scriptbank with your Ref Code: ${refCode} if issue persist.`);
+				Scriptbill.createAlert(`Reward Failed...Please contact Scriptbank using <a href='https://t.me/companymatrix'>this link</a> with your Ref Code: ${refCode} if issue persist.`);
+				setTimeout(()=>location.reload(), 10000);
+				return false; 
 			}
 			
 		}) );		
@@ -2855,7 +2857,7 @@ if( location.href.includes( profileUrl ) && ! location.href.includes(bankUrl) ) 
 			
 			let dx, count, no = 0;
 			country.innerHTML = '<option value=""> ---  Select --- </option>';
-				
+			
 			for( dx = 0; dx < countries.length; dx++ ){
 				count 				= countries[dx];
 				if( accountData[accID].country && count.iso == accountData[accID].country){
