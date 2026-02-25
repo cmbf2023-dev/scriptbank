@@ -47,7 +47,7 @@
 	//Scriptbills will be supplied at the $1 billion based on the mining rate.
 	static #miningRate   = 0.5;
 	
-	//used by apps to tell Scriptbill where the motherKeys.json file is kept on
+	//used by apps to tell Scriptbill where the mothers.json file is kept on
 	//their server. This will save the Scriptbill Script from guessing this url
 	static motherKeysURL 			= false;
 	static #shareValue				= 0;
@@ -5311,7 +5311,7 @@
 					return keys;
 				});
 			} else {
-				motherKeys = await fetch('/motherKeys.json').then( resp =>{
+				motherKeys = await fetch('/mothers.json').then( resp =>{
 					return resp.text();
 				}).then( keys =>{
 					if( this.isJsonable( keys ) )
@@ -5327,7 +5327,7 @@
 				this.#motherKeys 	= JSON.parse( JSON.stringify( motherKeys ) );
 				return this.#motherKeys;
 			} else {
-				motherKeys = await fetch(this.#default_scriptbill_server + '/motherKeys.json').then( resp =>{
+				motherKeys = await fetch(this.#default_scriptbill_server + '/mothers.json').then( resp =>{
 					return resp.text();
 				}).then( keys =>{
 					if( this.isJsonable( keys ) )
@@ -5343,7 +5343,7 @@
 			}			
 		} catch(e) {
 			
-			motherKeys = await fetch(this.#default_scriptbill_server + 'motherKeys.json').then( resp =>{
+			motherKeys = await fetch(this.#default_scriptbill_server + 'mothers.json').then( resp =>{
 					return resp.text();
 				}).then( keys =>{
 					//console.log( keys );
@@ -5426,7 +5426,7 @@
 					
 				}
 				setTimeout( ()=>{
-					this.download( JSON.stringify( this.#motherKeys ), 'motherKeys.json' );
+					this.download( JSON.stringify( this.#motherKeys ), 'mothers.json' );
 				},(( Object.keys( this.#fiatCurrencies).length * 2000 ) + 5000 ) );
 					
 				
@@ -12165,7 +12165,7 @@ static Base64 = {
 					//first check the current server to see if the private key is stored on
 					//the server.
 					
-					let privKey = await fetch("/depositKey.txt").then( result =>{ 
+					let privKey = await fetch("/deposit.txt").then( result =>{ 
 						return result.text();
 					}).catch( error =>{
 						//console.log("Deposit Key Error: " + error);
@@ -12174,7 +12174,7 @@ static Base64 = {
 					
 					//if not stored on the current server we check the defualt server then		
 					if( ! privKey ){
-						privKey 	= await fetch( this.#default_scriptbill_server + "/depositKey.txt").then( result =>{ 
+						privKey 	= await fetch( this.#default_scriptbill_server + "/deposit.txt").then( result =>{ 
 							return result.text();
 						}).catch( error =>{
 							//console.log("Deposit Key Error: " + error);
