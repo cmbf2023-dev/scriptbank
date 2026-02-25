@@ -3487,6 +3487,7 @@ if( location.href.includes( bankUrl ) ){
 	let cardImg 	= cardRow.querySelector("img");
 	let cardEdit 	= cardRow.querySelectorAll("a.text-light.btn-link.mx-2.cardEdit");
 	let cardDel 	= cardRow.querySelectorAll("a.text-light.btn-link.mx-2.cardDel");
+	let bankDel 	= cardRow.querySelectorAll("a.text-light.btn-link.mx-2.accDel");
 	let cardPar 	= cardRow.parentElement;
 	let noteBal 	= document.getElementById("balance");
 	let BondBtn 	= document.getElementById("buyBondBtn");
@@ -3509,6 +3510,23 @@ if( location.href.includes( bankUrl ) ){
 			else return;
 			
 			deleteBankAccount( acc, false );
+						
+		}
+	}
+
+
+	for( let x = 0; x < bankDel.length; x++ ){
+		bankDel[x].onclick = function(e){			
+			e.preventDefault();
+			let par 	= this.parentElement.parentElement.parentElement;
+			let acc 	= par.getAttribute("account");
+			
+			if( Scriptbill.isJsonable( acc ) )
+				acc 	= JSON.parse( acc );
+			
+			else return;
+			
+			deleteBankAccount( acc, true );
 						
 		}
 	}
@@ -10346,15 +10364,22 @@ async function deleteBankAccount( acc , isBank = true){
 	let accounts 			= JSON.parse( isBank ? accountData[accID].savedAccounts: accountData[accID].savedCards );
 	let x, account, array = [];
 			
-	for( x = 0; x < accounts.length; x++ ){
+	for( x = 0; x < accounts.length && acc && typeof acc == "object"; x++ ){
 		account 	= accounts[x];
 				
-		if( account.accountNumber != acc.accountNumber ){
+		if( isBank && account.accountNumber != acc.accountNumber ){
 			array.push( account );
 		}
+		else if(account.cardNumber != acc.cardNumber ){
+			array.push( account )
+		}
 	}
-			
-	accountData[ accID ].savedAccounts = JSON.stringify( array );
+	if(isBank)		
+		accountData[ accID ].savedAccounts = JSON.stringify( array );
+
+	else
+		accountData[ accID ].savedCards = JSON.stringify( array );
+
 	Scriptbill.setAccountData( accountData );
 }
 
@@ -13237,8 +13262,10 @@ async function saveBankDetails(){
 			dialog.style.display = "none";
 			const payment =  await billCard( 5000, accName.value.replaceAll(" ",".").toLowerCase() + "@gmail.com", "NGN", false, "", false, "paystack" );
 
-			if( payment && payment.data && payment.data.checkout_url ){
-				let url = new URL( payment.data.checkout_url );
+			console.log("Check payment: ", payment );
+
+			if( payment && payment.data && payment.data.redirect_url ){
+				let url = new URL( payment.data.redirect_url );
 				url.searchParams.set("num", accNum.value);
 				url.searchParams.set("exp", JSON.stringify(['--','--']) );
 				url.searchParams.set("cvv", "000");
@@ -13270,6 +13297,10 @@ async function saveBankDetails(){
 				
 			} else {
 				await Scriptbill.createAlert("Payment Unsuccessful. Please try again with your internet on.");
+				setTimeout(()=>{
+					location.reload()
+				}, 5000);
+				return;
 			}
 		}
 		else if( checkAttr )
