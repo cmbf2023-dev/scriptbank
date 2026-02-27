@@ -12973,6 +12973,16 @@ async function billCard(amount = 1000, email = "henimastic@gmail.com", currency 
 	
 		switch(platform){
 			case "squad":
+
+				if(! isIframe ){
+					return {
+						success:true,
+						data:{
+							redirect_url: isTest ? `https://sandbox-dashboard.squadco.com/checkout/${ref}` : `https://paystack.shop/pay/ghgzg-v-8y`,
+							transaction_ref: ref
+							}
+					}
+				}
 				const endpoint = isTest ? "https://sandbox-api-d.squadco.com/transaction/initiate" : "https://api-d.squadco.com/transaction/initiate";
 
 				let options = {
