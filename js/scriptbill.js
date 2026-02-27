@@ -13663,7 +13663,14 @@ static Base64 = {
 			}
 			/*console.log("note: ", note, "response: ", response );
 			await this.createAlert("Check the response and note while storing to confirm first!");*/
-			if( note && note.noteAddress && ( note.blockID == response.blockID || this.#setNoteBlocks ) &&  (! this.#isExchangeMarketMining && response.transType != "CREATE" ) ){
+			/* await this.createAlert(response.transType)
+			await this.createAlert(note && note.noteAddress && ( note.blockID == response.blockID || this.#setNoteBlocks ) &&  (! this.#isExchangeMarketMining && response.transType != "CREATE" ))
+			await this.createAlert(( note.blockID == response.blockID || this.#setNoteBlocks ) )
+			await this.createAlert((! this.#isExchangeMarketMining && response.transType != "CREATE" ))*/
+			if(response.transType == "CREATE"){
+				this.l.createBlock = JSON.stringify(response);
+			}
+			if( note && note.noteAddress && ( note.blockID == response.blockID || this.#setNoteBlocks ) ){
 				
 				if( note.blockID == response.blockID )
 					this.l[ note.noteAddress + "_current_block" ] = JSON.stringify( response );

