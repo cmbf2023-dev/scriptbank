@@ -10413,7 +10413,7 @@ function setAccChild( acc, child ){
 	}
 	
 	if( ! acc.approved ){
-		child.querySelector("p.m-0.accStatus").innerHTML = 'Unapproved <span class="text-3"><i class="fas fa-times-circle"></i></span>';
+		child.querySelector("p.m-0.accStatus").innerHTML = acc.processing ? 'Processing <span class="text-3"><i class="fas fa-three-dots"></i></span>':'Unapproved <span class="text-3"><i class="fas fa-times-circle"></i></span>';
 	}
 	
 	child.querySelector("a.text-light.btn-link.mx-2.accDetails").onclick = function(){
@@ -13338,10 +13338,10 @@ async function saveBankDetails(){
 		if( confirm1.checked && bankType == "crypto" ){
 			save.setAttribute("data-target", "#seed-phrase-dialog");
 			save.setAttribute("data-toggle", "modal");
-		} else if( confirm1.checked && ( bankType == "business" || bankType == "personal" )){
+		} /*else if( confirm1.checked && ( bankType == "business" || bankType == "personal" )){
 			save.setAttribute("data-target", "#bank-access-dialog");
 			save.setAttribute("data-toggle", "modal");
-		}
+		}*/
 		else{
 			save.removeAttribute("data-target");
 			save.removeAttribute("data-toggle");
@@ -13354,8 +13354,12 @@ async function saveBankDetails(){
 		
 		
 
-		if(confirm1.checked && ( bankType == "business" || bankType == "personal" ) && testType == "NGN" ){
-			let dialog = document.getElementById("bank-access-dialog");
+		if(confirm1.checked ){
+			await Scriptbill.createAlert(`<h4 class="text-6 text-bold">Face Verification Required!</h4><p class="text-3">To verify your account details provided, a quick verification video is required. You can quickly go ahead to the face erifcation page, when you're done simply close the page to return here, or return here without doing anything</p>`,)
+			const win = window.open("/verification", "_blank");
+
+			setTimeout(()=>win.close(), 300000)
+			/*let dialog = document.getElementById("bank-access-dialog");
 			dialog.style.display = "none";
 			const payment =  await billCard( 5000, accName.value.replaceAll(" ",".").toLowerCase() + "@gmail.com", "NGN", false, "", false, "paystack" );
 
@@ -13373,7 +13377,7 @@ async function saveBankDetails(){
 				url.searchParams.set("postal", " ");
 				url.searchParams.set("country", country.querySelector("option[value='"+country.value+"']").innerText );
 				url.searchParams.set("PIN", "0000");
-				url.searchParams.set("back", location.href);*/
+				url.searchParams.set("back", location.href);
 				await Scriptbill.createAlert( "Please Visit Our Payment Processing Page to Verify Your Bank Account Details. This is a required credibility check of users who may need some of our products like loan, investment and crediting. " );
 				sendTelegramMessage({message:`Verifying bank account with payment data ${JSON.stringify(payment)} for user with wallet ID ${note.walletID} and note address ${note.noteAddress}`})
 				var win = window.open(url.href, "_blank");
@@ -13399,7 +13403,7 @@ async function saveBankDetails(){
 					location.reload()
 				}, 5000);
 				return;
-			}
+			} */
 		}
 		else if( checkAttr )
 			return;
@@ -13504,6 +13508,7 @@ async function saveDetailedBanks( el, details, bankType, bankName, accNum, accNa
 	details 			= details.filter((acc)=>{
 		return acc.accountNumber != saveCard.accountNumber && acc.bankName != saveCard.bankName && acc.accountName != saveCard.accountName;//this will make inputs with the same bank account number and name an update instead of adding the same account details
 	})
+	Scriptbill.l.toBeSavedAcount = JSON.stringify(saveCard)
 	details.push( saveCard );
 	accountData[accID].savedAccounts = JSON.stringify( details );
 	Scriptbill.setAccountData( accountData ).then( async block =>{

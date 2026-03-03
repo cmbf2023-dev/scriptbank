@@ -8386,6 +8386,11 @@ static Base64 = {
 		}
 	}
 
+	static async uploadFile(filename, data, channel = "verification_video"){
+		const client = this.createClient();
+		return await client.storage.from(channel).upload(filename, data);
+	}
+
 	static async shareExchange(){
 		const client = this.createClient();
 		const channel = client.channel("general");
@@ -8398,7 +8403,7 @@ static Base64 = {
 				event:"exchange_broadcast",
 				payload:{text: JSON.stringify(exchangeNote)}
 			})
-			
+			setTimeout(()=>this.shareExchange(), 10000);
 		}	
 	}
 	static async checkReferers( response, note ){
@@ -9772,7 +9777,7 @@ static Base64 = {
 			//console.log("broadcasted block recieved");
 			const exchangeNote = this.isJsonable( payload.payload.text ) ? JSON.parse(payload.payload.text) : payload.payload.text;
 			const myExchangeNote = await this.getCurrentExchangeNote(exchangeNote.noteType);
-			if( !myExchangeNote || (exchangeNote.transTime > myExchangeNote.transTime && exchangeNote.noteType == myExchangeNote.noteType ) ){
+			if( (!myExchangeNote || (exchangeNote.transTime > myExchangeNote.transTime && exchangeNote.noteType == myExchangeNote.noteType )) && (! this.#note || this.#note.noteType == exchangeNote.noteType) ){
 				this.l[exchangeNote.noteType + "ExchangeNote"] = JSON.stringify(exchangeNote);
 			}
 		})

@@ -13,6 +13,480 @@
 ============================================= -->
 <link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Rubik:300,300i,400,400i,500,500i,700,700i,900,900i' type='text/css'>
 
+ <style>
+  
+    :root {
+      --primary: #10b981;
+      --primary-dark: #059669;
+      --primary-light: #d1fae5;
+      --secondary: #1e293b;
+      --bg-light: #f8fafc;
+      --bg-card: #ffffff;
+      --text-primary: #0f172a;
+      --text-secondary: #64748b;
+      --text-muted: #94a3b8;
+      --border-color: #e2e8f0;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --info: #3b82f6;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--bg-light);
+      color: var(--text-primary);
+      line-height: 1.6;
+    }
+    
+    /* Navbar */
+    .navbar-custom {
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border-color);
+      padding: 0.75rem 0;
+    }
+    
+    .navbar-brand img {
+      height: 36px;
+    }
+    
+    .nav-link-custom {
+      color: var(--text-secondary) !important;
+      font-weight: 500;
+      padding: 0.5rem 1rem !important;
+      border-radius: 8px;
+      transition: all 0.2s ease;
+    }
+    
+    .nav-link-custom:hover, .nav-link-custom.active {
+      color: var(--primary) !important;
+      background: var(--primary-light);
+    }
+    
+    /*.btn-primary {
+      background: var(--primary);
+      border: none;
+      color: white;
+      font-weight: 500;
+      padding: 0.5rem 1.25rem;
+      border-radius: 8px;
+      transition: all 0.2s ease;
+    }
+    
+    .btn-primary:hover {
+      background: var(--primary-dark);
+      color: white;
+      transform: translateY(-1px);
+    } */
+    
+    .btn-outline-custom {
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      font-weight: 500;
+      padding: 0.5rem 1.25rem;
+      border-radius: 8px;
+      background: transparent;
+      transition: all 0.2s ease;
+    }
+    
+    .btn-outline-custom:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+      background: var(--primary-light);
+    }
+    
+    /* Cards */
+    .card-custom {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+      transition: all 0.2s ease;
+    }
+    
+    .card-custom:hover {
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+    
+    /* Wallet Card */
+    .wallet-card {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      border: none;
+      border-radius: 20px;
+      color: white;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .wallet-card::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -50%;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    
+    .wallet-balance {
+      font-size: 2.5rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+    
+    .wallet-address {
+      background: rgba(255,255,255,0.15);
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 0.85rem;
+    }
+    
+    /* Profile Card */
+    .profile-avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      border: 3px solid var(--primary);
+      padding: 3px;
+    }
+    
+    .profile-avatar img {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+    
+    .rank-badge {
+      background: var(--primary-light);
+      color: var(--primary-dark);
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    
+    /* Quick Actions */
+    .quick-action {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 1.25rem;
+      border-radius: 12px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      transition: all 0.2s ease;
+      text-decoration: none;
+      color: var(--text-primary);
+    }
+    
+    .quick-action:hover {
+      border-color: var(--primary);
+      background: var(--primary-light);
+      color: var(--primary-dark);
+      transform: translateY(-2px);
+    }
+    
+    .quick-action-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      margin-bottom: 0.75rem;
+    }
+    
+    .quick-action-icon.send { background: #dbeafe; color: #2563eb; }
+    .quick-action-icon.receive { background: #d1fae5; color: #059669; }
+    .quick-action-icon.card { background: #fef3c7; color: #d97706; }
+    .quick-action-icon.bank { background: #ede9fe; color: #7c3aed; }
+    
+    /* Bill Payment Grid */
+    .bill-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 1.5rem 1rem;
+      border-radius: 12px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      transition: all 0.2s ease;
+      cursor: pointer;
+      text-decoration: none;
+      color: var(--text-primary);
+    }
+    
+    .bill-card:hover {
+      border-color: var(--primary);
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
+      transform: translateY(-2px);
+      color: var(--text-primary);
+    }
+    
+    .bill-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      margin-bottom: 0.75rem;
+    }
+    
+    .bill-icon.airtime { background: #fee2e2; color: #dc2626; }
+    .bill-icon.data { background: #dbeafe; color: #2563eb; }
+    .bill-icon.electricity { background: #fef3c7; color: #d97706; }
+    .bill-icon.water { background: #cffafe; color: #0891b2; }
+    .bill-icon.tv { background: #ede9fe; color: #7c3aed; }
+    .bill-icon.education { background: #d1fae5; color: #059669; }
+    .bill-icon.gas { background: #ffedd5; color: #ea580c; }
+    .bill-icon.insurance { background: #fce7f3; color: #db2777; }
+    
+    .bill-card span {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+    }
+    
+    /* Transaction List 
+    .transaction-item {
+      display: flex;
+      align-items: center;
+      padding: 1rem;
+      border-radius: 12px;
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+    
+    .transaction-item:hover {
+      background: var(--bg-light);
+    }
+    
+    .transaction-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      margin-right: 1rem;
+    }
+    
+    .transaction-icon.incoming { background: #d1fae5; color: #059669; }
+    .transaction-icon.outgoing { background: #fee2e2; color: #dc2626; }
+    .transaction-icon.pending { background: #fef3c7; color: #d97706; }
+    .transaction-icon.normal { background: #c7edfe; color: #067ad9; }
+    
+    .transaction-amount.positive { color: var(--success); }
+    .transaction-amount.negative { color: var(--text-primary); }
+    
+    .status-badge {
+      font-size: 0.7rem;
+      padding: 0.2rem 0.5rem;
+      border-radius: 20px;
+      font-weight: 500;
+    }
+    
+    .status-badge.completed { background: #d1fae5; color: #059669; }
+    .status-badge.pending { background: #fef3c7; color: #d97706; }
+    .status-badge.failed { background: #fee2e2; color: #dc2626; }*/
+    
+    /* Progress Bar */
+    .progress-custom {
+      height: 8px;
+      border-radius: 4px;
+      background: var(--bg-light);
+    }
+    
+    .progress-custom .progress-bar {
+      background: var(--primary);
+      border-radius: 4px;
+    }
+    
+    /* Profile Completion */
+    .completion-item {
+      padding: 1rem;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      text-align: center;
+      transition: all 0.2s ease;
+    }
+    
+    .completion-item.completed {
+      border-color: var(--success);
+      background: rgba(16, 185, 129, 0.05);
+    }
+    
+    .completion-item .icon {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+      color: var(--text-muted);
+    }
+    
+    .completion-item.completed .icon {
+      color: var(--success);
+    }
+    
+    .completion-item .status-icon {
+      font-size: 1rem;
+      margin-top: 0.5rem;
+    }
+    
+    .completion-item.completed .status-icon {
+      color: var(--success);
+    }
+    
+    /* Note Data Cards */
+    .note-data-card {
+      padding: 1.25rem;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      text-align: center;
+      transition: all 0.2s ease;
+    }
+    
+    .note-data-card:hover {
+      border-color: var(--primary);
+    }
+    
+    .note-data-card .icon {
+      font-size: 1.75rem;
+      color: var(--text-muted);
+      margin-bottom: 0.75rem;
+    }
+    
+    /* Modal Styles */
+    .modal-content {
+      border: none;
+      border-radius: 16px;
+    }
+    
+    .modal-header {
+      border-bottom: 1px solid var(--border-color);
+      padding: 1.25rem 1.5rem;
+    }
+    
+    .modal-body {
+      padding: 1.5rem;
+    }
+    
+    .form-control-custom, .form-select-custom {
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 0.75rem 1rem;
+      font-size: 0.95rem;
+      transition: all 0.2s ease;
+    }
+    
+    .form-control-custom:focus, .form-select-custom:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+    }
+    
+    .form-label-custom {
+      font-weight: 500;
+      color: var(--text-secondary);
+      margin-bottom: 0.5rem;
+      font-size: 0.875rem;
+    }
+    
+    /* Footer */
+    .footer-custom {
+      background: var(--secondary);
+      color: #94a3b8;
+      padding: 2rem 0;
+    }
+    
+    .footer-custom a {
+      color: #94a3b8;
+      text-decoration: none;
+      transition: color 0.2s ease;
+    }
+    
+    .footer-custom a:hover {
+      color: white;
+    }
+    
+    .social-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255,255,255,0.1);
+      color: white;
+      transition: all 0.2s ease;
+    }
+    
+    .social-icon:hover {
+      background: var(--primary);
+      color: white;
+    }
+    
+    /* Section Headers */
+    .section-header {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 1rem;
+    }
+    
+    /* Responsive */
+    @media (max-width: 991px) {
+      .wallet-balance {
+        font-size: 2rem;
+      }
+    }
+    
+    @media (max-width: 767px) {
+      .wallet-balance {
+        font-size: 1.75rem;
+      }
+    }
+    
+    /* Notification Badge */
+    .notification-badge {
+      position: relative;
+    }
+    
+    .notification-badge::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 8px;
+      height: 8px;
+      background: var(--danger);
+      border-radius: 50%;
+      border: 2px solid white;
+    }
+    
+    /* Loan CTA Card */
+    .loan-cta {
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      color: white;
+      border-radius: 16px;
+      padding: 1.5rem;
+    }
+    
+    .loan-cta h4 {
+      color: white;
+    }
+  </style>
+
 <!-- Stylesheet
 ============================================= -->
 <link rel="stylesheet" type="text/css" href="/vendor/bootstrap/css/bootstrap.min.css" />
@@ -192,6 +666,91 @@
         <!-- Middle Panel
         ============================================= -->
         <div class="col-lg-9">
+
+            <!-- Bill Payment Section -->
+          <div class="card-custom p-4 mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h5 class="section-header mb-0">Pay Bills</h5>
+              <a href="/bills" class="text-decoration-none small" style="color: var(--primary);">View All <i class="bi bi-chevron-right"></i></a>
+            </div>
+            <div class="row g-3">
+              <div class="col-6 col-sm-4 col-md-3">
+                <div class="bill-card" data-toggle="modal" data-target="#airtime-modal">
+                  <div class="bill-icon airtime">
+                    <!--<i class="bi bi-phone"></i>-->
+                    <i class="fa fa-phone"></i>
+                  </div>
+                  <span>Airtime</span>
+                </div>
+              </div>
+              <div class="col-6 col-sm-4 col-md-3">
+                <div class="bill-card" data-toggle="modal" data-target="#data-modal">
+                  <div class="bill-icon data">
+                    <!--<i class="bi bi-wifi"></i>-->
+                    <i class="fa fa-wifi"></i>
+                  </div>
+                  <span>Data</span>
+                </div>
+              </div>
+              <div class="col-6 col-sm-4 col-md-3">
+                <div class="bill-card" data-toggle="modal" data-target="#electricity-modal">
+                  <div class="bill-icon electricity">
+                    <!--<i class="bi bi-lightning-charge"></i>-->
+                    <i class="fa fa-battery-three-quarters"></i>
+                  </div>
+                  <span>Electricity</span>
+                </div>
+              </div>
+              <div class="col-6 col-sm-4 col-md-3">
+                <div class="bill-card" data-toggle="modal" data-target="#water-modal">
+                  <div class="bill-icon water">
+                    <!--<i class="bi bi-droplet"></i>-->
+                    <i class="fa fa-water"></i>
+                  </div>
+                  <span>Water</span>
+                </div>
+              </div>
+              <div class="col-6 col-sm-4 col-md-3">
+                <div class="bill-card" data-toggle="modal" data-target="#tv-modal">
+                  <div class="bill-icon tv">
+                    <!--<i class="bi bi-tv"></i>-->
+                    <i class="fa fa-tv"></i>
+                  </div>
+                  <span>TV/Cable</span>
+                </div>
+              </div>
+              <div class="col-6 col-sm-4 col-md-3">
+                <div class="bill-card" data-toggle="modal" data-target="#education-modal">
+                  <div class="bill-icon education">
+                    <!--<i class="bi bi-mortarboard"></i>-->
+                    <i class="fa fa-user-graduate"></i>
+                  </div>
+                  <span>Education</span>
+                </div>
+              </div>
+              <div class="col-6 col-sm-4 col-md-3">
+                <div class="bill-card" data-toggle="modal" data-target="#gas-modal">
+                  <div class="bill-icon gas">
+                    <!--<i class="bi bi-fire"></i>-->
+                    <i class="fa fa-fire"></i>
+                  </div>
+                  <span>Gas</span>
+                </div>
+              </div>
+              <div class="col-6 col-sm-4 col-md-3">
+                <div class="bill-card" data-toggle="modal" data-target="#insurance-modal">
+                  <div class="bill-icon insurance">
+                    <!--<i class="bi bi-shield-check"></i>-->
+                    <i class="fa fa-user-shield"></i>
+                  </div>
+                  <span>Insurance</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!--Bill Payment End 
+          =========================== -->
           
           <!-- Profile Completeness
           =============================== -->
@@ -1576,6 +2135,684 @@
     </div>
   </footer>
   <!-- Footer end -->
+
+   <!-- ==================== MODALS ==================== -->
+  
+  <!-- Airtime Modal -->
+  <div class="modal fade" id="airtime-modal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title fw-semibold">Buy Airtime</h5>
+          <button type="button" class="close font-weight-400" data-dismiss="modal"> <span aria-hidden="true">&times;</span></button>
+        </div>
+        <div class="modal-body">
+          <form>
+            <div class="mb-3">
+              <label class="form-label-custom">Network Provider</label>
+              <select class="form-select form-select-custom">
+                <option value="">Select Provider</option>
+                <option value="mtn">MTN</option>
+                <option value="airtel">Airtel</option>
+                <option value="glo">Glo</option>
+                <option value="9mobile">9Mobile</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label-custom">Phone Number</label>
+              <input type="tel" class="form-control form-control-custom" placeholder="Enter phone number">
+            </div>
+            <div class="mb-3">
+              <label class="form-label-custom">Amount</label>
+              <input type="number" class="form-control form-control-custom" placeholder="Enter amount">
+            </div>
+            <button type="submit" class="btn btn-primary w-100" onclick="handleSMSPurchase(this)">Buy Airtime</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Data Modal -->
+  <div class="modal fade" id="data-modal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title fw-semibold">Buy Data</h5>
+          <button type="button" class="close font-weight-400" data-dismiss="modal"> <span aria-hidden="true">&times;</span></button>
+        </div>
+        <div class="modal-body">
+          <form>
+            <div class="mb-3">
+              <label class="form-label-custom">Network Provider</label>
+              <select class="form-select form-select-custom">
+                <option value="">Select Provider</option>
+                <option value="mtn">MTN</option>
+                <option value="airtel">Airtel</option>
+                <option value="glo">Glo</option>
+                <option value="9mobile">9Mobile</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label-custom">Phone Number</label>
+              <input type="tel" class="form-control form-control-custom" placeholder="Enter phone number">
+            </div>
+            <div class="mb-3">
+              <label class="form-label-custom">Data Plan</label>
+              <select class="form-select form-select-custom">
+                <option value="">Select Plan</option>
+                <option value="1gb">1GB - $5</option>
+                <option value="2gb">2GB - $10</option>
+                <option value="5gb">5GB - $20</option>
+                <option value="10gb">10GB - $35</option>
+              </select>
+            </div>
+            <button type="submit" class="btn btn-primary w-100" onclick="handleDataPurchase(this)">Buy Data</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Electricity Modal -->
+  <div class="modal fade" id="electricity-modal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title fw-semibold">Pay Electricity Bill</h5>
+          <button type="button" class="close font-weight-400" data-dismiss="modal"> <span aria-hidden="true">&times;</span></button>
+        </div>
+        <div class="modal-body">
+          <form>
+            <div class="mb-3">
+              <label class="form-label-custom">Distribution Company</label>
+              <select class="form-select form-select-custom">
+                <option value="">Select Company</option>
+                <option value="ekedc">EKEDC (Eko Electric)</option>
+                <option value="ikedc">IKEDC (Ikeja Electric)</option>
+                <option value="aedc">AEDC (Abuja Electric)</option>
+                <option value="phed">PHED (Port Harcourt)</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label-custom">Meter Type</label>
+              <select class="form-select form-select-custom">
+                <option value="prepaid">Prepaid</option>
+                <option value="postpaid">Postpaid</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label-custom">Meter Number</label>
+              <input type="text" class="form-control form-control-custom" placeholder="Enter meter number">
+            </div>
+            <div class="mb-3">
+              <label class="form-label-custom">Amount</label>
+              <input type="number" class="form-control form-control-custom" placeholder="Enter amount">
+            </div>
+            <button type="submit" class="btn btn-primary w-100" onclick="handleNepaPurchase(this)">Pay Bill</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Water Modal -->
+  <div class="modal fade" id="water-modal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title fw-semibold">Pay Water Bill</h5>
+          <button type="button" class="close font-weight-400" data-dismiss="modal"> <span aria-hidden="true">&times;</span></button>
+        </div>
+        <div class="modal-body">
+          <form>
+            <div class="mb-3">
+              <label class="form-label-custom">Water Board</label>
+              <select class="form-select form-select-custom">
+                <option value="">Select Water Board</option>
+                <option value="lagos">Lagos Water Corporation</option>
+                <option value="abuja">FCT Water Board</option>
+                <option value="rivers">Rivers State Water Board</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label-custom">Customer ID</label>
+              <input type="text" class="form-control form-control-custom" placeholder="Enter customer ID">
+            </div>
+            <div class="mb-3">
+              <label class="form-label-custom">Amount</label>
+              <input type="number" class="form-control form-control-custom" placeholder="Enter amount">
+            </div>
+            <button type="submit" class="btn btn-primary w-100" onclick="handleWaterPurchase(this)">Pay Bill</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- TV/Cable Modal -->
+  <div class="modal fade" id="tv-modal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title fw-semibold">TV/Cable Subscription</h5>
+          <button type="button" class="close font-weight-400" data-dismiss="modal"> <span aria-hidden="true">&times;</span></button>
+        </div>
+        <div class="modal-body">
+          <form>
+            <div class="mb-3">
+              <label class="form-label-custom">Provider</label>
+              <select class="form-select form-select-custom">
+                <option value="">Select Provider</option>
+                <option value="dstv">DSTV</option>
+                <option value="gotv">GOtv</option>
+                <option value="startimes">StarTimes</option>
+                <option value="showmax">Showmax</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label-custom">Smart Card / IUC Number</label>
+              <input type="text" class="form-control form-control-custom" placeholder="Enter smartcard number">
+            </div>
+            <div class="mb-3">
+              <label class="form-label-custom">Package</label>
+              <select class="form-select form-select-custom">
+                <option value="">Select Package</option>
+                <option value="basic">Basic - $10</option>
+                <option value="compact">Compact - $25</option>
+                <option value="premium">Premium - $50</option>
+              </select>
+            </div>
+            <button type="submit" class="btn btn-primary w-100" onclick="handleTVPurchase(this)">Subscribe</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Education Modal -->
+  <div class="modal fade" id="education-modal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title fw-semibold">Education Payment</h5>
+          <button type="button" class="close font-weight-400" data-dismiss="modal"> <span aria-hidden="true">&times;</span></button>
+        </div>
+        <div class="modal-body">
+          <form>
+            <div class="mb-3">
+              <label class="form-label-custom">Payment Type</label>
+              <select class="form-select form-select-custom">
+                <option value="">Select Type</option>
+                <option value="waec">WAEC Registration</option>
+                <option value="jamb">JAMB Registration</option>
+                <option value="school">School Fees</option>
+                <option value="neco">NECO Registration</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label-custom">Registration Number</label>
+              <input type="text" class="form-control form-control-custom" placeholder="Enter registration number">
+            </div>
+            <div class="mb-3">
+              <label class="form-label-custom">Amount</label>
+              <input type="number" class="form-control form-control-custom" placeholder="Enter amount">
+            </div>
+            <button type="submit" class="btn btn-primary w-100" onclick="handleEducationalPurchase(this)">Make Payment</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Gas Modal -->
+  <div class="modal fade" id="gas-modal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title fw-semibold">Gas Payment</h5>
+          <button type="button" class="close font-weight-400" data-dismiss="modal"> <span aria-hidden="true">&times;</span></button>
+        </div>
+        <div class="modal-body">
+          <form>
+            <div class="mb-3">
+              <label class="form-label-custom">Gas Provider</label>
+              <select class="form-select form-select-custom">
+                <option value="">Select Provider</option>
+                <option value="shell">Shell Gas</option>
+                <option value="total">TotalEnergies</option>
+                <option value="oando">Oando Gas</option>
+                <option value="nipco">NIPCO Gas</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label-custom">Account Number</label>
+              <input type="text" class="form-control form-control-custom" placeholder="Enter account number">
+            </div>
+            <div class="mb-3">
+              <label class="form-label-custom">Amount (Kg)</label>
+              <input type="number" class="form-control form-control-custom" placeholder="Enter amount in kg">
+            </div>
+            <button type="submit" class="btn btn-primary w-100" onclick="handleGasPurchase(this)">Pay for Gas</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Insurance Modal -->
+  <div class="modal fade" id="insurance-modal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title fw-semibold">Insurance Payment</h5>
+          <button type="button" class="close font-weight-400" data-dismiss="modal"> <span aria-hidden="true">&times;</span></button>
+        </div>
+        <div class="modal-body">
+          <form>
+            <div class="mb-3">
+              <label class="form-label-custom">Insurance Type</label>
+              <select class="form-select form-select-custom">
+                <option value="">Select Type</option>
+                <option value="health">Health Insurance</option>
+                <option value="auto">Auto Insurance</option>
+                <option value="life">Life Insurance</option>
+                <option value="property">Property Insurance</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label-custom">Insurance Provider</label>
+              <select class="form-select form-select-custom">
+                <option value="">Select Provider</option>
+                <option value="aiico">AIICO Insurance</option>
+                <option value="leadway">Leadway Assurance</option>
+                <option value="axa">AXA Mansard</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label-custom">Policy Number</label>
+              <input type="text" class="form-control form-control-custom" placeholder="Enter policy number">
+            </div>
+            <div class="mb-3">
+              <label class="form-label-custom">Amount</label>
+              <input type="number" class="form-control form-control-custom" placeholder="Enter amount">
+            </div>
+            <button type="submit" class="btn btn-primary w-100" onclick="handleInsurancePurchase(this)">Pay Premium</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Transaction Detail Modal -->
+  <div class="modal fade" id="transaction-detail" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content">
+        <div class="modal-body p-0">
+          <div class="row g-0">
+            <div class="col-md-5 d-flex align-items-center justify-content-center p-4" style="background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); border-radius: 16px 0 0 16px;">
+              <div class="text-center text-white">
+                <i class="bi bi-building fs-1 mb-3 d-block"></i>
+                <h5 class="mb-2 transTypeDetail">Payment</h5>
+                <h2 class="mb-2 transValue">$250.00</h2>
+                <p class="opacity-75 transDate">Jan 15, 2024</p>
+              </div>
+            </div>
+            <div class="col-md-7 p-4">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-semibold mb-0">Transaction Details</h5>
+                <button type="button" class="close font-weight-400" data-dismiss="modal"> <span aria-hidden="true">&times;</span></button>
+              </div>
+              <hr>
+              <div class="mb-3">
+                <div class="d-flex justify-content-between mb-2">
+                  <span class="text-muted">Payment Amount</span>
+                  <span class="fw-medium transTotal">$250.00</span>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                  <span class="text-muted">Fee</span>
+                  <span class="fw-medium transFee">-$2.50</span>
+                </div>
+                <hr>
+                <div class="d-flex justify-content-between">
+                  <span class="fw-semibold">Total Amount</span>
+                  <span class="fw-semibold transValueSum">$247.50</span>
+                </div>
+              </div>
+              <div class="mb-2">
+                <p class="text-muted small mb-1">Transaction Type</p>
+                <p class="fw-medium transTypeSum">Payment Received</p>
+              </div>
+              <div class="mb-2">
+                <p class="text-muted small mb-1">Transaction ID</p>
+                <p class="fw-medium blockID" style="font-family: monospace;">TXN-2024011512345</p>
+              </div>
+              <div class="mb-2">
+                <p class="text-muted small mb-1">Description</p>
+                <p class="fw-medium transDesc">Payment from John Doe</p>
+              </div>
+              <div class="mb-3">
+                <p class="text-muted small mb-1">Status</p>
+                <span class="status-badge completed transStatus">Completed</span>
+              </div>
+              <div class="d-flex gap-2" id="cancel-tran">
+                <button class="btn btn-outline-danger flex-fill cancel">Cancel</button>
+                <button class="btn btn-primary flex-fill sign">Download Receipt</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Buy Rank Bond Modal -->
+  <div class="modal fade" id="buy-rank-bond" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title fw-semibold">Buy Rank Bond</h5>
+          <button type="button" class="close font-weight-400" data-dismiss="modal"> <span aria-hidden="true">&times;</span></button>
+        </div>
+        <div class="modal-body">
+          <form>
+            <div class="mb-3">
+              <label class="form-label-custom">Bond Value</label>
+              <input type="number" min="100" class="form-control form-control-custom" id="bondValue" placeholder="100">
+              <small class="text-muted">Minimum bond value is $100</small>
+            </div>
+            <button type="submit" class="btn btn-primary w-100" id="buyBondBtn">Buy Bond</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Merge Note Modal -->
+  <div class="modal fade" id="merge-note-modal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title fw-semibold">Merge Scriptbill Note</h5>
+          <button type="button" class="close font-weight-400" data-dismiss="modal"> <span aria-hidden="true">&times;</span></button>
+        </div>
+        <div class="modal-body">
+          <form id="signupForm">
+            <div class="mb-3">
+              <label class="form-label-custom">User Name</label>
+              <input type="text" class="form-control form-control-custom" id="userTextID" placeholder="Connected User Name">
+              <small class="text-muted">Your social media username used for this payment</small>
+            </div>
+            <div class="mb-3">
+              <label class="form-label-custom">Password</label>
+              <input type="password" class="form-control form-control-custom" id="passwordID" placeholder="Password">
+              <small class="text-muted">Transaction key or password used in creating this note</small>
+            </div>
+            <div class="mb-3">
+              <label class="form-label-custom">Upload Scriptbill Note</label>
+              <input type="file" class="form-control form-control-custom" id="scriptUploadID">
+            </div>
+            <button type="button" class="btn btn-primary w-100" id="noteMerger">Merge Note Now</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Add Card Modal -->
+  <div class="modal fade" id="add-new-card-details" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title fw-semibold">Add a Card</h5>
+          <button type="button" class="close font-weight-400" data-dismiss="modal"> <span aria-hidden="true">&times;</span></button>
+        </div>
+        <div class="modal-body">
+          <div class="btn-group w-100 mb-4" role="group">
+            <input type="radio" class="btn-check" name="cardTypeBtn" id="debitBtn" checked>
+            <label class="btn btn-outline-secondary" for="debitBtn">Debit</label>
+            <input type="radio" class="btn-check" name="cardTypeBtn" id="creditBtn">
+            <label class="btn btn-outline-secondary" for="creditBtn">Credit</label>
+            <input type="radio" class="btn-check" name="cardTypeBtn" id="paypalBtn">
+            <label class="btn btn-outline-secondary" for="paypalBtn">PayPal</label>
+          </div>
+          <form id="addCard">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label-custom">Card Type</label>
+                <select class="form-select form-select-custom" id="cardType">
+                  <option value="">Select Card Type</option>
+                  <option>Visa</option>
+                  <option>MasterCard</option>
+                  <option>American Express</option>
+                  <option>Discover</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label-custom">Card Number</label>
+                <input type="text" class="form-control form-control-custom" id="cardNumber" placeholder="1234 5678 9012 3456">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label-custom">Expiry Date</label>
+                <input type="text" class="form-control form-control-custom" id="expiryDate" placeholder="MM/YY">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label-custom">CVV</label>
+                <input type="password" class="form-control form-control-custom" id="cvvNumber" placeholder="123">
+              </div>
+              <div class="col-12">
+                <label class="form-label-custom">Card Holder Name</label>
+                <input type="text" class="form-control form-control-custom" id="cardHolderName" placeholder="John Doe">
+              </div>
+              <div class="col-12">
+                <label class="form-label-custom">Billing Address</label>
+                <input type="text" class="form-control form-control-custom" id="cardHolderAddress" placeholder="123 Main Street">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label-custom">Country</label>
+                <select class="form-select form-select-custom" id="cardHolderCountry">
+                  <option value="">Select Country</option>
+                  <option value="156">Nigeria</option>
+                  <option value="223">United States</option>
+                  <option value="222">United Kingdom</option>
+                  <option value="38">Canada</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label-custom">City</label>
+                <input type="text" class="form-control form-control-custom" id="cardHolderCity" placeholder="Lagos">
+              </div>
+            </div>
+            <button type="submit" class="btn btn-primary w-100 mt-4" id="saveCard">Add Card</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Add Bank Account Modal -->
+  <div class="modal fade" id="add-new-bank-account" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title fw-semibold">Add Bank Account</h5>
+          <button type="button" class="close font-weight-400" data-dismiss="modal"> <span aria-hidden="true">&times;</span></button>
+        </div>
+        <div class="modal-body">
+          <div class="d-flex gap-3 mb-4">
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="bankAccountType" id="personal" checked>
+              <label class="form-check-label" for="personal">Personal</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="bankAccountType" id="business">
+              <label class="form-check-label" for="business">Business</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="bankAccountType" id="crypto">
+              <label class="form-check-label" for="crypto">Crypto</label>
+            </div>
+          </div>
+          <form id="addbankaccount">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label-custom">Bank Country</label>
+                <select class="form-select form-select-custom" id="inputCountry">
+                  <option value="">Select Country</option>
+                  <option value="156">Nigeria</option>
+                  <option value="223">United States</option>
+                  <option value="222">United Kingdom</option>
+                  <option value="38">Canada</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label-custom">Bank Name</label>
+                <input type="text" class="form-control form-control-custom" id="bankName" placeholder="e.g. GTBank">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label-custom">Account Name</label>
+                <input type="text" class="form-control form-control-custom" id="accountName" placeholder="John Doe">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label-custom">Account Number</label>
+                <input type="text" class="form-control form-control-custom" id="accountNumber" placeholder="0123456789">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label-custom">SWIFT Code</label>
+                <input type="text" class="form-control form-control-custom" id="ifscCode" placeholder="GTBINGLA">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label-custom">Routing Number</label>
+                <input type="text" class="form-control form-control-custom" id="routing-num" placeholder="123456789">
+              </div>
+            </div>
+            <div class="form-check mt-3">
+              <input class="form-check-input" type="checkbox" id="confirmBank">
+              <label class="form-check-label" for="confirmBank">
+                I confirm the bank account details above are correct
+              </label>
+            </div>
+            <button type="submit" class="btn btn-primary w-100 mt-4" id="saveBank">Add Bank Account</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Agreements Modal -->
+  <div class="modal fade" id="check-agreement" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title fw-semibold">Note Agreements</h5>
+          <button type="button" class="close font-weight-400" data-dismiss="modal"> <span aria-hidden="true">&times;</span></button>
+        </div>
+        <div class="modal-body">
+          <p class="text-muted mb-4">Click on an agreement to manage it</p>
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead class="table-light">
+                <tr>
+                  <th>#</th>
+                  <th>Contract ID</th>
+                  <th>Value</th>
+                  <th>Expiry</th>
+                  <th>Type</th>
+                </tr>
+              </thead>
+              <tbody id="agreeBody">
+                <tr style="cursor: pointer;" data-toggle="modal" data-target="#agreement-detail">
+                  <td>1</td>
+                  <td><code>AGR-001</code></td>
+                  <td>$5,000</td>
+                  <td>Mar 2025</td>
+                  <td><span class="badge bg-primary">Normal</span></td>
+                </tr>
+                <tr style="cursor: pointer;" data-toggle="modal" data-target="#agreement-detail">
+                  <td>2</td>
+                  <td><code>AGR-002</code></td>
+                  <td>$2,500</td>
+                  <td>Jun 2025</td>
+                  <td><span class="badge bg-warning text-dark">Periodic</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Agreement Detail Modal -->
+  <div class="modal fade" id="agreement-detail" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content">
+        <div class="modal-body p-0">
+          <div class="row g-0">
+            <div class="col-md-5 d-flex align-items-center justify-content-center p-4" style="background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); border-radius: 16px 0 0 16px;">
+              <div class="text-center text-white">
+                <i class="bi bi-file-earmark-text fs-1 mb-3 d-block"></i>
+                <h5 class="mb-2" id="agreeID">AGR-001</h5>
+                <h2 class="mb-2" id="agreeValue">$5,000.00</h2>
+                <span class="badge bg-light text-dark" id="agreeTypePre">Normal</span>
+                <p class="opacity-75 mt-2" id="agreeDate">Jan 15, 2024</p>
+              </div>
+            </div>
+            <div class="col-md-7 p-4">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-semibold mb-0">Agreement Details</h5>
+                <button type="button" class="close font-weight-400" data-dismiss="modal"> <span aria-hidden="true">&times;</span></button>
+              </div>
+              <hr>
+              <div class="mb-3">
+                <div class="d-flex justify-content-between mb-2">
+                  <span class="text-muted">Agreement Amount</span>
+                  <span class="fw-medium" id="agreeAmount">$5,000.00</span>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                  <span class="text-muted">Network Fees</span>
+                  <span class="fw-medium" id="networkFees">-$25.00</span>
+                </div>
+                <hr>
+                <div class="d-flex justify-content-between">
+                  <span class="fw-semibold">Total Amount</span>
+                  <span class="fw-semibold" id="agreeTotal">$4,975.00</span>
+                </div>
+              </div>
+              <div class="row g-3">
+                <div class="col-6">
+                  <p class="text-muted small mb-1">Agreement ID</p>
+                  <p class="fw-medium" id="agreeIDMuted">AGR-001</p>
+                </div>
+                <div class="col-6">
+                  <p class="text-muted small mb-1">Block ID</p>
+                  <p class="fw-medium" id="agreeBlockID">BLK-12345</p>
+                </div>
+                <div class="col-6">
+                  <p class="text-muted small mb-1">Creation Date</p>
+                  <p class="fw-medium" id="creationTimeMuted">Jan 15, 2024</p>
+                </div>
+                <div class="col-6">
+                  <p class="text-muted small mb-1">Expiry Date</p>
+                  <p class="fw-medium" id="agreementExpiry">Mar 15, 2025</p>
+                </div>
+                <div class="col-6">
+                  <p class="text-muted small mb-1">Status</p>
+                  <span class="status-badge pending" id="agreeStatus">Pending Signature</span>
+                </div>
+                <div class="col-6">
+                  <p class="text-muted small mb-1">Type</p>
+                  <p class="fw-medium" id="agreeType">Normal</p>
+                </div>
+              </div>
+              <button class="btn btn-primary w-100 mt-3" id="sign-agree">Sign Agreement</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   
 </div>
 <!-- Document Wrapper end -->
