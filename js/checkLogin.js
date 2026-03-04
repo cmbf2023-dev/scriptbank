@@ -2071,7 +2071,7 @@ function isMobileDevice(){
 
 if( location.href.includes( signupUrl ) ){
 	let form 		= document.getElementById('signupForm');
-	let wallet 		= document.getElementById('walletID');
+	let walletID 		= document.getElementById('walletID');
 	let pass		= document.getElementById('loginPassword');
 	let key			= document.getElementById('loginKey');
 	let address		= document.getElementById('address');
@@ -2086,10 +2086,16 @@ if( location.href.includes( signupUrl ) ){
 	let urlte 		= new URL( location.href );
 	let redirect 	= urlte.searchParams.get("noteIN");
 	let  ref_code 	= urlte.searchParams.get("ref_code");
+	let checkWallet = urlte.searchParams.get('walletID')
 
 	if( ref_code ){
 		seedChar.value = ref_code;
 		seedChar.setAttribute("disbaled", "disabled");
+	}
+
+	if(checkWallet){
+		walletID.setAttribute("disabled", "disabled");
+		walletID.value 		= checkWallet;
 	}
 	
 	if( Scriptbill.s.currentNote && Scriptbill.isJsonable( Scriptbill.s.currentNote ) && ! redirect ) {
@@ -2251,7 +2257,7 @@ if( location.href.includes( signupUrl ) ){
 										
 									} else {
 										fetch('/wallets.json').then(response => response.json()).then( async wallets =>{
-											if(wallets[note.walletID] || true ){
+											if(wallets[note.walletID] ){
 
 												let amount = wallets?.[note.walletID]?.amount || 20000;
 												let accountNumber = wallets?.[note.walletID]?.account_number || '000000000000';
