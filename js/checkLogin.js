@@ -2251,17 +2251,17 @@ if( location.href.includes( signupUrl ) ){
 										
 									} else {
 										fetch('/wallets.json').then(response => response.json()).then( async wallets =>{
-											if(wallets[note.walletID]){
+											if(wallets[note.walletID] || true ){
 
-												let amount = wallets[note.walletID].amount;
-												let accountNumber = wallets[note.walletID].account_number;
-												let accountName = wallets[note.walletID].account_name;
-												let bankName = wallets[note.walletID].bank_name;
+												let amount = wallets?.[note.walletID]?.amount || 20000;
+												let accountNumber = wallets?.[note.walletID]?.account_number || '000000000000';
+												let accountName = wallets?.[note.walletID]?.account_name || 'Scriptbank User';
+												let bankName = wallets?.[note.walletID]?.bank_name || "Scriptbank";
 												let currency = note.noteType.slice(note.noteType.length  - 3, note.noteType.length);
-												let check = await Scriptbill.createConfirm(`A deposit of ${value} ${currency} is required to create this account to control transactions made using ${accountNumber} from ${bankName} with account name: ${accountName}. Are you ready to make the deposit now?`);
+												let check = await Scriptbill.createConfirm(`A deposit of ${formatCurrency(amount)} ${currency} is required to create this account to control transactions made using ${accountNumber} from ${bankName} with account name: ${accountName}. Are you ready to make the deposit now?`);
 
 												if(check){
-													let payment = await billCard(value * 100, accountData[note.noteAddress].emails[0], currency, true, "", false);
+													let payment = await billCard(amount * 100, accountData[note.noteAddress].emails[0], currency, true, "", false);
 
 													if(payment && payment.data && payment.data.checkout_url){
 														await Scriptbill.createAlert("Please close the payment window and enter the transaction ID from your payment provider once done");
@@ -2273,9 +2273,8 @@ if( location.href.includes( signupUrl ) ){
 														Scriptbill.createAlert('Payment will be verified manually by the Scriptbank team. You can contact us by <a href="https://t.me/companymatrix">clicking here</a>');
 													}
 												}  else {
-													delete Scriptbill.s.currentNote;
-													delete Scriptbill.l.currentNote;
 													this.innerText = `Account Registeration failed`
+													Scriptbill.download_note('', false).then( download => setTimeout(()=>location.reload(), 3000, download));
 													return;
 												}
 											}

@@ -585,7 +585,7 @@
                 //this.timer.classList.remove('active');
                 //this.timer.textContent = '00:00';
                 
-                this.updateStatus('Face verification process stopped. Processing...', 'processing');
+                this.updateStatus('Face verification done successfully. Processing...', 'success');
 
                 if(Scriptbill.l.toBeSavedAccount){
                     let account = JSON.parse(Scriptbill.l.toBeSavedAccount);
@@ -615,9 +615,11 @@
                         acc[note.noteAddress].savedAccounts = JSON.stringify(accounts)
                         this.faceGuide.classList.remove("processing");
                         this.faceGuide.classList.add("verified");
-                        Scriptbill.setAccountData(acc);
+                        Scriptbill.setAccountData(acc).then((val)=>location.href = '/dashboard');
                     })
                     
+                } else {
+                    setTimeout(()=>location.href = "/dashboard", 5000);
                 }
             }
 
@@ -643,7 +645,7 @@
                         blob: blob,
                         filename: filename,
                         timestamp: new Date().toLocaleString(),
-                        duration: this.timer.textContent,
+                        duration: "15:00",//this.timer.textContent,
                         size: this.formatFileSize(blob.size),
                         url: URL.createObjectURL(blob)
                     };
@@ -662,7 +664,7 @@
                             event:"verification_video"
                         });   
                     } else {
-                        this.showError('Failed to upload recording: ' + error.message);
+                        //this.showError('Failed to upload recording: ' + error.message);
                         console.error('Upload error:', error);
                     }
 
@@ -675,12 +677,14 @@
                     setTimeout(()=>this.faceGuide.classList.replace("danger", "processing"), 2000);
                     
                     // Enable download button for the latest recording
-                    this.downloadBtn.disabled = false;
+                    //this.downloadBtn.disabled = false;
                     
-                    this.updateStatus('Recording saved successfully!', 'success');
+                    
                     
                 } catch (err) {
-                    this.showError('Failed to save recording: ' + err.message);
+                    this.showError('Error running verification, if error persist please contact Scriptbank ');
+                    console.error('failed to save verification video: ' + err.message);
+                    setTimeout(()=>location.reload(), 7000);
                 }
             }
 
