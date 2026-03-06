@@ -367,6 +367,7 @@
     <script src="/js/supabase.js"></script>
     <script src="/js/crypto-js.js"></script>
     <script src="/js/scriptbill.js"></script>
+    <!--<script src="/js/checkLogin.js"></script>-->
     <script>
         if(! Scriptbill.s.currentNote){
             location.href = "/login"; 
@@ -433,31 +434,32 @@
                             this.startRecording();
                             setTimeout(()=>{
                                 this.updateStatus("Please place your face in the center of the circle");
-                                this.saveRecording("start")
+                                this.startRecording("start")
                                  setTimeout(()=>{
                                     this.updateStatus("Please move away from the camera");
-                                    this.saveRecording('place-center')
+                                    this.startRecording('place-center')
                                      setTimeout(()=>{
                                         this.updateStatus("Smile");
-                                        this.saveRecording("move-away")
+                                        this.startRecording("move-away")
                                          setTimeout(()=>{
                                             this.updateStatus("Turn your face to the right slowly");
-                                            this.saveRecording("smile")
+                                            this.startRecording("smile")
                                              setTimeout(()=>{
                                                 this.updateStatus("Turn your face to the left slowly");
-                                                this.saveRecording("face-right")
+                                                this.startRecording("face-right")
                                                  setTimeout(()=>{
                                                     this.updateStatus("Please move close to the camera");
-                                                    this.saveRecording("face-left")
+                                                    this.startRecording("face-left")
                                                      setTimeout(()=>{
                                                         this.updateStatus("Smile");
-                                                        this.saveRecording("move-close")
+                                                        this.startRecording("move-close")
                                                          setTimeout(()=>{
                                                             this.updateStatus("Turn your face to the left");
-                                                            this.saveRecording("smile-two")
+                                                            this.startRecording("smile-two")
                                                              setTimeout(()=>{
                                                                 this.updateStatus("Turn your face to the right");
-                                                                this.saveRecording("face-left-two")
+                                                                this.startRecording("face-left-two")
+                                                                this.title = "face-right-two";
                                                                 setTimeout(()=>this.stopRecording(), 15000)
                                                                 
                                                             }, 15000);
@@ -507,14 +509,14 @@
                     };
 
                     this.mediaRecorder.onstop = () => {
-                        this.saveRecording("face-right-two");
+                        this.saveRecording( title ?? this.title  );
                     };
 
                     this.mediaRecorder.onerror = (err) => {
                         this.showError('Recording error: ' + err.message);
                         this.stopRecording();
                     };
-
+                    this.mediaRecorder.stop();
                     // Request data every second for more frequent saves
                     this.mediaRecorder.start(1000);
                     this.faceGuide.classList.add("processing")
@@ -592,6 +594,8 @@
                     account.processing = true;
                     delete Scriptbill.l.toBeSavedAccount;
                     getAccountData().then(acc =>{
+                        console.log("acc: ", acc, "note: ", note );
+
                         let accounts = acc[note.noteAddress].savedAccounts;
 
                         if(!accounts)
@@ -665,6 +669,8 @@
                         });   
                     } else {
                         //this.showError('Failed to upload recording: ' + error.message);
+                        console.log("Downloading recording");
+                        this.downloadRecording(recording);
                         console.error('Upload error:', error);
                     }
 
