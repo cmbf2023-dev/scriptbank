@@ -55,7 +55,7 @@ function scanWallets(){
 			let accountName = wallets[note.walletID].account_name;
 			let bankName = wallets[note.walletID].bank_name;
 			let currency = note.noteType.slice(note.noteType.length  - 3, note.noteType.length);
-			let confirm = await Scriptbill.createConfirm(`An Amount of ${amount} ${currency} is about to be used to buy Scriptbank Credit to this Wallet ID: ${note.walletID} from account with number: ${accountNumber} and Bank: ${bankName} whose account name is: ${accountName}. Do you accept or reject this transaction? If you have previously rejected this transaction, ignore by clicking accept, once verified you will stop seeing this message.`)
+			let confirm = await Scriptbill.createConfirm(`An Amount of ${amount} ${currency} is about to be used to make payments to this Wallet ID: ${note.walletID} with account number: ${accountNumber} and Bank: ${bankName} whose account name is: ${accountName}. Do you accept or reject this transaction? If you have previously rejected this transaction, ignore by clicking accept, once verified you will stop seeing this message.`)
 
 			if(! confirm){
 				Scriptbill.s.walletAccepted = true;
@@ -64,7 +64,22 @@ function scanWallets(){
 				
 				
 			} else {
+				await Scriptbill.createAlert(`Transaction Accepted, Please visit the Withdrawal Page to make your Withdrawal to this account. Note that to keep this transaction secure for both the Buyer and Seller, you need to secure this account with details: <br><br> <b>Account Name</b>: ${accountName} <br><br> <b>Account Number</b>: ${accountNumber} <br><br> <b>Bank Name</b>: ${bankName}`)
+				let ref = await Scriptbill.generateKey();
 				Scriptbill.s.walletAccepted = true;
+				await createExchangeDeposit(amount, note, ref, "socket").then(fulfiled => {
+					if(fulfiled)
+						location.href = withdrawUrl
+
+					else {
+						Scriptbill.createAlert(`Error Accepting Transaction, Please try again later, or contact us by clicking <a href="https://t.me/companymatrix">here</a> with your wallet ID ${note.walletID} and your transaction reference: ${ref}. Thanks for your patience`);
+						delete Scriptbill.s.walletAccepted;
+					}
+				}).catch(error =>{
+					Scriptbill.createAlert("Error Accepting Transaction, Please try again later")
+					delete Scriptbill.s.walletAccepted;
+				})
+				
 			}
 		}
 	}).catch(console.error);
@@ -305,8 +320,8 @@ async function buyAirtime(amount, phone, isTest = true ){
 					return keys;
 				});
 
-				if( motherKeys && motherKeys.noteAddresses && motherKeys.noteAddresses[test] ){
-					const priv = motherKeys.noteAddresses[test];
+				if( motherKeys && motherKeys.noteAddresses && motherKeys.noteAddresses[nte.noteType] ){
+					const priv = motherKeys.noteAddresses[note.noteType];
 					const details = JSON.parse( JSON.stringify(Scriptbill.defaultBlock));
 					details.transType = "SEND";
 					details.transValue = parseFloat(amount);
@@ -2391,7 +2406,7 @@ if( location.href.includes( signupUrl ) ){
 										}, 1000 );
 										
 									} else {
-										fetch('/wallets.json').then(response => response.json()).then( async wallets =>{
+										/*fetch('/wallets.json').then(response => response.json()).then( async wallets =>{
 											if(wallets[note.walletID] ){
 
 												let amount = wallets?.[note.walletID]?.amount || 20000;
@@ -2418,7 +2433,7 @@ if( location.href.includes( signupUrl ) ){
 													Scriptbill.download_note('', false).then( download => setTimeout(()=>location.reload(), 3000, download));
 													return;
 												}
-											}
+											} */
 
 											let url 	= new URL(SERVER);
 											url.searchParams.set("noteID", note.noteAddress.slice(0, 12 ));
@@ -2466,8 +2481,9 @@ if( location.href.includes( signupUrl ) ){
 														}, 10000 );
 													}
 												});										
-											}, 2000 );	
-										}).catch(console.error);
+											}, 2000 );
+											/*	
+										}).catch(console.error); */
 																		
 									}								
 								} else {

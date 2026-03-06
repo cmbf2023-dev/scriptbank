@@ -446,31 +446,39 @@
                                             this.startRecording("smile")
                                              setTimeout(()=>{
                                                 this.updateStatus("Turn your face to the left slowly");
-                                                this.startRecording("face-right")
-                                                 setTimeout(()=>{
-                                                    this.updateStatus("Please move close to the camera");
-                                                    this.startRecording("face-left")
-                                                     setTimeout(()=>{
-                                                        this.updateStatus("Smile");
-                                                        this.startRecording("move-close")
-                                                         setTimeout(()=>{
-                                                            this.updateStatus("Turn your face to the left");
-                                                            this.startRecording("smile-two")
+                                                this.startRecording("face-right")                                                
+                                                setTimeout(()=>{
+                                                this.updateStatus("Blink Your eyes ");
+                                                this.startRecording("face-left")
+                                                    setTimeout(()=>{
+                                                        this.updateStatus("Please move close to the camera");
+                                                        this.startRecording("blink-eyes")
+                                                        setTimeout(()=>{
+                                                            this.updateStatus("Smile");
+                                                            this.startRecording("move-close")
                                                              setTimeout(()=>{
-                                                                this.updateStatus("Turn your face to the right");
-                                                                this.startRecording("face-left-two")
-                                                                this.title = "face-right-two";
-                                                                setTimeout(()=>this.stopRecording(), 15000)
-                                                                
-                                                            }, 15000);
-                                                        }, 15000);
-                                                    }, 15000);
-                                                }, 15000);
-                                            }, 15000);
-                                        }, 15000);
-                                    }, 15000);
-                                }, 15000);
-                            }, 15000);
+                                                            this.updateStatus("Blink Your eyes again");
+                                                            this.startRecording("smile-two")
+                                                                setTimeout(()=>{
+                                                                    this.updateStatus("Turn your face to the left");
+                                                                    this.startRecording("blink-eyes-two")
+                                                                    setTimeout(()=>{
+                                                                        this.updateStatus("Turn your face to the right");
+                                                                        this.startRecording("face-left-two")
+                                                                        this.title = "face-right-two";
+                                                                        setTimeout(()=>this.stopRecording(), 25000)
+                                                                        
+                                                                    }, 25000);
+                                                                }, 25000);
+                                                            }, 25000);
+                                                        }, 25000);
+                                                    }, 25000);
+                                                }, 25000);
+                                            }, 25000);
+                                        }, 25000);
+                                    }, 25000);
+                                }, 25000);
+                            }, 25000);
                             resolve();
                         };
                     });
