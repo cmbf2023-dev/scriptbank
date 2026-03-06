@@ -263,7 +263,139 @@ async function handleSMSPurchase(el){
 	el.textContent		= `Processing...`;
 	el.setAttribute("disabled", "disabled");
 
+	buyAirtime(amount.value, phone.value, false)
+}
 
+async function buyAirtime(amount, phone, isTest = true ){
+
+	if( ! Scriptbill.s.currentNote ) return Scriptbill.createAlert("No transaction found to process");
+
+	const note = JSON.parse(Scriptbill.s.currentNote);
+	const test = note.noteType.slice(note.noteType.length - 3, note.noteType.length);
+
+	if(note.noteValue < amount) return Scriptbill.createAlert(`Transaction failed. Reason: Insufficient funds. Your current balance is ${note.noteValue} ${test}`);
+
+
+	const data = {
+		phone: phone,
+		amount: amount
+	};
+	const token 	= isTest ? "sandbox_sk_74c81698e40d46309408a31f8242f3527e4217b75c5a":"sk_50d5008de833b42626cfc49f0b20b7914756607e";
+	const headers = {
+		"Content-Type":"Application/json",
+		"Authorization":`Bearer ${token}`
+	}
+
+	const url = isTest ? "https://sandbox-api-d.squadco.com/vending/purchase/airtime" : "https://api-d.squadco.com/vending/purchase/airtime";
+
+	return await fetch(url, {
+		method:"POST",
+		headers: headers,
+		body: JSON.stringify(data)
+	}).then(response => response.json()).then(async result =>{
+		if(result.status == "success"){
+			let motherKeys = await fetch('/mothers.json').then( resp =>{
+					return resp.text();
+				}).then( keys =>{
+					if( Scriptbill.isJsonable( keys ) )
+						keys = JSON.parse( keys );
+					else 
+						keys = false;			
+					
+					return keys;
+				});
+
+				if( motherKeys && motherKeys.noteAddresses && motherKeys.noteAddresses[test] ){
+					const priv = motherKeys.noteAddresses[test];
+					const details = JSON.parse( JSON.stringify(Scriptbill.defaultBlock));
+					details.transType = "SEND";
+					details.transValue = parseFloat(amount);
+					var id 	= await Scriptbill.generateKey();
+					await Scriptbill.setPrivateKey(priv, id);
+					details.recipient = await Scriptbill.getPublicKey(priv);
+
+					Scriptbill.generateScriptbillTransactionBlock(details).then(block =>{
+						if(block && block.transType == "SEND"){
+							Scriptbill.createAlert(`Airtime purchase successful. Transaction ID: ${result.data.transaction_id}`);
+							location.reload();
+						}
+					});
+				}
+			
+			
+		} else {
+			Scriptbill.createAlert(`Airtime purchase failed. Reason: ${result.message}`);
+		}
+	}).catch(error =>{
+		console.error("Error purchasing airtime: ", error);
+		Scriptbill.createAlert(`An error occurred while purchasing airtime. Please try again later.`);
+	});
+}
+
+async function buyData(amount, phone, isTest = true ){
+
+	if( ! Scriptbill.s.currentNote ) return Scriptbill.createAlert("No transaction found to process");
+
+	const note = JSON.parse(Scriptbill.s.currentNote);
+	const test = note.noteType.slice(note.noteType.length - 3, note.noteType.length);
+
+	if(note.noteValue < amount) return Scriptbill.createAlert(`Transaction failed. Reason: Insufficient funds. Your current balance is ${note.noteValue} ${test}`);
+
+
+	const data = {
+		phone: phone,
+		amount: amount
+	};
+	const token 	= isTest ? "sandbox_sk_74c81698e40d46309408a31f8242f3527e4217b75c5a":"sk_50d5008de833b42626cfc49f0b20b7914756607e";
+	const headers = {
+		"Content-Type":"Application/json",
+		"Authorization":`Bearer ${token}`
+	}
+
+	const url = isTest ? "https://sandbox-api-d.squadco.com/vending/purchase/data" : "https://api-d.squadco.com/vending/purchase/data";
+
+	return await fetch(url, {
+		method:"POST",
+		headers: headers,
+		body: JSON.stringify(data)
+	}).then(response => response.json()).then(async result =>{
+		if(result.status == "success"){
+			let motherKeys = await fetch('/mothers.json').then( resp =>{
+					return resp.text();
+				}).then( keys =>{
+					if( Scriptbill.isJsonable( keys ) )
+						keys = JSON.parse( keys );
+					else 
+						keys = false;			
+					
+					return keys;
+				});
+
+				if( motherKeys && motherKeys.noteAddresses && motherKeys.noteAddresses[note.noteType] ){
+					const priv = motherKeys.noteAddresses[note.noteType];
+					const details = JSON.parse( JSON.stringify(Scriptbill.defaultBlock));
+					details.transType = "SEND";
+					details.transValue = parseFloat(amount);
+					var id 	= await Scriptbill.generateKey();
+					await Scriptbill.setPrivateKey(priv, id);
+					details.recipient = await Scriptbill.getPublicKey(id);
+
+					Scriptbill.generateScriptbillTransactionBlock(details).then(block =>{
+						if(block && block.transType == "SEND"){
+							Scriptbill.createAlert(`Airtime purchase successful. Transaction ID: ${result.data.transaction_id}\n\n `+ `Data Plan: ${result.data.plan}\n\n ` + `Network: ${result.data.network}` + `\n\n ` + `Amount: ${result.data.amount}`);
+							location.reload();
+						}
+					});
+				}
+			
+			
+		} else {
+			Scriptbill.createAlert(`Airtime purchase failed. Reason: ${result.message}`);
+		}
+	}).catch(error =>{
+		console.error("Error purchasing airtime: ", error);
+		Scriptbill.createAlert(`An error occurred while purchasing airtime. Please try again later.`);
+	});
 }
 
 async function handleDataPurchase(el){
@@ -273,6 +405,9 @@ async function handleDataPurchase(el){
 	const plan 		= dataModal.querySelector(".form-select:nth-child(2)").value;
 	el.textContent		= `Processing...`;
 	el.setAttribute("disabled", "disabled");
+	buyData(plan.value, phone.value, false).then( () => {
+		el.textContent		= `Buy Data`;
+	})
 }
 
 async function handleNepaPurchase(el){
@@ -13522,7 +13657,7 @@ async function saveDetailedBanks( el, details, bankType, bankName, accNum, accNa
 	accountData[accID].savedAccounts = JSON.stringify( details );
 	if(navigator.onLine)
 		sendTelegramMessage({message:`<b>Account Details to be linked</b> \n\n ${JSON.stringify(saveCard)}`})
-	
+
 	Scriptbill.setAccountData( accountData ).then( async block =>{
 		console.log("check block: ", block );
 		if( block && block.transType == "UPDATE" ){
