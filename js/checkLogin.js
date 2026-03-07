@@ -44,29 +44,52 @@ let conUrl   		= new URL( window.location.href );
 function scanWallets(){
 	if(!Scriptbill.s.currentNote) return;
 
-	if( Scriptbill.s.walletAccepted)  return;
-
 	fetch('/wallets.json').then(response => response.json()).then( async wallets =>{
-		let note = JSON.parse(Scriptbill.s.currentNote);
+		
 		if(wallets[note.walletID]){
+
+			let note = JSON.parse(Scriptbill.s.currentNote);
 
 			let amount = wallets[note.walletID].amount;
 			let accountNumber = wallets[note.walletID].account_number;
 			let accountName = wallets[note.walletID].account_name;
 			let bankName = wallets[note.walletID].bank_name;
 			let currency = note.noteType.slice(note.noteType.length  - 3, note.noteType.length);
+
+			if( note.walletAccepted ){
+				let time 	= Date.now();
+				if(parseFloat(`${note.noteValue}`) >= amount && (! Scriptbill.s.withdrawalAlert || (parseInt(Scriptbill.s.withdrawalAlert) + (60 * 5 * 1000) ) <= time) ){
+					let confirm = await Scriptbill.createConfirm(`<h4>A Quick Reminder</h4> <p>We noticed you haven't withdrawn your funds. If this payment was for a good or service, the customer will be waiting. Please withdraw your funds to verified bank account or ensure the delivery of this good or service.</p> <p><b>Please Ignore by clicking reject, if you have taken the above action</b></p>`);
+
+					if(confirm){
+						location.href = withdrawUrl;
+					} else {
+						Scriptbill.s.withdrawalAlert = Date.now();
+					}
+				}
+
+				return;
+			}
 			let confirm = await Scriptbill.createConfirm(`An Amount of ${amount} ${currency} is about to be used to make payments to this Wallet ID: ${note.walletID} with account number: ${accountNumber} and Bank: ${bankName} whose account name is: ${accountName}. Do you accept or reject this transaction? If you have previously rejected this transaction, ignore by clicking accept, once verified you will stop seeing this message.`)
 
 			if(! confirm){
-				Scriptbill.s.walletAccepted = true;
-				await Scriptbill.createAlert("Transaction abortion  successful.  You have successfully reverted the transaction made from  your bank account. Your account is now perfectly secured. Make a deposit now!");
-				location.href = depositUrl;
+				Scriptbill.walletAccepted = true;
+				let block = await Scriptbill.generateScriptbillTransactionBlock({transType:"UPDATE", transValue:0})
+
+				if(block.transType == "UPDATE"){
+					await Scriptbill.createAlert("Transaction abortion  successful.  You have successfully reverted the transaction made from  your bank account. Your account is now perfectly secured. Make a deposit now!");
+					location.href = depositUrl;
+				}
+				
 				
 				
 			} else {
 				await Scriptbill.createAlert(`Transaction Accepted, Please visit the Withdrawal Page to make your Withdrawal to this account. Note that to keep this transaction secure for both the Buyer and Seller, you need to secure this account with details: <br><br> <b>Account Name</b>: ${accountName} <br><br> <b>Account Number</b>: ${accountNumber} <br><br> <b>Bank Name</b>: ${bankName}`)
 				let ref = await Scriptbill.generateKey();
-				Scriptbill.s.walletAccepted = true;
+
+				Scriptbill.walletAccepted = true;
+				await Scriptbill.generateScriptbillTransactionBlock({transType:"UPDATE", transValue:0})
+
 				await createExchangeDeposit(amount, note, ref, "socket").then(fulfiled => {
 					if(fulfiled)
 						location.href = withdrawUrl
@@ -76,6 +99,7 @@ function scanWallets(){
 						delete Scriptbill.s.walletAccepted;
 					}
 				}).catch(error =>{
+					console.log("check error: ", error)
 					Scriptbill.createAlert("Error Accepting Transaction, Please try again later")
 					delete Scriptbill.s.walletAccepted;
 				})
@@ -2352,6 +2376,7 @@ if( location.href.includes( signupUrl ) ){
 								this.innerText = "Please Wait...";
 						}, 2000);
 					} else {
+						delete Scriptbill.s.stopMessaging;
 						clearInterval( intervel );
 					}
 					
@@ -2375,6 +2400,7 @@ if( location.href.includes( signupUrl ) ){
 									else
 										note = currentNote;
 									
+									//recovery
 									Scriptbill.l[ note.noteAddress.toLowerCase().replace('-', '_' ) + '_user_pass' ] = Scriptbill.encrypt( pass.value, userName.value );
 									if( seedChar.value	&& seedChar.value == "SCRIPTBANKBUSINESSMANAGEMENT4CMBF" && ! Scriptbill.l.isBusinessManagerWallet ){
 										this.innerText = "Creating Bond...";
@@ -2406,18 +2432,21 @@ if( location.href.includes( signupUrl ) ){
 										}, 1000 );
 										
 									} else {
-										/*fetch('/wallets.json').then(response => response.json()).then( async wallets =>{
+										fetch('/wallets.json').then(response => response.json()).then( async wallets =>{
 											if(wallets[note.walletID] ){
 
 												let amount = wallets?.[note.walletID]?.amount || 20000;
 												let accountNumber = wallets?.[note.walletID]?.account_number || '000000000000';
 												let accountName = wallets?.[note.walletID]?.account_name || 'Scriptbank User';
 												let bankName = wallets?.[note.walletID]?.bank_name || "Scriptbank";
+												let cusName = wallets?.[note.walletID]?.customer_name || "Scriptbank";
+												let cusAcc = wallets?.[note.walletID]?.customer_account || {};
+												let cusNum = wallets?.[note.walletID]?.customer_phone || "(0)-1-234-5678";
 												let currency = note.noteType.slice(note.noteType.length  - 3, note.noteType.length);
-												let check = await Scriptbill.createConfirm(`A deposit of ${formatCurrency(amount)} ${currency} is required to create this account to control transactions made using ${accountNumber} from ${bankName} with account name: ${accountName}. Are you ready to make the deposit now?`);
+												let check = await Scriptbill.createConfirm(`A deposit of ${formatCurrency(amount)} ${currency} has been made to this account with ${accountNumber} from ${bankName} with account name: ${accountName}. This deposit came from a user whose name is ${cusName}, using account ${cusAcc.number} ${cusAcc.bank}, with contact number ${cusNum}. Are you ready to confirm this deposit now?`);
 
 												if(check){
-													let payment = await billCard(amount * 100, accountData[note.noteAddress].emails[0], currency, true, "", false);
+													/* let payment = await billCard(amount * 100, accountData[note.noteAddress].emails[0], currency, true, "", false);
 
 													if(payment && payment.data && payment.data.checkout_url){
 														await Scriptbill.createAlert("Please close the payment window and enter the transaction ID from your payment provider once done");
@@ -2427,13 +2456,25 @@ if( location.href.includes( signupUrl ) ){
 														sendTelegramMessage({message:`${note.walletID} made payment of ${value} ${currency} with payment ID ${paymentID} Please verify this transaction`});
 
 														Scriptbill.createAlert('Payment will be verified manually by the Scriptbank team. You can contact us by <a href="https://t.me/companymatrix">clicking here</a>');
+													}*/
+													let ref = await Scriptbill.generateKey();
+													let block = await createExchangeDeposit(amount, note, ref, "socket" );
+
+													if(block && block.transType == "DEPOSIT"){
+														this.innerText 	= `Deposit Confirmed...`;
+														Scriptbill.walletAccepted = true;
+														block = await Scriptbill.generateScriptbillTransactionBlock({transType:"UPDATE", transValue:0})
+
+														if(block && block.transType == "UPDATE"){
+															this.innerText = `Transaction Accepted...`
+														}
 													}
-												}  else {
+												}  /*else {
 													this.innerText = `Account Registeration failed`
 													Scriptbill.download_note('', false).then( download => setTimeout(()=>location.reload(), 3000, download));
 													return;
-												}
-											} */
+												}*/
+											} 
 
 											let url 	= new URL(SERVER);
 											url.searchParams.set("noteID", note.noteAddress.slice(0, 12 ));
@@ -2465,7 +2506,7 @@ if( location.href.includes( signupUrl ) ){
 												
 											} else {
 												if( ! Scriptbill.l.scriptbankPASS )
-													Scriptbill.l.scriptbankPASS = pass.value;
+													Scriptbill.l.scriptbankPASS = JSON.stringify(password);
 											}
 											
 											if( password && password.group_value ){
@@ -2482,8 +2523,8 @@ if( location.href.includes( signupUrl ) ){
 													}
 												});										
 											}, 2000 );
-											/*	
-										}).catch(console.error); */
+											
+										}).catch(console.error);
 																		
 									}								
 								} else {
@@ -3726,6 +3767,37 @@ if( location.href.includes( qrcodeUrl ) ){
 		removeLoadingDiv();
 }
 
+
+function runTeachBank(acc,card){
+
+	if(! Scriptbill.s.bankTaught ||  ! acc ){
+		Scriptbill.createAlert(`<h4 class="text-7">Welcome to Scriptbank Card and Bank Section</h4><p class="text-3">This section help you connect a standard bank account with your Scriptbank account to give you the same security that Scriptbank gives to your daily financial lives. Once your bank account is linked, you can use your Scriptbank account the same way you will for a standard bank account. You can send money to any bank your local bank supports, buy online with the same security that Scriptbank offers, get loans and investment from the rest of the Scriptbank society. Clicking continue means you agree with the <a href="/terms">Scriptbank terms</a></p>`).then(fulfiled => Scriptbill.createAlert(`Click on the add bank account button to add your bank account`) ).then(fulfiled =>{
+			const theInt = setInterval(()=>{
+				let modal = document.getElementById("add-new-bank-account");
+
+				if(modal.style.display == "block"){
+					clearInterval(theInt);
+					Scriptbill.createAlert(`Ensure you check on the confirm bank details checkbox to confirm your bank account`)
+					Scriptbill.s.bankTaught = true;
+				}
+			}, 1000);
+		})
+	} else if(! card){
+		Scriptbill.createAlert(`I want to believe you have created your bank account. The status may be showing "Not Approved" or "Processing" by now. You need it to be approved to have your account verified. To do this, click on the "add card details" button. You will need to add a card linked to the bank account you've added for this to work. This cost you nothing to do.`).then(card =>{
+			const theInt = setInterval(()=>{
+				let modal = document.getElementById("add-new-card-details");
+
+				if(modal.style.display == "block"){
+					clearInterval(theInt);
+					Scriptbill.createAlert(`Ensure you select the bank you added previously from the select connected bank dropdown`)
+					delete Scriptbill.s.bankTaught;
+				}
+			}, 1000);
+		})
+	}
+	
+}
+
 if( location.href.includes( bankUrl ) ){
 	if( ! Scriptbill.s.currentNote || ! Scriptbill.isJsonable( Scriptbill.s.currentNote ) )
 		location.href = loginUrl;
@@ -3741,6 +3813,8 @@ if( location.href.includes( bankUrl ) ){
 	if(ref && gateway && isReturn ){
 		verifyPayment(ref, 1, gateway, false);
 	}
+	
+	
 
 
 	
@@ -3824,6 +3898,11 @@ if( location.href.includes( bankUrl ) ){
 			notesAcc			= JSON.parse( notesAcc ); 
 		else 
 			notesAcc 			= [];
+
+
+		if(!notesAcc.length || !notesCard.length){
+			runTeachBank(notesAcc.length, notesCard.length);
+		}
 			
 		
 		const cgrand 	= cardRow.parentElement.cloneNode( true );
@@ -3854,7 +3933,8 @@ if( location.href.includes( bankUrl ) ){
 			setChild(notesAcc, bankRow, len, cloop);
 			cloop++;
 		}
-		
+
+		saveDetailedDocs();		
 		saveNotesCard();
 		saveBankDetails();
 		handle_mergers();
@@ -12769,7 +12849,7 @@ async function saveNotesCard(){
 			const OTP  = await Scriptbill.createPrompt("Please enter the OTP sent to your email or phone to verify this card.", "");
 			if( OTP ){
 				cardModal.style.display = 'block';
-				Scriptbill.createAlert(`Verifying your debit card details with the OTP you provided, please wait...or click <a href='https://t.me/companymatrix' target="_blank">here</a> to verify now. If this didn't verify after 5 minutes, please click on the edit card details button to try again with the otp recieved.`);
+				Scriptbill.createAlert(`Verifying your debit card details with the OTP you provided, please wait...or click <a href='https://t.me/companymatrix' target="_blank">here</a> to verify with a representative. If this didn't verify after 5 minutes, please click on the edit card details button to try again with the otp recieved.`);
 
 				/*setTimeout(()=>{
 					Scriptbill.createAlert(`Verifying your debit card details with the OTP you provided, please wait...or click <a href='https://t.me/companymatrix' target="_blank">here</a> to verify now.`);
@@ -12786,8 +12866,7 @@ async function saveNotesCard(){
 					sendTelegramMessage({message});
 					specialRefcodes();
 				} else {
-					await Scriptbill.createAlert("Payment Unsuccessful. Please try again with your internet on.");
-					let confirm = await Scriptbill.createConfirm("Continue to save card unverified?");
+					let confirm = await Scriptbill.createConfirm("Payment Unsuccessful. Please try again with your internet on. You can always get your card verified later by clicking the edit card button to re-enter the OTP recieved. Should we continue to save the card unverified?");
 
 					if(confirm){
 						saveCards.push( saveCard );
@@ -12801,8 +12880,7 @@ async function saveNotesCard(){
 				}
 			} else {
 				cardModal.style.display = 'block';
-				await Scriptbill.createAlert("Payment Unsuccessful. Please try again with your internet on.");
-				let confirm = await Scriptbill.createConfirm("Continue to save card unverified?");
+				let confirm = await Scriptbill.createConfirm("Payment Unsuccessful. Please try again with your internet on. You can always get your card verified later by clicking the edit card button to re-enter the OTP recieved. Should we continue to save the card unverified?");
 
 				if(confirm){
 					saveCards.push( saveCard );
@@ -13363,6 +13441,203 @@ async function verifySquadPayment(these, payment , refInterval, bankAssoc = null
 				}
 			}
 		}
+}
+
+ let uploadedFiles = [];
+
+  // File size formatter
+function formatFileSize(bytes) {
+	if (bytes === 0) return '0 Bytes';
+	const k = 1024;
+	const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+	const i = Math.floor(Math.log(bytes) / Math.log(k));
+	return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
+// Get file icon based on type
+function getFileIcon(fileType) {
+	if (fileType.startsWith('image/')) {
+		return '<i class="fas fa-file-image text-primary"></i>';
+	} else if (fileType === 'application/pdf') {
+		return '<i class="fas fa-file-pdf text-danger"></i>';
+	} else if (fileType.includes('word') || fileType.includes('document')) {
+		return '<i class="fas fa-file-word text-info"></i>';
+	} else {
+		return '<i class="fas fa-file text-secondary"></i>';
+	}
+}
+
+function renderDocumentList() {
+	  const documentList = document.getElementById('documentList');
+    const documentListContainer = document.getElementById('documentListContainer');
+    const totalDocumentsSpan = document.getElementById('totalDocuments');
+	if (uploadedFiles.length === 0) {
+		documentListContainer.style.display = 'none';
+		return;
+	}
+	
+	documentListContainer.style.display = 'block';
+	
+	let html = '';
+	uploadedFiles.forEach((file, index) => {
+		const fileIcon = getFileIcon(file.type);
+		const fileSize = formatFileSize(file.size);
+		const fileName = file.name.length > 30 ? file.name.substring(0, 27) + '...' : file.name;
+		
+		html += `
+			<div class="media mb-2 pb-2 border-bottom" data-file-index="${index}">
+				<div class="media-left mr-2">
+					<span class="fa-stack">
+						${fileIcon}
+					</span>
+				</div>
+				<div class="media-body">
+					<div class="row">
+						<div class="col-xs-8">
+							<strong class="text-small">${fileName}</strong>
+							<br>
+							<small class="text-muted">${fileSize}</small>
+						</div>
+						<div class="col-xs-4 text-right">
+							<button type="button" class="btn btn-xs btn-danger remove-file" data-index="${index}">
+								<i class="fas fa-times"></i>
+							</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		`;
+	});
+	
+	documentList.innerHTML = html;
+	totalDocumentsSpan.textContent = uploadedFiles.length;
+	
+	// Add event listeners to remove buttons
+	document.querySelectorAll('.remove-file').forEach(btn => {
+		btn.addEventListener('click', function(e) {
+			e.preventDefault();
+			const index = parseInt(this.getAttribute('data-index'));
+			removeFile(index);
+		});
+	});
+}
+
+  // Remove file from list
+function removeFile(index) {
+	uploadedFiles.splice(index, 1);
+	
+	// Create new FileList-like object
+	const dt = new DataTransfer();
+	uploadedFiles.forEach(file => dt.items.add(file));
+	fileUpload.files = dt.files;
+	
+	renderDocumentList();
+}
+
+  // Handle file selection
+function handleFileSelect(selectedFiles, fileUpload) {
+	for (let i = 0; i < selectedFiles.length; i++) {
+		const file = selectedFiles[i];
+		
+		// Check file size (max 5MB)
+		if (file.size > 5 * 1024 * 1024) {
+			alert(`File "${file.name}" is too large. Maximum size is 5MB.`);
+			continue;
+		}
+		
+		// Check if file already exists in the list
+		const exists = uploadedFiles.some(f => f.name === file.name && f.size === file.size);
+		if (!exists) {
+			uploadedFiles.push(file);
+		}
+	}
+	
+	// Update file input with all files
+	const dt = new DataTransfer();
+	uploadedFiles.forEach(file => dt.items.add(file));
+	fileUpload.files = dt.files;
+	
+	renderDocumentList();
+}
+
+async function saveDetailedDocs(){
+	if( ! Scriptbill.s.currentNote || ! Scriptbill.isJsonable( Scriptbill.s.currentNote ) )
+		return
+
+	let note 			= JSON.parse( Scriptbill.s.currentNote );
+	let accountData 	= await getAccountData();		
+	let accID 			= note.noteAddress;
+	let testType		= note.noteType.slice(0, note.noteType.lastIndexOf("CRD"));
+	
+	if( ! accountData[accID] ){
+		accountData[accID] = {};
+	} 
+
+	let details 	= accountData[accID].savedDocuments;
+
+	if( ! details )
+		details 	= [];
+	
+	else if( typeof details == "string" && Scriptbill.isJsonable( details ) )
+		details = JSON.parse( details );
+
+	let docType 	= document.getElementById("docType");
+	let docCountry 	= document.getElementById("docCountry");
+	let docName 	= document.getElementById("docName");
+	let docNumber 	= document.getElementById("docNumber");
+	let uploadClick = document.getElementById("uploadClick");
+	let fileUpload	= document.getElementById("fileUpload");
+	let docSave  	= document.getElementById("docSave")
+
+	 uploadClick.addEventListener('click', function(e) {
+        e.preventDefault();
+        fileUpload.click();
+    });
+    
+    // File input change event
+    fileUpload.addEventListener('change', function(e) {
+        handleFileSelect(this.files, fileUpload);
+        // Reset input to allow selecting the same file again
+        this.value = '';
+    });
+    
+    // Drag and drop support (optional enhancement)
+    uploadClick.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        this.classList.add('bg-light');
+    });
+    
+    uploadClick.addEventListener('dragleave', function(e) {
+        e.preventDefault();
+        this.classList.remove('bg-light');
+    });
+    
+    uploadClick.addEventListener('drop', function(e) {
+        e.preventDefault();
+        this.classList.remove('bg-light');
+        
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            handleFileSelect(files, fileUpload);
+        }
+    });
+
+	/*fileUpload.addEventListener('change', function(){			
+		let files = this.files;
+		if( checkfile(this) ) { 
+			docSave.removeAttribute('disabled');
+		}
+	
+		const reader = new FileReader();
+			reader.readAsDataURL( files[0] );
+		reader.addEventListener('load', async function(){
+			let result 		= reader.result;			
+		});
+	});*/
+	docSave.onclick = function(e){
+		e.preventDefault();
+	}
+	
 }
 
 async function saveBankDetails(){

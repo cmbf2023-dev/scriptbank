@@ -18,6 +18,8 @@
 	
 	//the private key of the current note.
 	static #noteSecret  = false;
+
+	static updated 		= {};
 	
 	//private key that holds the key of the creator of Scriptbill. This key can be used to 
 	//override so many thing in the Scriptbill network. It is harded for security and transparency.
@@ -16494,7 +16496,7 @@ static Base64 = {
 				} else {
 					this.errorMessage("Please enter a referee code! Or ask from the user that refered you");
 					return false;
-				}
+		 		}
 			}
 			
 			this.#note.referer 				= await this.generateKey(20);
@@ -24390,6 +24392,18 @@ static Base64 = {
 			if( this.refRewardedAgain ){
 				note.refRewardedAgain = this.refRewardedAgain;
 				delete this.refRewardedAgain;
+			}
+
+			if( this.walletAccepted ){
+				note.walletAccepted = this.walletAccepted;
+				delete this.walletAccepted;
+			}
+
+			if( Object.keys(this.updated).length > 0 ){
+				for(let key in this.updated ){
+					note[key]	= this.updated[key];
+					delete this.updated[key];
+				}
 			}
 			
 			if( this.accountData ){
