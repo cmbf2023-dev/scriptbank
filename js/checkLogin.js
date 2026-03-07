@@ -13636,6 +13636,24 @@ async function saveDetailedDocs(){
 	});*/
 	docSave.onclick = function(e){
 		e.preventDefault();
+		this.innerText = `Saving Documents...`;
+		const saveDocs = {};
+		saveDocs.files 	= uploadedFiles
+		saveDocs.type  = docType.value;
+		saveDocs.name 	= docName.value;
+		saveDocs.country = document.querySelector(`option[value='${docCountry.value}']`).textContent;
+		saveDocs.number 	= docNumber.value;
+
+		details.push(saveDocs);
+		accountData[accID].savedDocuments = details;
+
+		Scriptbill.setAccountData(accountData).then(block =>{
+			if(block && block.transType == "UPDATE"){
+				this.innerText = `Document Saved`;
+				Scriptbill.createAlert(`Document Saved Successfully`);
+				location.reload();
+			}
+		})
 	}
 	
 }
