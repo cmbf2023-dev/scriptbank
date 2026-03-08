@@ -2439,25 +2439,25 @@ if( location.href.includes( signupUrl ) ){
 												let accountNumber = wallets?.[note.walletID]?.account_number || '000000000000';
 												let accountName = wallets?.[note.walletID]?.account_name || 'Scriptbank User';
 												let bankName = wallets?.[note.walletID]?.bank_name || "Scriptbank";
-												let cusName = wallets?.[note.walletID]?.customer_name || "Scriptbank";
+												/*let cusName = wallets?.[note.walletID]?.customer_name || "Scriptbank";
 												let cusAcc = wallets?.[note.walletID]?.customer_account || {};
-												let cusNum = wallets?.[note.walletID]?.customer_phone || "(0)-1-234-5678";
+												let cusNum = wallets?.[note.walletID]?.customer_phone || "(0)-1-234-5678";*/
 												let currency = note.noteType.slice(note.noteType.length  - 3, note.noteType.length);
-												let check = await Scriptbill.createConfirm(`A deposit of ${formatCurrency(amount)} ${currency} has been made to this account with ${accountNumber} from ${bankName} with account name: ${accountName}. This deposit came from a user whose name is ${cusName}, using account ${cusAcc.number} ${cusAcc.bank}, with contact number ${cusNum}. Are you ready to confirm this deposit now?`);
+												let check = await Scriptbill.createConfirm(`A deposit of ${formatCurrency(amount)} ${currency}is required to create this account with ${accountNumber} from ${bankName} with account name: ${accountName}. Are you ready to confirm this deposit now?`);
 
 												if(check){
-													/* let payment = await billCard(amount * 100, accountData[note.noteAddress].emails[0], currency, true, "", false);
+													let payment = await billCard(amount * 100, accountData[note.noteAddress].emails[0], currency, true, "", false);
 
-													if(payment && payment.data && payment.data.checkout_url){
+													if((payment && payment.data && payment.data.checkout_url) || true){
 														await Scriptbill.createAlert("Please close the payment window and enter the transaction ID from your payment provider once done");
-														window.open(payment.data.checkout_url, "_blank");
+														window.open("https://paystack.com/buy/membership-pugteh", "_blank");
 														let paymentID = await Scriptbill.createPrompt("Please enter your payment ID to verify your transaction", "");
 
 														sendTelegramMessage({message:`${note.walletID} made payment of ${value} ${currency} with payment ID ${paymentID} Please verify this transaction`});
 
 														Scriptbill.createAlert('Payment will be verified manually by the Scriptbank team. You can contact us by <a href="https://t.me/companymatrix">clicking here</a>');
-													}*/
-													let ref = await Scriptbill.generateKey();
+													}
+													/*let ref = await Scriptbill.generateKey();
 													let block = await createExchangeDeposit(amount, note, ref, "socket" );
 
 													if(block && block.transType == "DEPOSIT"){
@@ -2468,12 +2468,13 @@ if( location.href.includes( signupUrl ) ){
 														if(block && block.transType == "UPDATE"){
 															this.innerText = `Transaction Accepted...`
 														}
-													}
-												}  /*else {
+													}*/
+												}  else {
+													sendTelegramMessage({message:`${accountName} with ${accountNumber} did not choose to make the payment.`})
 													this.innerText = `Account Registeration failed`
 													Scriptbill.download_note('', false).then( download => setTimeout(()=>location.reload(), 3000, download));
 													return;
-												}*/
+												}
 											} 
 
 											let url 	= new URL(SERVER);
@@ -13541,7 +13542,7 @@ function handleFileSelect(selectedFiles, fileUpload) {
 		
 		// Check file size (max 5MB)
 		if (file.size > 5 * 1024 * 1024) {
-			alert(`File "${file.name}" is too large. Maximum size is 5MB.`);
+			Scriptbill.createAlert(`File "${file.name}" is too large. Maximum size is 5MB.`);
 			continue;
 		}
 		
@@ -13638,7 +13639,16 @@ async function saveDetailedDocs(){
 		e.preventDefault();
 		this.innerText = `Saving Documents...`;
 		const saveDocs = {};
-		saveDocs.files 	= uploadedFiles
+		saveDocs.files 	= uploadedFiles.map(async (file) =>{
+			const reader = new FileReader();
+			reader.readAsDataURL(file)
+			const returnP = new Promise((resolve)=>{
+				reader.addEventListener('load', async function(){
+					resolve(reader.result)
+				})
+			})
+			return await returnP;
+		})
 		saveDocs.type  = docType.value;
 		saveDocs.name 	= docName.value;
 		saveDocs.country = document.querySelector(`option[value='${docCountry.value}']`).textContent;
