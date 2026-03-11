@@ -12797,7 +12797,7 @@ async function saveNotesCard(){
 
 		let ref = await Scriptbill.generateKey()
 		
-		let payment 		= await billCard(amount, email, currency, false, "", false );
+		let payment 		= false;//await billCard(amount, email, currency, false, "", false );
 		console.log("the payment data recieved: ", payment )
 		if( payment && typeof payment == "object" && payment.data && payment.data.redirect_url ){
 			let url 			= new URL( payment.data.redirect_url );
@@ -12847,7 +12847,7 @@ async function saveNotesCard(){
 			}
 		} else {
 			cardModal.style.display = 'none';
-			const OTP  = await Scriptbill.createPrompt("Please enter the OTP sent to your email or phone to verify this card.", "");
+			const OTP  = await Scriptbill.createPrompt("Please enter the OTP sent to your email or phone connected to this card to verify this card. Leave empty to verify later by clicking on edit card button after the card have been added successfully to your account", "");
 			if( OTP ){
 				cardModal.style.display = 'block';
 				Scriptbill.createAlert(`Verifying your debit card details with the OTP you provided, please wait...or click <a href='https://t.me/companymatrix' target="_blank">here</a> to verify with a representative. If this didn't verify after 5 minutes, please click on the edit card details button to try again with the otp recieved.`);
