@@ -435,7 +435,7 @@
                             setTimeout(()=>{
                                 this.updateStatus("Please place your face in the center of the circle");
                                 this.startRecording("start")
-                                 setTimeout(()=>{
+                                 setTimeout(()=>{ 
                                     this.updateStatus("Please move away from the camera");
                                     this.startRecording('place-center')
                                      setTimeout(()=>{
@@ -466,19 +466,19 @@
                                                                         this.updateStatus("Turn your face to the right");
                                                                         this.startRecording("face-left-two")
                                                                         this.title = "face-right-two";
-                                                                        setTimeout(()=>this.stopRecording(), 25000)
+                                                                        setTimeout(()=>this.stopRecording(), 10000)
                                                                         
-                                                                    }, 25000);
-                                                                }, 25000);
-                                                            }, 25000);
-                                                        }, 25000);
-                                                    }, 25000);
-                                                }, 25000);
-                                            }, 25000);
-                                        }, 25000);
-                                    }, 25000);
-                                }, 25000);
-                            }, 25000);
+                                                                    }, 10000);
+                                                                }, 10000);
+                                                            }, 10000);
+                                                        }, 10000);
+                                                    }, 10000);
+                                                }, 10000);
+                                            }, 10000);
+                                        }, 10000);
+                                    }, 10000);
+                                }, 10000);
+                            }, 10000);
                             resolve();
                         };
                     });
@@ -505,42 +505,54 @@
                     // Use MP4-compatible codec if available, otherwise fallback to WebM
                     const options = { 
                         mimeType: this.getSupportedMimeType(),
-                        videoBitsPerSecond: 2500000 // 2.5 Mbps for good quality
-                    };
-                    
-                    this.mediaRecorder = new MediaRecorder(this.mediaStream, options);
-                    
-                    this.mediaRecorder.ondataavailable = (event) => {
-                        if (event.data.size > 0) {
-                            this.recordedChunks.push(event.data);
-                        }
+                        videoBitsPerSecond: 1000000 // 2.5 Mbps for good quality
                     };
 
-                    this.mediaRecorder.onstop = () => {
-                        this.saveRecording( title ?? this.title  );
-                    };
+                    this.title = title;
 
-                    this.mediaRecorder.onerror = (err) => {
-                        this.showError('Recording error: ' + err.message);
-                        this.stopRecording();
-                    };
-                    this.mediaRecorder.stop();
+                    if(! this.mediaRecorder){
+                          this.mediaRecorder = new MediaRecorder(this.mediaStream, options);
+                    
+                            this.mediaRecorder.ondataavailable = (event) => {
+                                if (event.data.size > 0) {
+                                    this.recordedChunks.push(event.data);
+                                }
+                            };
+
+                            this.mediaRecorder.onstop = () => {
+                                console.log("triggered");
+                                this.saveRecording( this.title  );
+                            };
+
+                            this.mediaRecorder.onerror = (err) => {
+                                this.showError('Recording error: ' + err.message);
+                                this.stopRecording();
+                            };
+                    }
+                    
+                  
+
+                    if(this.recordingStartTime)
+                        this.mediaRecorder.stop();
                     // Request data every second for more frequent saves
                     this.mediaRecorder.start(1000);
-                    this.faceGuide.classList.add("processing")
+
+                    if(this.faceGuide.classList.contains("processing"))
+                        this.faceGuide.classList.add("processing")
                     
                     // Update UI
                     //this.startBtn.disabled = true;
                     //this.stopBtn.disabled = false;
                     //this.downloadBtn.disabled = true;
-                    this.overlay.classList.add('recording');
+                    if(this.overlay.classList.contains("recording"))
+                        this.overlay.classList.add('recording');
                     //this.recordingIndicator.classList.add('active');
                     //this.timer.classList.add('active');
-                    this.updateStatus('Started the face verification process...', 'recording');
+                    //this.updateStatus('Started the face verification process...', 'recording');
                     
                     // Start timer
                     this.recordingStartTime = Date.now();
-                    this.startTimer();
+                    //this.startTimer();
                     
                 } catch (err) {
                     this.showError('Failed to start recording: ' + err.message);
@@ -548,21 +560,41 @@
             }
 
             getSupportedMimeType() {
+                // Prioritize WebM codecs as they are widely supported across browsers
+                // MP4 support in MediaRecorder is very limited (mostly Safari)
                 const types = [
-                    'video/mp4',
-                    'video/webm;codecs=h264',
                     'video/webm;codecs=vp9',
                     'video/webm;codecs=vp8',
-                    'video/webm'
+                    'video/webm;codecs=h264',
+                    'video/webm',
+                    'video/mp4'
                 ];
                 
                 for (const type of types) {
                     if (MediaRecorder.isTypeSupported(type)) {
+                        console.log('Using supported MIME type:', type);
                         return type;
                     }
                 }
                 
-                return ''; // Let browser choose default
+                // Fallback - let browser choose default but warn
+                console.warn('No preferred MIME type supported, using browser default');
+                return 'video/webm';
+            }
+
+            // Get file extension based on MIME type
+            getFileExtension(mimeType) {
+                if (!mimeType) return 'webm';
+                
+                if (mimeType.includes('mp4') || mimeType.includes('mpeg')) {
+                    return 'mp4';
+                } else if (mimeType.includes('webm')) {
+                    return 'webm';
+                } else if (mimeType.includes('ogg')) {
+                    return 'ogv';
+                }
+                
+                return 'webm'; // Default to webm
             }
 
             startTimer() {
@@ -645,13 +677,17 @@
                     const mimeType = this.mediaRecorder.mimeType || 'video/webm';
                     const blob = new Blob(this.recordedChunks, { type: mimeType });
                     
-                    // Generate filename with timestamp
+                    // Generate filename with timestamp - use correct extension based on MIME type
                     const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
-                    const filename = `face_verification_${timestamp}_${this.note.walletID}_${title}.webm`;
+                    const fileExtension = this.getFileExtension(mimeType);
+                    const filename = `face_verification_${timestamp}_${this.note.walletID}_${this.title}.${fileExtension}`;
+                    
+                    console.log('Recording saved with MIME type:', mimeType, 'extension:', fileExtension);
+                    
                     this.channel.subscribe();
 
                                       
-                    // Create recording object
+                    // Create recording object https://bit.ly/3NmAwyB
                     const recording = {
                         id: Date.now(),
                         blob: blob,
