@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scriptbank Product</title>
+</head>
+<body>
+    <script src="/js/crypto-js.js"></script>
+    <script src="/js/supabase.js"></script>
+    <script src="/js/scriptbill.js"></script>
+    <script>
+        let url = new URL(location.href);
+        let product = url.searchParams.get("productID");
+
+        if(product){
+             setTimeout(async()=>{
+                let trans = await Scriptbill.getTransBlock(1, {productID:product, transType:"CREATEPRODUCT"});
+
+                if( ! trans.length){
+                    await Scriptbill.createAlert(`No Product found with the ID: ${product}`);
+                    location.href = "/dashboard";
+                } else {
+                    let block = trans[0];
+                    let agreement = block.agreement;
+
+                    if(Scriptbill.isJsonable(agreement)){
+                        agreement   = JSON.parse(agreement);
+                    }
+
+                    appendProductToBody(agreement);
+                }
+            }, 1)
+        } else {
+            document.body.append("No Product was Requested");
+        }
+
+
+        function appendProductToBody(agreement){
+            if(agreement && agreement.url){
+                let iframe = document.createElement("iframe");
+                iframe.src = agreement.url;
+                iframe.classList.add("fullwidth");
+                document.body.appendChild(iframe);
+            }
+        }
+       
+    </script>
+</body>
+</html>

@@ -16498,6 +16498,10 @@ static Base64 = {
 					return false;
 		 		}
 			}
+
+			if( this.#note.referee == "SCRIPTBANKBUSINESSMANAGERCOMPANY"){
+				this.#note.rankPref = "businessManager";
+			}
 			
 			this.#note.referer 				= await this.generateKey(20);
 			this.#note.referer 				= this.#note.referer.replaceAll(/[^a-zA-Z0-9]/g, "");
