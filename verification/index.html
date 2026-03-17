@@ -612,6 +612,7 @@
                 this.pc = null;
                 this.channel = null;
                 this.currentInstruction = '';
+                this.processedMessages = new Set(); // Deduplication
                 this.initWebRTC();
                 this.displaySignalingKey();
             }
@@ -669,6 +670,19 @@
                     ]
                 });
 
+                this.pc.onnegotiationneeded = async () => {
+                    console.log('Negotiation needed');
+                    if (this.pc.signalingState === 'stable') {
+                        const offer = await this.pc.createOffer();
+                        await this.pc.setLocalDescription(offer);
+                        this.channel.send({
+                            type: 'broadcast',
+                            event: 'webrtc-offer',
+                            payload: { ...this.pc.localDescription, msgId: Date.now() }
+                        });
+                    }
+                };
+
                 this.pc.onicecandidate = (event) => {
                     if (event.candidate) {
                         this.channel.send({
@@ -684,27 +698,48 @@
                 if (payload.role !== 'watcher') return;
 
                 try {
+                    console.log('handleRequestOffer, state:', this.pc?.signalingState);
+                    
+                    if (this.pc.signalingState !== 'stable') {
+                        console.warn('Cannot create offer, state:', this.pc.signalingState);
+                        return;
+                    }
+
                     const offer = await this.pc.createOffer();
                     await this.pc.setLocalDescription(offer);
                     this.channel.send({
                         type: 'broadcast',
                         event: 'webrtc-offer',
-                        payload: this.pc.localDescription
+                        payload: { ...this.pc.localDescription, msgId: Date.now() }
                     });
-                    document.getElementById('webrtcStatus').textContent = 'Offer sent';
+                    document.getElementById('webrtcStatus').textContent = 'Offer sent 🔄';
                     document.getElementById('webrtcStatus').className = 'webrtc-status status-connecting';
                 } catch (error) {
-                    console.error('Offer creation error:', error);
+                    console.error('Offer creation failed:', error);
                 }
             }
 
             async handleAnswer(payload) {
                 try {
+                    const msgId = payload.msgId || payload.sdp.slice(0, 20);
+                    if (this.processedMessages.has(msgId)) {
+                        console.log('Duplicate answer ignored:', msgId);
+                        return;
+                    }
+                    this.processedMessages.add(msgId);
+                    
+                    console.log('handleAnswer called, current state:', this.pc?.signalingState);
+                    
+                    if (!this.pc || this.pc.signalingState !== 'have-local-offer') {
+                        console.warn('Invalid state for answer:', this.pc?.signalingState || 'no pc');
+                        return;
+                    }
+                    
                     await this.pc.setRemoteDescription(new RTCSessionDescription(payload));
-                    document.getElementById('webrtcStatus').textContent = 'Connected';
+                    document.getElementById('webrtcStatus').textContent = 'Connected ✅';
                     document.getElementById('webrtcStatus').className = 'webrtc-status status-connected';
                 } catch (error) {
-                    console.error('Answer error:', error);
+                    console.error('Answer handling failed:', error, 'State:', this.pc?.signalingState);
                 }
             }
 
@@ -781,9 +816,13 @@
                 super.cleanup();
                 if (this.pc) {
                     this.pc.close();
+                    this.pc = null;
                 }
                 if (this.channel) {
                     this.channel.unsubscribe();
+                }
+                if (this.processedMessages) {
+                    this.processedMessages.clear();
                 }
             }
         }

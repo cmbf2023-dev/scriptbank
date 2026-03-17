@@ -262,6 +262,7 @@
                 this.isConnected = false;
                 this.recordings = [];
                 this.currentRecording = null;
+                this.processedMessages = new Set(); // Deduplication
 
                 this.init();
             }
@@ -321,6 +322,10 @@
                         ]
                     });
 
+                    this.pc.onnegotiationneeded = async () => {
+                        console.log('Watcher negotiation needed - ignoring (offer only)');
+                    };
+
                     // Handle remote stream
                     this.pc.ontrack = (event) => {
                         this.remoteVideo.srcObject = event.streams[0];
@@ -379,24 +384,62 @@
 
             async handleOffer(payload) {
                 try {
+                    const msgId = payload.msgId || payload.sdp?.slice(0, 20) || Date.now();
+                    if (this.processedMessages.has(msgId)) {
+                        console.log('Duplicate offer ignored:', msgId);
+                        return;
+                    }
+                    this.processedMessages.add(msgId);
+                    
+                    console.log('handleOffer called, current state:', this.pc?.signalingState);
+                    
+                    if (!this.pc || this.pc.signalingState !== 'stable') {
+                        console.warn('Invalid state for offer, expected stable, got:', this.pc?.signalingState);
+                        return;
+                    }
+                    
+                    // Critical: setRemoteDescription FIRST
                     await this.pc.setRemoteDescription(new RTCSessionDescription(payload));
+                    
+                    if (!this.pc.remoteDescription) {
+                        console.error('No remote description after setRemoteDescription');
+                        return;
+                    }
+                    
                     const answer = await this.pc.createAnswer();
                     await this.pc.setLocalDescription(answer);
                     this.channel.send({
                         type: 'broadcast',
                         event: 'webrtc-answer',
-                        payload: this.pc.localDescription
+                        payload: { ...this.pc.localDescription, msgId: Date.now() }
                     });
+                    
+                    console.log('Offer handled successfully');
                 } catch (error) {
-                    console.error('Offer handling error:', error);
+                    console.error('Offer handling failed:', error, 'State:', this.pc?.signalingState);
                 }
             }
 
             async handleAnswer(payload) {
                 try {
+                    const msgId = payload.msgId || payload.sdp?.slice(0, 20) || Date.now();
+                    if (this.processedMessages.has(msgId)) {
+                        console.log('Duplicate answer ignored:', msgId);
+                        return;
+                    }
+                    this.processedMessages.add(msgId);
+                    
+                    console.log('handleAnswer called, current state:', this.pc?.signalingState);
+                    
+                    if (!this.pc || this.pc.signalingState !== 'have-local-offer') {
+                        console.warn('Invalid state for answer, expected have-local-offer, got:', this.pc?.signalingState);
+                        return;
+                    }
+                    
                     await this.pc.setRemoteDescription(new RTCSessionDescription(payload));
+                    console.log('Answer set successfully');
                 } catch (error) {
-                    console.error('Answer handling error:', error);
+                    console.error('Answer handling failed:', error, 'State:', this.pc?.signalingState);
                 }
             }
 
@@ -508,6 +551,9 @@
                 }
                 this.remoteVideo.srcObject = null;
                 this.channel?.unsubscribe();
+                if (this.processedMessages) {
+                    this.processedMessages.clear();
+                }
                 this.isConnected = false;
                 this.updateConnectionStatus('disconnected');
                 this.connectBtn.disabled = false;

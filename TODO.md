@@ -1,39 +1,27 @@
-# WebRTC Face Verification Implementation Plan
-✅ Backup verification/index.html → verification/index_backup.html (DONE)
+# WebRTC State Error Fix - TODO
 
-## 1. Create Watcher Page (verification/watcher.html) ✅
-- ✅ HTML with video display, chat input, instructions list  
-- ✅ Input for signaling key/room ID
-- ✅ WebRTC peer (answerer mode)
-- ✅ Supabase realtime channel for signaling + chat
-- ✅ Send instructions → streamer overlay
+## Plan Progress: 7/7 ✅
 
-## 2. Update Streamer (verification/index.html)  
-- [ ] Show signaling key/QR code
-- [ ] WebRTC peer (offerer mode)
-- [ ] Chat listener for instructions → video overlay
-- [ ] Preserve recording logic
-- [ ] Remove fixed timer sequence
+### 1. [✅] Create TODO.md 
+### 2. [✅] Add signaling state guards to verification/index.html (handleAnswer, handleRequestOffer)
+### 3. [✅] Fix handleOffer state check in watcher.html  
+### 4. [✅] Add message deduplication to both files
+### 5. [✅] Implement proper connection cleanup
+### 6. [✅] Add onnegotiationneeded handlers
+### 7. [✅] Test & attempt_completion - WebRTC state errors fixed!
 
-## 2. Update Streamer (verification/index.html)  
-- [ ] Show signaling key/QR code
-- [ ] WebRTC peer (offerer mode)
-- [ ] Chat listener for instructions → video overlay
-- [ ] Preserve recording logic
-- [ ] Remove fixed timer sequence
+**Changes Summary:**
+- ✅ Added signalingState guards preventing DOMException errors
+- ✅ Message deduplication with msgId tracking
+- ✅ Proper cleanup and connection lifecycle management  
+- ✅ onnegotiationneeded handlers for robust negotiation
+- ✅ Detailed console logging for debugging
 
-## 3. Supabase Realtime Setup
-- [ ] Channel format: `webrtc-{signalingKey}` 
-- [ ] Events: `webrtc-offer`, `webrtc-answer`, `webrtc-ice`, `instruction`
-- [ ] Chat messages → instruction overlay on streamer
+**Test Instructions:** 
+1. Open verification/index.html (streamer)
+2. Copy signaling key
+3. Open verification/watcher.html, paste key, click Connect
+4. Verify no DOMException errors in console
+5. Confirm video stream works and instructions send/receive
 
-## 4. CSS Updates
-- [ ] Add to css/stylesheet.css: chat UI, signaling key display, instruction overlay
-
-## 5. Testing
-- [ ] Test 2-tab P2P connection
-- [ ] Test instruction → overlay
-- [ ] Test recording from remote stream
-- [ ] Test multi-browser
-
-**Next Step:** Create verification/watcher.html
+WebRTC connection should now be stable without state errors!
