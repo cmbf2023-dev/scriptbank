@@ -722,14 +722,27 @@
 
             async handleAnswer(payload) {
                 try {
-                    const msgId = payload.msgId || payload.sdp.slice(0, 20);
+                    console.log('Raw answer payload:', JSON.stringify(payload, null, 2));
+                    
+                    const msgId = payload.msgId || (payload.sdp ? payload.sdp.slice(0, 20) : 'no-sdp');
                     if (this.processedMessages.has(msgId)) {
                         console.log('Duplicate answer ignored:', msgId);
                         return;
                     }
                     this.processedMessages.add(msgId);
                     
-                    console.log('handleAnswer called, current state:', this.pc?.signalingState);
+                    // Validate payload structure
+                    if (!payload || !payload.type || !payload.sdp) {
+                        console.error('Invalid answer payload:', payload);
+                        return;
+                    }
+                    
+                    if (payload.type !== 'answer') {
+                        console.warn('Not an answer, type:', payload.type);
+                        return;
+                    }
+                    
+                    console.log('handleAnswer called, state:', this.pc?.signalingState, 'payload type:', payload.type);
                     
                     if (!this.pc || this.pc.signalingState !== 'have-local-offer') {
                         console.warn('Invalid state for answer:', this.pc?.signalingState || 'no pc');
@@ -739,8 +752,11 @@
                     await this.pc.setRemoteDescription(new RTCSessionDescription(payload));
                     document.getElementById('webrtcStatus').textContent = 'Connected ✅';
                     document.getElementById('webrtcStatus').className = 'webrtc-status status-connected';
+                    console.log('✅ Answer set successfully');
                 } catch (error) {
-                    console.error('Answer handling failed:', error, 'State:', this.pc?.signalingState);
+                    console.error('❌ Answer handling failed:', error);
+                    console.error('Raw payload:', payload);
+                    console.error('State:', this.pc?.signalingState);
                 }
             }
 
@@ -856,7 +872,6 @@
 
         // Initialize streamer
         window.addEventListener('load', function() {
-            alert("initing")
             window.streamer = new WebRTCStreamer();
             window.streamer.init();
         });

@@ -425,10 +425,18 @@
                     await this.pc.setLocalDescription(answer);
                     console.log('Local answer created, sending to streamer');
                     
+                    console.log('Sending answer:', {
+                        type: this.pc.localDescription.type,
+                        sdp: this.pc.localDescription.sdp?.substring(0, 100) + '...'
+                    });
                     this.channel.send({
                         type: 'broadcast',
                         event: 'webrtc-answer',
-                        payload: { ...this.pc.localDescription, msgId: Date.now() }
+                        payload: { 
+                            type: this.pc.localDescription.type,
+                            sdp: this.pc.localDescription.sdp,
+                            msgId: Date.now()
+                        }
                     });
                     
                     console.log('✅ Offer handled & answer sent');
