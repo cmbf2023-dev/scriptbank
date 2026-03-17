@@ -366,12 +366,26 @@
                     this.channel.send({
                         type: 'broadcast',
                         event: 'request-offer',
-                        payload: { key, role: 'watcher' }
+                        payload: { key, role: 'watcher', msgId: Date.now() }
                     });
+
+                    console.log('Request offer sent for key:', key);
 
                     this.currentRoom.textContent = key;
                     this.connectionInfo.style.display = 'block';
                     this.videoLayout.style.display = 'grid';
+
+                    // Auto-request offer again after 2s if no response
+                    setTimeout(() => {
+                        if (this.pc && this.pc.signalingState === 'stable') {
+                            console.log('Auto re-request offer');
+                            this.channel.send({
+                                type: 'broadcast',
+                                event: 'request-offer',
+                                payload: { key, role: 'watcher', msgId: Date.now() + 1 }
+                            });
+                        }
+                    }, 2000);
 
                 } catch (error) {
                     console.error('Connection error:', error);
@@ -384,39 +398,43 @@
 
             async handleOffer(payload) {
                 try {
-                    const msgId = payload.msgId || payload.sdp?.slice(0, 20) || Date.now();
+                    const msgId = payload.msgId || payload.sdp?.slice(0, 20);
                     if (this.processedMessages.has(msgId)) {
                         console.log('Duplicate offer ignored:', msgId);
                         return;
                     }
                     this.processedMessages.add(msgId);
                     
-                    console.log('handleOffer called, current state:', this.pc?.signalingState);
+                    console.log('handleOffer called, state:', this.pc?.signalingState, 'type:', typeof payload.type, payload.type);
+                    
+                    // Ensure it's an offer SDP
+                    if (!payload.type || payload.type !== 'offer') {
+                        console.warn('Not an offer:', payload.type);
+                        return;
+                    }
                     
                     if (!this.pc || this.pc.signalingState !== 'stable') {
-                        console.warn('Invalid state for offer, expected stable, got:', this.pc?.signalingState);
+                        console.warn('Invalid state for offer. Expected stable, got:', this.pc?.signalingState);
                         return;
                     }
                     
-                    // Critical: setRemoteDescription FIRST
                     await this.pc.setRemoteDescription(new RTCSessionDescription(payload));
-                    
-                    if (!this.pc.remoteDescription) {
-                        console.error('No remote description after setRemoteDescription');
-                        return;
-                    }
+                    console.log('Remote offer set, creating answer');
                     
                     const answer = await this.pc.createAnswer();
                     await this.pc.setLocalDescription(answer);
+                    console.log('Local answer created, sending to streamer');
+                    
                     this.channel.send({
                         type: 'broadcast',
                         event: 'webrtc-answer',
                         payload: { ...this.pc.localDescription, msgId: Date.now() }
                     });
                     
-                    console.log('Offer handled successfully');
+                    console.log('✅ Offer handled & answer sent');
                 } catch (error) {
-                    console.error('Offer handling failed:', error, 'State:', this.pc?.signalingState);
+                    console.error('❌ Offer handling failed:', error);
+                    console.error('State:', this.pc?.signalingState, 'Payload:', payload);
                 }
             }
 
