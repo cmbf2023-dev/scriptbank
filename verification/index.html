@@ -5,29 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WebRTC Face Verification - Streamer</title>
     <style>
-        /* Keep all existing verification styles */
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
+        body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             padding: 20px;
         }
-        .container { 
-            background: white; 
-            border-radius: 20px; 
-            padding: 30px; 
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3); 
-            max-width: 800px; 
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 800px;
             width: 100%;
         }
         h1 { text-align: center; color: #333; margin-bottom: 10px; }
         .subtitle { text-align: center; color: #666; margin-bottom: 20px; font-size: 0.95rem; }
 
-        /* NEW: Signaling Key Display */
         .signaling-section {
             background: #f8f9fa;
             padding: 20px;
@@ -47,13 +45,6 @@
             word-break: break-all;
             margin: 10px 0;
         }
-        .qr-section {
-            margin-top: 15px;
-        }
-        #qrCode {
-            margin: 0 auto;
-            max-width: 200px;
-        }
         .copy-key-btn {
             background: #2196F3;
             color: white;
@@ -65,27 +56,25 @@
             margin-top: 10px;
         }
 
-        /* Video Container with overlays */
-        .video-container { 
-            position: relative; 
-            width: 100%; 
-            max-width: 500px; 
-            margin: 0 auto 25px; 
-            border-radius: 50%; 
-            overflow: hidden; 
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2); 
-            background: #f0f0f0; 
+        .video-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto 25px;
+            border-radius: 50%;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            background: #f0f0f0;
             aspect-ratio: 1 / 1;
         }
-        #localVideo { 
-            width: 100%; 
-            height: 100%; 
-            display: block; 
-            object-fit: cover; 
+        #localVideo {
+            width: 100%;
+            height: 100%;
+            display: block;
+            object-fit: cover;
             transform: scaleX(-1);
         }
 
-        /* NEW: Instruction Overlay */
         .instruction-overlay {
             position: absolute;
             top: 50%;
@@ -103,16 +92,13 @@
             opacity: 0;
             transition: opacity 0.3s ease, transform 0.3s ease;
             z-index: 20;
+            pointer-events: none;
         }
         .instruction-overlay.show {
             opacity: 1;
             transform: translate(-50%, -50%) scale(1.05);
         }
-        .instruction-icon {
-            font-size: 32px;
-            margin-bottom: 10px;
-            display: block;
-        }
+        .instruction-icon { font-size: 32px; margin-bottom: 10px; display: block; }
 
         .face-guide {
             position: absolute;
@@ -124,26 +110,20 @@
             border: 3px dashed rgba(255,255,255,0.6);
             border-radius: 50%;
             pointer-events: none;
-            box-shadow: 0 0 30px rgba(0,0,0,0.3);
         }
-        .overlay { /* existing overlay styles */ }
 
-        /* Connection Status */
         .webrtc-status {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            padding: 8px 12px;
+            display: inline-block;
+            padding: 6px 12px;
             border-radius: 20px;
-            font-size: 12px;
+            font-size: 13px;
             font-weight: 500;
-            z-index: 10;
+            margin-top: 10px;
         }
+        .status-waiting  { background: #e3f2fd; color: #1976d2; }
         .status-connecting { background: #fff3e0; color: #f57c00; }
-        .status-connected { background: #e8f5e8; color: #2e7d32; animation: pulse 2s infinite; }
-        .status-waiting { background: #e3f2fd; color: #1976d2; }
+        .status-connected  { background: #e8f5e8; color: #2e7d32; }
 
-        /* Controls */
         .controls {
             display: flex;
             justify-content: center;
@@ -164,9 +144,7 @@
         .btn-primary { background: #4CAF50; color: white; }
         .btn-primary:hover:not(:disabled) { background: #45a049; transform: translateY(-2px); }
         .btn-danger { background: #f44336; color: white; }
-        .btn-secondary { background: #9e9e9e; color: white; }
 
-        /* Status */
         .status {
             margin-top: 20px;
             padding: 15px;
@@ -174,10 +152,10 @@
             text-align: center;
             font-weight: 500;
         }
-        .status.success { background: #e8f5e8; color: #2e7d32; }
-        .status.recording { background: #ffebee; color: #c62828; }
+        .status.success  { background: #e8f5e8; color: #2e7d32; }
+        .status.error    { background: #ffebee; color: #c62828; }
+        .status.warning  { background: #fff3e0; color: #f57c00; }
 
-        /* Responsive */
         @media (max-width: 768px) {
             .signaling-key-display { font-size: 16px; }
             .video-container { max-width: 350px; }
@@ -187,32 +165,28 @@
 <body>
     <div class="container">
         <h1>📹 WebRTC Face Verification</h1>
-        <p class="subtitle">Share this key with watcher: <strong id="signalingKeyDisplay"></strong></p>
+        <p class="subtitle">Share this key with the watcher: <strong id="signalingKeyDisplay"></strong></p>
 
-        <!-- Signaling Key Section -->
         <div class="signaling-section">
-            <div class="signaling-key-display" id="keyDisplay"></div>
-            <div class="qr-section">
-                <canvas id="qrCode" style="display: none;"></canvas>
-                <button class="copy-key-btn" onclick="copyKey()">📋 Copy Key</button>
-            </div>
+            <div class="signaling-key-display" id="keyDisplay">Generating key…</div>
+            <button class="copy-key-btn" onclick="copyKey()">📋 Copy Key</button>
             <div style="margin-top: 10px; font-size: 14px; color: #666;">
-                Status: <span id="webrtcStatus" class="webrtc-status status-waiting">Waiting for watcher...</span>
+                Status: <span id="webrtcStatus" class="webrtc-status status-waiting">Waiting for watcher…</span>
             </div>
         </div>
 
         <div class="video-container">
             <video id="localVideo" autoplay playsinline muted></video>
             <div class="face-guide" id="faceGuide"></div>
-            <div class="overlay" id="overlay"></div>
+            <div id="overlay"></div>
             <div class="instruction-overlay" id="instructionOverlay">
                 <span class="instruction-icon" id="instructionIcon">📢</span>
                 <div id="instructionText"></div>
             </div>
         </div>
 
-        <div class="status" id="status">Starting camera...</div>
-        <div id="error" class="status" style="display: none;"></div>
+        <div class="status" id="status">Starting camera…</div>
+        <div id="error" class="status error" style="display:none;"></div>
 
         <div class="controls">
             <button id="startBtn" class="btn-primary" disabled>▶ Start Recording</button>
@@ -220,436 +194,127 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
     <script src="/js/supabase.js"></script>
     <script src="/js/crypto-js.js"></script>
     <script src="/js/scriptbill.js"></script>
     <script>
-        if(!Scriptbill.s.currentNote){
-            location.href = "/login"; 
+        // Guard: must be logged in
+        if (!Scriptbill.s.currentNote) {
+            location.href = '/login';
         }
 
-        var copyKey = () => {
-            navigator.clipboard.writeText(window.streamer.signalingKey);
-            const btn = event.target;
-            const original = btn.textContent;
-            btn.textContent = '✅ Copied!';
-            setTimeout(() => btn.textContent = original, 2000);
+        window.copyKey = function() {
+            if (!window.streamer) return;
+            navigator.clipboard.writeText(window.streamer.signalingKey).then(() => {
+                const btn = document.querySelector('.copy-key-btn');
+                const original = btn.textContent;
+                btn.textContent = '✅ Copied!';
+                setTimeout(() => btn.textContent = original, 2000);
+            });
+        };
+
+        // ─── Utility ──────────────────────────────────────────────────────────
+        function generateSignalingKey() {
+            return 'fv_' + CryptoJS.MD5(
+                Date.now() + '' + Math.random() + JSON.parse(Scriptbill.s.currentNote).noteAddress
+            ).toString().slice(0, 12);
         }
 
-        
-        class FaceVerificationRecorder {
-            constructor(videoId = 'localVideo') {
-                this.video = document.getElementById(videoId);
-                this.status = document.getElementById('status');
-                this.error = document.getElementById('error');
-                this.overlay = document.getElementById('overlay');
-                this.faceGuide = document.getElementById("faceGuide");
-                this.client = Scriptbill.createClient();
-                this.verifier = "verifier";
-                this.channel = this.client.channel(this.verifier);
-                this.note = JSON.parse(Scriptbill.s.currentNote);
+        function setWebRTCStatus(text, cls) {
+            const el = document.getElementById('webrtcStatus');
+            el.textContent = text;
+            el.className = 'webrtc-status ' + cls;
+        }
 
-                this.mediaStream = null;
-                this.mediaRecorder = null;
-                this.recordedChunks = [];
-                this.recordings = [];
-                this.recordingStartTime = null;
-                this.timerInterval = null;
+        // ─── Main Streamer class ───────────────────────────────────────────────
+        class WebRTCStreamer {
+            constructor() {
+                this.video       = document.getElementById('localVideo');
+                this.statusEl    = document.getElementById('status');
+                this.errorEl     = document.getElementById('error');
+                this.faceGuide   = document.getElementById('faceGuide');
+                this.note        = JSON.parse(Scriptbill.s.currentNote);
 
-                this.init();
+                this.signalingKey      = generateSignalingKey();
+                this.mediaStream       = null;
+                this.pc                = null;
+                this.supaChannel       = null;
+                this.processedMessages = new Set();
+                this.mediaRecorder     = null;
+                this.recordedChunks    = [];
+                this.recordings        = [];
+                this.recordingStartTime= null;
+
+                // Display the key immediately
+                document.getElementById('keyDisplay').textContent      = this.signalingKey;
+                document.getElementById('signalingKeyDisplay').textContent = this.signalingKey;
+
+                this._boot();
             }
 
-            async init() {
+            // ── Boot sequence (ordered correctly) ────────────────────────────
+            async _boot() {
                 try {
-                    await this.setupCamera();
-                    this.updateStatus('Camera ready. Share key with watcher.', 'success');
-                    this.faceGuide.classList.remove("danger");
+                    await Scriptbill.init();
+
+                    // 1. Get camera FIRST
+                    await this._setupCamera();
+
+                    // 2. Create RTCPeerConnection and add tracks
+                    this._createPeerConnection();
+
+                    // 3. Subscribe to signaling channel
+                    await this._subscribeSignaling();
+
+                    this._updateStatus('Camera ready. Share key with watcher.', 'success');
                 } catch (err) {
-                    console.error('Camera init error:', err);
-                    this.showError('Camera setup failed: ' + err.message + '. WebRTC still works with test stream.');
-                    this.faceGuide.classList.add('danger');
-                    this.updateStatus('WebRTC ready (test mode)', 'warning');
+                    console.error('Boot error:', err);
+                    this._showError('Setup failed: ' + err.message);
                 }
             }
 
-            async setupCamera() {
+            // ── Camera ────────────────────────────────────────────────────────
+            async _setupCamera() {
                 try {
                     this.mediaStream = await navigator.mediaDevices.getUserMedia({
-                        video: {
-                            width: { ideal: 1280 },
-                            height: { ideal: 720 },
-                            facingMode: 'user',
-                            frameRate: { ideal: 30 }
-                        },
+                        video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: 'user', frameRate: { ideal: 30 } },
                         audio: false
                     });
-                    
                     this.video.srcObject = this.mediaStream;
-                    
-                    return new Promise((resolve) => {
-                        this.video.onloadedmetadata = () => {
-                            this.video.play();
-                            this.startRecording();
-                            setTimeout(()=>{
-                                this.updateStatus("Please place your face in the center of the circle");
-                                this.startRecording("start")
-                                 setTimeout(()=>{ 
-                                    this.updateStatus("Please move away from the camera");
-                                    this.startRecording('place-center')
-                                     setTimeout(()=>{
-                                        this.updateStatus("Smile");
-                                        this.startRecording("move-away")
-                                         setTimeout(()=>{
-                                            this.updateStatus("Turn your face to the right slowly");
-                                            this.startRecording("smile")
-                                             setTimeout(()=>{
-                                                this.updateStatus("Turn your face to the left slowly");
-                                                this.startRecording("face-right")                                                
-                                                setTimeout(()=>{
-                                                this.updateStatus("Blink Your eyes ");
-                                                this.startRecording("face-left")
-                                                    setTimeout(()=>{
-                                                        this.updateStatus("Please move close to the camera");
-                                                        this.startRecording("blink-eyes")
-                                                        setTimeout(()=>{
-                                                            this.updateStatus("Smile");
-                                                            this.startRecording("move-close")
-                                                             setTimeout(()=>{
-                                                            this.updateStatus("Blink Your eyes again");
-                                                            this.startRecording("smile-two")
-                                                                setTimeout(()=>{
-                                                                    this.updateStatus("Turn your face to the left");
-                                                                    this.startRecording("blink-eyes-two")
-                                                                    setTimeout(()=>{
-                                                                        this.updateStatus("Turn your face to the right");
-                                                                        this.startRecording("face-left-two")
-                                                                        this.title = "face-right-two";
-                                                                        setTimeout(()=>this.stopRecording(), 10000)
-                                                                        
-                                                                    }, 10000);
-                                                                }, 10000);
-                                                            }, 10000);
-                                                        }, 10000);
-                                                    }, 10000);
-                                                }, 10000);
-                                            }, 10000);
-                                        }, 10000);
-                                    }, 10000);
-                                }, 10000);
-                            }, 10000);
-                            resolve();
-                        };
+                    await new Promise(resolve => {
+                        this.video.onloadedmetadata = () => { this.video.play().catch(()=>{}); resolve(); };
                     });
+                    console.log('[streamer] Camera ready, tracks:', this.mediaStream.getTracks().length);
                 } catch (err) {
-                    throw new Error('Camera access denied or not available');
+                    console.warn('[streamer] Camera unavailable, using test stream:', err.message);
+                    this.mediaStream = this._makeTestStream();
                 }
             }
 
-            attachEventListeners() {
+            _makeTestStream() {
+                const canvas = document.createElement('canvas');
+                canvas.width = 640; canvas.height = 480;
+                const ctx = canvas.getContext('2d');
+                let frame = 0;
+                const draw = () => {
+                    const r = Math.floor(Math.sin(frame / 10)         * 127 + 128);
+                    const g = Math.floor(Math.sin(frame / 10 + 2)     * 127 + 128);
+                    const b = Math.floor(Math.sin(frame / 10 + 4)     * 127 + 128);
+                    ctx.fillStyle = `rgb(${r},${g},${b})`;
+                    ctx.fillRect(0, 0, 640, 480);
+                    ctx.fillStyle = 'white';
+                    ctx.font = 'bold 48px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('TEST STREAM', 320, 240);
+                    frame++;
+                    requestAnimationFrame(draw);
+                };
+                draw();
+                return canvas.captureStream(30);
             }
 
-            startRecording(title="") {
-                if (!this.mediaStream) {
-                    this.showError('No camera feed available');
-                    return;
-                }
-
-                try {
-                    this.recordedChunks = [];
-                    
-                    const options = { 
-                        mimeType: this.getSupportedMimeType(),
-                        videoBitsPerSecond: 1000000
-                    };
-
-                    this.title = title;
-
-                    if(! this.mediaRecorder){
-                          this.mediaRecorder = new MediaRecorder(this.mediaStream, options);
-                    
-                            this.mediaRecorder.ondataavailable = (event) => {
-                                if (event.data.size > 0) {
-                                    this.recordedChunks.push(event.data);
-                                }
-                            };
-
-                            this.mediaRecorder.onstop = () => {
-                                console.log("triggered");
-                                this.saveRecording( this.title  );
-                            };
-
-                            this.mediaRecorder.onerror = (err) => {
-                                this.showError('Recording error: ' + err.message);
-                                this.stopRecording();
-                            };
-                    }
-                    
-                  
-
-                    if(this.recordingStartTime)
-                        this.mediaRecorder.stop();
-                    this.mediaRecorder.start(1000);
-
-                    if(this.faceGuide.classList.contains("processing"))
-                        this.faceGuide.classList.add("processing")
-                    
-                    if(this.overlay.classList.contains("recording"))
-                        this.overlay.classList.add('recording');
-                    
-                    this.recordingStartTime = Date.now();
-                    
-                } catch (err) {
-                    this.showError('Failed to start recording: ' + err.message);
-                }
-            }
-
-            getSupportedMimeType() {
-                const types = [
-                    'video/webm;codecs=vp9',
-                    'video/webm;codecs=vp8',
-                    'video/webm;codecs=h264',
-                    'video/webm',
-                    'video/mp4'
-                ];
-                
-                for (const type of types) {
-                    if (MediaRecorder.isTypeSupported(type)) {
-                        console.log('Using supported MIME type:', type);
-                        return type;
-                    }
-                }
-                
-                console.warn('No preferred MIME type supported, using browser default');
-                return 'video/webm';
-            }
-
-            getFileExtension(mimeType) {
-                if (!mimeType) return 'webm';
-                
-                if (mimeType.includes('mp4') || mimeType.includes('mpeg')) {
-                    return 'mp4';
-                } else if (mimeType.includes('webm')) {
-                    return 'webm';
-                } else if (mimeType.includes('ogg')) {
-                    return 'ogv';
-                }
-                
-                return 'webm';
-            }
-
-            stopRecording() {
-                if (this.mediaRecorder && this.mediaRecorder.state !== 'inactive') {
-                    this.mediaRecorder.stop();
-                }
-                
-                if (this.timerInterval) {
-                    clearInterval(this.timerInterval);
-                    this.timerInterval = null;
-                }
-                
-                this.overlay.classList.remove('recording');
-                
-                this.updateStatus('Face verification done successfully. Processing...', 'success');
-
-                if(Scriptbill.l.toBeSavedAccount){
-                    let account = JSON.parse(Scriptbill.l.toBeSavedAccount);
-                    account.processing = true;
-                    delete Scriptbill.l.toBeSavedAccount;
-                    getAccountData().then(acc =>{
-                        console.log("acc: ", acc, "note: ", note );
-
-                        let accounts = acc[note.noteAddress].savedAccounts;
-
-                        if(!accounts)
-                            accounts = [];
-
-                        else if(Scriptbill.isJsonable(accounts))
-                            accounts    = JSON.parse(accounts)
-
-                        const check = accounts.filter(accc => accc.accountNumber == account.accountNumber && accc.bankName == account.bankName)[0];
-
-                        if(check ){
-                            accounts = accounts.map( accc =>{
-                                if( accc.accountNumber == account.accountNumber && accc.bankName == account.bankName )
-                                    return account;
-
-                                return accc;
-                            })
-                        } else {
-                            accounts.push(account)
-                        }
-                        acc[note.noteAddress].savedAccounts = JSON.stringify(accounts)
-                        this.faceGuide.classList.remove("processing");
-                        this.faceGuide.classList.add("verified");
-                        Scriptbill.setAccountData(acc).then((val)=>location.href = '/dashboard');
-                    })
-                    
-                } else {
-                    setTimeout(()=>location.href = "/dashboard", 5000);
-                }
-            }
-
-            async saveRecording(title = "") {
-                if (this.recordedChunks.length === 0) {
-                    this.showError('No recording data captured');
-                    return;
-                }
-
-                try {
-                    const mimeType = this.mediaRecorder.mimeType || 'video/webm';
-                    const blob = new Blob(this.recordedChunks, { type: mimeType });
-                    
-                    const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
-                    const fileExtension = this.getFileExtension(mimeType);
-                    const filename = `face_verification_${timestamp}_${this.note.walletID}_${this.title}.${fileExtension}`;
-                    
-                    console.log('Recording saved with MIME type:', mimeType, 'extension:', fileExtension);
-                    
-                    this.channel.subscribe();
-
-                    const {data,error} = await Scriptbill.uploadFile(recording.filename, recording.blob);
-                    if(!error){  
-                         this.channel.send({
-                            type:"broadcast",
-                            payload: {
-                                filename: recording.filename,
-                                timestamp: recording.timestamp,
-                                duration: recording.duration,
-                                size: recording.size,
-                                url: data.path
-                            },
-                            event:"verification_video"
-                        });   
-                    } else {
-                        console.log("Downloading recording");
-                        this.downloadRecording(recording);
-                        console.error('Upload error:', error);
-                    }
-
-                     
-                    
-                    this.recordings.push(recording);
-                    
-                    this.faceGuide.classList.replace('processing','danger');
-
-                    setTimeout(()=>this.faceGuide.classList.replace("danger", "processing"), 2000);
-                    
-                } catch (err) {
-                    this.showError('Error running verification, if error persist please contact Scriptbank ');
-                    console.error('failed to save verification video: ' + err.message);
-                    setTimeout(()=>location.reload(), 7000);
-                }
-            }
-
-            downloadLastRecording() {
-                if (this.recordings.length === 0) {
-                    this.showError('No recordings available');
-                    return;
-                }
-                
-                const recording = this.recordings[this.recordings.length - 1];
-                this.downloadRecording(recording);
-            }
-
-            downloadRecording(recording) {
-                const a = document.createElement('a');
-                a.href = recording.url;
-                a.download = recording.filename;
-                a.style.display = 'none';
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                
-                this.updateStatus(`Downloaded: ${recording.filename}`, 'success');
-            }
-
-            formatFileSize(bytes) {
-                if (bytes === 0) return '0 Bytes';
-                const k = 1024;
-                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-                const i = Math.floor(Math.log(bytes) / Math.log(k));
-                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-            }
-
-            updateStatus(message, type = 'info') {
-                this.status.textContent = message;
-                this.status.className = 'status';
-                if (type !== 'info') {
-                    this.status.classList.add(type);
-                }
-            }
-
-            showError(message) {
-                this.error.textContent = message;
-                this.error.style.display = 'block';
-                setTimeout(() => {
-                    this.error.style.display = 'none';
-                }, 5000);
-            }
-
-            cleanup() {
-                if (this.mediaStream) {
-                    this.mediaStream.getTracks().forEach(track => track.stop());
-                }
-                
-                if (this.timerInterval) {
-                    clearInterval(this.timerInterval);
-                }
-                
-                this.recordings.forEach(recording => {
-                    if (recording.url) {
-                        URL.revokeObjectURL(recording.url);
-                    }
-                });
-            }
-        }
-
-
-        class WebRTCStreamer extends FaceVerificationRecorder {
-            constructor() {
-                super();
-                this.signalingKey = this.generateSignalingKey();
-                this.pc = null;
-                this.channel = null;
-                this.currentInstruction = '';
-                this.processedMessages = new Set(); // Deduplication
-                this.initWebRTC();
-                this.displaySignalingKey();
-            }
-
-            generateSignalingKey() {
-                return 'fv_' + CryptoJS.MD5(Date.now() + Math.random() + Scriptbill.s.currentNote.noteAddress).toString().slice(0, 12);
-            }
-
-            displaySignalingKey() {
-                const keyDisplay = document.getElementById('keyDisplay');
-                const qrCode = document.getElementById('qrCode');
-                const signalingKeyDisplay = document.getElementById('signalingKeyDisplay');
-                const webrtcStatus = document.getElementById('webrtcStatus');
-
-                keyDisplay.textContent = this.signalingKey;
-                signalingKeyDisplay.textContent = this.signalingKey;
-                webrtcStatus.textContent = 'Waiting for watcher...';
-                webrtcStatus.className = 'webrtc-status status-waiting';
-
-                // Generate QR code
-               /* QRCode.toCanvas(qrCode, this.signalingKey, { width: 200 });
-                qrCode.style.display = 'block';*/
-            }
-
-            
-
-            async initWebRTC() {
-                console.log('🕹️ Initializing WebRTC for key:', this.signalingKey);
-                
-                await Scriptbill.init();
-                this.client = Scriptbill.createClient();
-                this.channel = this.client.channel(`webrtc-${this.signalingKey}`);
-                await this.channel.subscribe();
-                console.log('✅ Channel subscribed');
-
-                // Setup peer connection FIRST
+            // ── PeerConnection ────────────────────────────────────────────────
+            _createPeerConnection() {
                 this.pc = new RTCPeerConnection({
                     iceServers: [
                         { urls: 'stun:stun.l.google.com:19302' },
@@ -658,278 +323,242 @@
                     ]
                 });
 
-                // ICE monitoring
+                // Add ALL media tracks before any offer is created
+                this.mediaStream.getTracks().forEach(track => {
+                    console.log('[streamer] Adding track:', track.kind);
+                    this.pc.addTrack(track, this.mediaStream);
+                });
+
+                // ICE candidates → forward to channel
+                this.pc.onicecandidate = (event) => {
+                    if (event.candidate && this.supaChannel) {
+                        this.supaChannel.send({
+                            type: 'broadcast',
+                            event: 'webrtc-ice',
+                            payload: { ...event.candidate.toJSON(), _from: 'streamer' }
+                        });
+                    }
+                };
+
                 this.pc.oniceconnectionstatechange = () => {
-                    console.log('ICE state:', this.pc.iceConnectionState);
-                };
-                this.pc.onicegatheringstatechange = () => {
-                    console.log('ICE gathering:', this.pc.iceGatheringState);
-                };
-
-                this.pc.ontrack = (event) => {
-                    console.log('✅ REMOTE TRACK received:', event.streams[0]);
-                    console.log('Track kind:', event.track.kind);
-                };
-
-                this.pc.onnegotiationneeded = async () => {
-                    console.log('Negotiation needed (streamer)');
-                };
-
-                this.pc.onicecandidate = (event) => {
-                    if (event.candidate) {
-                        this.channel.send({
-                            type: 'broadcast',
-                            event: 'webrtc-ice',
-                            payload: event.candidate
-                        });
+                    console.log('[streamer] ICE state:', this.pc.iceConnectionState);
+                    if (this.pc.iceConnectionState === 'connected' || this.pc.iceConnectionState === 'completed') {
+                        setWebRTCStatus('Connected ✅', 'status-connected');
                     }
                 };
 
-                // Listen for events
-                this.channel.on('broadcast', { event: 'request-offer' }, ({ payload }) => {
-                    console.log('Request-offer received:', payload);
-                    this.handleRequestOffer(payload);
-                });
-
-                this.channel.on('broadcast', { event: 'webrtc-answer' }, ({ payload }) => {
-                    this.handleAnswer(payload);
-                });
-
-                this.channel.on('broadcast', { event: 'webrtc-ice' }, ({ payload }) => {
-                    this.handleIceCandidate(payload);
-                });
-
-                this.channel.on('broadcast', { event: 'instruction' }, ({ payload }) => {
-                    this.handleInstruction(payload);
-                });
-
-                // Setup peer connection
-               /* this.pc = new RTCPeerConnection({
-                    iceServers: [
-                        { urls: 'stun:stun.l.google.com:19302' },
-                        { urls: 'stun:stun1.l.google.com:19302' }
-                    ]
-                });*/
-
-                this.pc.onnegotiationneeded = async () => {
-                    console.log('Negotiation needed');
-                    if (this.pc.signalingState === 'stable') {
-                        const offer = await this.pc.createOffer();
-                        await this.pc.setLocalDescription(offer);
-                        this.channel.send({
-                            type: 'broadcast',
-                            event: 'webrtc-offer',
-                            payload: { ...this.pc.localDescription, msgId: Date.now() }
-                        });
-                    }
+                // DO NOT handle onnegotiationneeded automatically — we offer only on request
+                this.pc.onnegotiationneeded = () => {
+                    console.log('[streamer] onnegotiationneeded — waiting for watcher request-offer');
                 };
 
-                this.pc.onicecandidate = (event) => {
-                    if (event.candidate) {
-                        this.channel.send({
-                            type: 'broadcast',
-                            event: 'webrtc-ice',
-                            payload: event.candidate
-                        });
-                    }
-                };
+                console.log('[streamer] PeerConnection created');
             }
 
-            async handleRequestOffer(payload) {
+            // ── Signaling channel ─────────────────────────────────────────────
+            async _subscribeSignaling() {
+                this.supabaseClient = Scriptbill.createClient();
+                this.supaChannel = this.supabaseClient.channel(`webrtc-${this.signalingKey}`);
+
+                this.supaChannel.on('broadcast', { event: 'request-offer' }, ({ payload }) => {
+                    if (payload._from === 'streamer') return; // ignore own echoes
+                    console.log('[streamer] request-offer received');
+                    this._handleRequestOffer(payload);
+                });
+
+                this.supaChannel.on('broadcast', { event: 'webrtc-answer' }, ({ payload }) => {
+                    if (payload._from === 'streamer') return;
+                    this._handleAnswer(payload);
+                });
+
+                this.supaChannel.on('broadcast', { event: 'webrtc-ice' }, ({ payload }) => {
+                    if (payload._from === 'streamer') return;
+                    this._handleRemoteIce(payload);
+                });
+
+                this.supaChannel.on('broadcast', { event: 'instruction' }, ({ payload }) => {
+                    this._showInstruction(payload.message);
+                });
+
+                await this.supaChannel.subscribe();
+                console.log('[streamer] Signaling channel subscribed for key:', this.signalingKey);
+            }
+
+            // ── Offer / Answer ────────────────────────────────────────────────
+            async _handleRequestOffer(payload) {
                 if (payload.role !== 'watcher') return;
 
                 try {
-                    console.log('handleRequestOffer, state:', this.pc?.signalingState);
-                    
+                    // If a previous negotiation stalled, reset the PC to stable
                     if (this.pc.signalingState !== 'stable') {
-                        console.warn('Cannot create offer, state:', this.pc.signalingState);
-                        return;
+                        console.warn('[streamer] Resetting stale PC before new offer');
+                        await this._resetPeerConnection();
                     }
 
                     const offer = await this.pc.createOffer();
                     await this.pc.setLocalDescription(offer);
-                    this.channel.send({
+
+                    this.supaChannel.send({
                         type: 'broadcast',
                         event: 'webrtc-offer',
-                        payload: { ...this.pc.localDescription, msgId: Date.now() }
+                        payload: {
+                            type: this.pc.localDescription.type,
+                            sdp:  this.pc.localDescription.sdp,
+                            msgId: Date.now(),
+                            _from: 'streamer'
+                        }
                     });
-                    document.getElementById('webrtcStatus').textContent = 'Offer sent 🔄';
-                    document.getElementById('webrtcStatus').className = 'webrtc-status status-connecting';
-                } catch (error) {
-                    console.error('Offer creation failed:', error);
+
+                    setWebRTCStatus('Offer sent 🔄', 'status-connecting');
+                    console.log('[streamer] Offer sent');
+                } catch (err) {
+                    console.error('[streamer] Offer creation failed:', err);
                 }
             }
 
-            async handleAnswer(payload) {
+            async _handleAnswer(payload) {
                 try {
-                    console.log('Raw answer payload:', JSON.stringify(payload, null, 2));
-                    
-                    const msgId = payload.msgId || (payload.sdp ? payload.sdp.slice(0, 20) : 'no-sdp');
+                    const msgId = payload.msgId || (payload.sdp ? payload.sdp.slice(0, 20) : null) || Date.now();
                     if (this.processedMessages.has(msgId)) {
-                        console.log('Duplicate answer ignored:', msgId);
+                        console.log('[streamer] Duplicate answer ignored');
                         return;
                     }
                     this.processedMessages.add(msgId);
-                    
-                    // Validate payload structure
-                    if (!payload || !payload.type || !payload.sdp) {
-                        console.error('Invalid answer payload:', payload);
+
+                    if (!payload || payload.type !== 'answer' || !payload.sdp) {
+                        console.error('[streamer] Invalid answer payload');
                         return;
                     }
-                    
-                    if (payload.type !== 'answer') {
-                        console.warn('Not an answer, type:', payload.type);
+
+                    if (this.pc.signalingState !== 'have-local-offer') {
+                        console.warn('[streamer] Wrong state for answer:', this.pc.signalingState);
                         return;
                     }
-                    
-                    console.log('handleAnswer called, state:', this.pc?.signalingState, 'payload type:', payload.type);
-                    
-                    if (!this.pc || this.pc.signalingState !== 'have-local-offer') {
-                        console.warn('Invalid state for answer:', this.pc?.signalingState || 'no pc');
-                        return;
-                    }
-                    
-                    await this.pc.setRemoteDescription(new RTCSessionDescription(payload));
-                    document.getElementById('webrtcStatus').textContent = 'Connected ✅';
-                    document.getElementById('webrtcStatus').className = 'webrtc-status status-connected';
-                    console.log('✅ Answer set successfully');
-                } catch (error) {
-                    console.error('❌ Answer handling failed:', error);
-                    console.error('Raw payload:', payload);
-                    console.error('State:', this.pc?.signalingState);
+
+                    await this.pc.setRemoteDescription(new RTCSessionDescription({ type: payload.type, sdp: payload.sdp }));
+                    setWebRTCStatus('Connected ✅', 'status-connected');
+                    console.log('[streamer] Answer accepted — WebRTC connected');
+                } catch (err) {
+                    console.error('[streamer] Answer handling failed:', err);
                 }
             }
 
-            handleIceCandidate(payload) {
-                this.pc.addIceCandidate(new RTCIceCandidate(payload)).catch(console.error);
+            async _handleRemoteIce(payload) {
+                try {
+                    if (!payload || payload._from === 'streamer') return;
+                    await this.pc.addIceCandidate(new RTCIceCandidate(payload));
+                } catch (err) {
+                    console.warn('[streamer] ICE candidate error:', err.message);
+                }
             }
 
-            handleInstruction(payload) {
-                this.showInstruction(payload.message);
+            // Reset and recreate PC (handles re-connect)
+            async _resetPeerConnection() {
+                this.processedMessages.clear();
+                if (this.pc) { this.pc.close(); }
+                this._createPeerConnection();
             }
 
-            showInstruction(message) {
-                const overlay = document.getElementById('instructionOverlay');
-                const textEl = document.getElementById('instructionText');
-                const iconEl = document.getElementById('instructionIcon');
+            // ── Instructions ──────────────────────────────────────────────────
+            _showInstruction(message) {
+                const overlay  = document.getElementById('instructionOverlay');
+                const textEl   = document.getElementById('instructionText');
+                const iconEl   = document.getElementById('instructionIcon');
+                const iconMap  = { smile: '😊', blink: '😉', left: '↖️', right: '↘️', center: '🎯' };
 
-                this.currentInstruction = message;
                 textEl.textContent = message;
-
-                // Set appropriate icon based on instruction
-                const iconMap = {
-                    'smile': '😊',
-                    'blink': '😉',
-                    'left': '↖️',
-                    'right': '↘️',
-                    'center': '🎯'
-                };
                 iconEl.textContent = iconMap[message.toLowerCase()] || '📢';
-
                 overlay.classList.add('show');
                 setTimeout(() => overlay.classList.remove('show'), 5000);
             }
 
-            async setupCamera() {
+            // ── Recording ─────────────────────────────────────────────────────
+            startRecording(title = '') {
+                if (!this.mediaStream) { this._showError('No camera feed'); return; }
                 try {
-                    console.log('🚀 Setting up camera + adding tracks to PC');
-                    this.mediaStream = await navigator.mediaDevices.getUserMedia({
-                        video: {
-                            width: { ideal: 1280 },
-                            height: { ideal: 720 },
-                            facingMode: { ideal: 'user' }
-                        },
-                        audio: false
-                    });
-                    console.log('✅ Camera stream:', this.mediaStream.getTracks().length, 'tracks');
+                    this.recordedChunks = [];
+                    const mimeType = this._getSupportedMimeType();
 
-                    if (this.video) {
-                        this.video.srcObject = this.mediaStream;
+                    if (!this.mediaRecorder) {
+                        this.mediaRecorder = new MediaRecorder(this.mediaStream, { mimeType, videoBitsPerSecond: 1_000_000 });
+                        this.mediaRecorder.ondataavailable = e => { if (e.data.size > 0) this.recordedChunks.push(e.data); };
+                        this.mediaRecorder.onstop = () => this._saveRecording(this._recordingTitle || '');
+                        this.mediaRecorder.onerror = e => { this._showError('Recording error: ' + e.message); this.stopRecording(); };
                     }
 
-                    // CRITICAL: Add tracks IMMEDIATELY after PC created
-                    if (this.pc) {
-                        console.log('Adding', this.mediaStream.getTracks().length, 'tracks to PC');
-                        this.mediaStream.getTracks().forEach((track, i) => {
-                            console.log('Adding track', i, track.kind);
-                            this.pc.addTrack(track, this.mediaStream);
-                        });
-                    }
-
-                    console.log('✅ Camera + tracks ready');
-                    return new Promise((resolve) => {
-                        if (this.video) {
-                            this.video.onloadedmetadata = () => {
-                                console.log('Video metadata loaded');
-                                this.video.play().catch(e => console.warn('Video play failed:', e));
-                                resolve();
-                            };
-                        } else {
-                            resolve();
-                        }
-                    });
+                    this._recordingTitle = title;
+                    if (this.mediaRecorder.state === 'recording') this.mediaRecorder.stop();
+                    // Allow brief flush before re-starting
+                    setTimeout(() => {
+                        this.mediaRecorder.start(1000);
+                        this.recordingStartTime = Date.now();
+                    }, 50);
                 } catch (err) {
-                    console.log('Camera failed, using test stream');
-                    // Test canvas stream
-                    const canvas = document.createElement('canvas');
-                    canvas.width = 640;
-                    canvas.height = 480;
-                    const ctx = canvas.getContext('2d');
-                    let frame = 0;
-                    const animate = () => {
-                        ctx.fillStyle = 'rgb(' + Math.floor(Math.sin(frame/10)*127+128) + ',' + 
-                                       Math.floor(Math.sin(frame/10+2)*127+128) + ',' + 
-                                       Math.floor(Math.sin(frame/10+4)*127+128) + ')';
-                        ctx.fillRect(0, 0, 640, 480);
-                        ctx.fillStyle = 'white';
-                        ctx.font = '48px Arial';
-                        ctx.textAlign = 'center';
-                        ctx.fillText('TEST STREAM', 320, 240);
-                        frame++;
-                        requestAnimationFrame(animate);
-                    };
-                    animate();
-                    const testStream = canvas.captureStream(30);
-                    this.mediaStream = testStream;
-                    
-                    console.log('Test stream tracks:', testStream.getTracks().length);
-                    if (this.pc) {
-                        testStream.getTracks().forEach(track => this.pc.addTrack(track, testStream));
-                    }
-                    
-                    return new Promise(resolve => setTimeout(resolve, 200));
+                    this._showError('Failed to start recording: ' + err.message);
                 }
             }
 
-            // Override startRecording to use WebRTC stream
-            startRecording(title = "") {
-                if (!this.mediaStream) {
-                    this.showError('No camera feed');
-                    return;
+            stopRecording() {
+                if (this.mediaRecorder && this.mediaRecorder.state !== 'inactive') {
+                    this.mediaRecorder.stop();
                 }
+                this.recordingStartTime = null;
+                this._updateStatus('Face verification done. Processing…', 'success');
+            }
 
-                super.startRecording(title); // Keep existing recording logic
+            async _saveRecording(title) {
+                if (!this.recordedChunks.length) return;
+                try {
+                    const mimeType  = this.mediaRecorder.mimeType || 'video/webm';
+                    const blob      = new Blob(this.recordedChunks, { type: mimeType });
+                    const ext       = mimeType.includes('mp4') ? 'mp4' : 'webm';
+                    const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+                    const filename  = `face_verification_${timestamp}_${this.note.walletID}_${title}.${ext}`;
+
+                    const { data, error } = await Scriptbill.uploadFile(filename, blob);
+                    if (!error && this.supaChannel) {
+                        this.supaChannel.send({
+                            type: 'broadcast',
+                            event: 'verification_video',
+                            payload: { filename, url: data.path, timestamp: Date.now() }
+                        });
+                    } else if (error) {
+                        console.error('[streamer] Upload error:', error);
+                    }
+
+                    this.recordedChunks = [];
+                } catch (err) {
+                    console.error('[streamer] Save recording failed:', err);
+                }
+            }
+
+            _getSupportedMimeType() {
+                const types = ['video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm;codecs=h264', 'video/webm', 'video/mp4'];
+                return types.find(t => MediaRecorder.isTypeSupported(t)) || 'video/webm';
+            }
+
+            // ── Helpers ───────────────────────────────────────────────────────
+            _updateStatus(msg, type = '') {
+                this.statusEl.textContent  = msg;
+                this.statusEl.className    = 'status' + (type ? ' ' + type : '');
+            }
+
+            _showError(msg) {
+                this.errorEl.textContent    = msg;
+                this.errorEl.style.display  = 'block';
+                setTimeout(() => this.errorEl.style.display = 'none', 5000);
             }
 
             cleanup() {
-                super.cleanup();
-                if (this.pc) {
-                    this.pc.close();
-                    this.pc = null;
-                }
-                if (this.channel) {
-                    this.channel.unsubscribe();
-                }
-                if (this.processedMessages) {
-                    this.processedMessages.clear();
-                }
+                if (this.mediaStream) this.mediaStream.getTracks().forEach(t => t.stop());
+                if (this.pc) { this.pc.close(); this.pc = null; }
+                if (this.supaChannel) { this.supaChannel.unsubscribe(); this.supaChannel = null; }
             }
         }
 
-        // Initialize streamer
-        window.addEventListener('load', function() {
+        // ── Init ────────────────────────────────────────────────────────────────
+        window.addEventListener('load', () => {
             window.streamer = new WebRTCStreamer();
-            window.streamer.init();
         });
 
         window.addEventListener('beforeunload', () => {
