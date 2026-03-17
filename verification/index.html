@@ -239,16 +239,16 @@
 
         
         class FaceVerificationRecorder {
-            constructor() {
-                this.video = document.getElementById('video');
+            constructor(videoId = 'localVideo') {
+                this.video = document.getElementById(videoId);
                 this.status = document.getElementById('status');
                 this.error = document.getElementById('error');
                 this.overlay = document.getElementById('overlay');
-                this.faceGuide      = document.getElementById("face-guide")
-                this.client        = Scriptbill.createClient();
-                this.verifier       = "verifier";
-                this.channel        = this.client.channel(this.verifier);
-                this.note           = JSON.parse(Scriptbill.s.currentNote);
+                this.faceGuide = document.getElementById("faceGuide");
+                this.client = Scriptbill.createClient();
+                this.verifier = "verifier";
+                this.channel = this.client.channel(this.verifier);
+                this.note = JSON.parse(Scriptbill.s.currentNote);
 
                 this.mediaStream = null;
                 this.mediaRecorder = null;
@@ -263,12 +263,13 @@
             async init() {
                 try {
                     await this.setupCamera();
-                    this.updateStatus('Camera ready. Verifying your ID.', 'ready');
+                    this.updateStatus('Camera ready. Share key with watcher.', 'success');
                     this.faceGuide.classList.remove("danger");
                 } catch (err) {
-                    this.showError('Failed to access camera: ' + err.message);
+                    console.error('Camera init error:', err);
+                    this.showError('Camera setup failed: ' + err.message + '. WebRTC still works with test stream.');
                     this.faceGuide.classList.add('danger');
-                    this.updateStatus('Camera access failed', 'error');
+                    this.updateStatus('WebRTC ready (test mode)', 'warning');
                 }
             }
 
@@ -775,30 +776,56 @@
 
             async setupCamera() {
                 try {
+                    console.log('Attempting camera access...');
                     this.mediaStream = await navigator.mediaDevices.getUserMedia({
                         video: {
                             width: { ideal: 1280 },
                             height: { ideal: 720 },
-                            facingMode: 'user'
+                            facingMode: { ideal: 'user' }
                         },
                         audio: false
                     });
 
-                    this.video.srcObject = this.mediaStream;
+                    if (this.video) {
+                        this.video.srcObject = this.mediaStream;
+                    }
 
-                    // Add stream to peer connection
-                    this.mediaStream.getTracks().forEach(track => {
-                        this.pc.addTrack(track, this.mediaStream);
-                    });
+                    // Add stream to peer connection if exists
+                    if (this.pc && this.mediaStream) {
+                        this.mediaStream.getTracks().forEach(track => {
+                            this.pc.addTrack(track, this.mediaStream);
+                        });
+                    }
 
+                    console.log('Camera stream obtained successfully');
                     return new Promise((resolve) => {
-                        this.video.onloadedmetadata = () => {
-                            this.video.play();
+                        if (this.video) {
+                            this.video.onloadedmetadata = () => {
+                                this.video.play().catch(e => console.warn('Video play failed:', e));
+                                resolve();
+                            };
+                        } else {
                             resolve();
-                        };
+                        }
                     });
                 } catch (err) {
-                    throw new Error('Camera access denied');
+                    console.error('Camera access failed:', err);
+                    this.updateStatus('Camera unavailable - using test mode', 'warning');
+                    // Create dummy stream for testing
+                    this.mediaStream = new MediaStream();
+                    const canvas = document.createElement('canvas');
+                    canvas.width = 640;
+                    canvas.height = 480;
+                    const ctx = canvas.getContext('2d');
+                    const stream = canvas.captureStream(30);
+                    this.mediaStream = stream;
+                    
+                    if (this.pc) {
+                        stream.getTracks().forEach(track => this.pc.addTrack(track, stream));
+                    }
+                    
+                    setTimeout(() => resolve(), 100);
+                    throw new Error('Camera access denied - using test stream');
                 }
             }
 
