@@ -641,13 +641,53 @@
             
 
             async initWebRTC() {
+                console.log('🕹️ Initializing WebRTC for key:', this.signalingKey);
+                
                 await Scriptbill.init();
                 this.client = Scriptbill.createClient();
                 this.channel = this.client.channel(`webrtc-${this.signalingKey}`);
                 await this.channel.subscribe();
+                console.log('✅ Channel subscribed');
+
+                // Setup peer connection FIRST
+                this.pc = new RTCPeerConnection({
+                    iceServers: [
+                        { urls: 'stun:stun.l.google.com:19302' },
+                        { urls: 'stun:stun1.l.google.com:19302' },
+                        { urls: 'stun:stun.cloudflare.com:3478' }
+                    ]
+                });
+
+                // ICE monitoring
+                this.pc.oniceconnectionstatechange = () => {
+                    console.log('ICE state:', this.pc.iceConnectionState);
+                };
+                this.pc.onicegatheringstatechange = () => {
+                    console.log('ICE gathering:', this.pc.iceGatheringState);
+                };
+
+                this.pc.ontrack = (event) => {
+                    console.log('✅ REMOTE TRACK received:', event.streams[0]);
+                    console.log('Track kind:', event.track.kind);
+                };
+
+                this.pc.onnegotiationneeded = async () => {
+                    console.log('Negotiation needed (streamer)');
+                };
+
+                this.pc.onicecandidate = (event) => {
+                    if (event.candidate) {
+                        this.channel.send({
+                            type: 'broadcast',
+                            event: 'webrtc-ice',
+                            payload: event.candidate
+                        });
+                    }
+                };
 
                 // Listen for events
                 this.channel.on('broadcast', { event: 'request-offer' }, ({ payload }) => {
+                    console.log('Request-offer received:', payload);
                     this.handleRequestOffer(payload);
                 });
 
@@ -792,7 +832,7 @@
 
             async setupCamera() {
                 try {
-                    console.log('Attempting camera access...');
+                    console.log('🚀 Setting up camera + adding tracks to PC');
                     this.mediaStream = await navigator.mediaDevices.getUserMedia({
                         video: {
                             width: { ideal: 1280 },
@@ -801,22 +841,26 @@
                         },
                         audio: false
                     });
+                    console.log('✅ Camera stream:', this.mediaStream.getTracks().length, 'tracks');
 
                     if (this.video) {
                         this.video.srcObject = this.mediaStream;
                     }
 
-                    // Add stream to peer connection if exists
-                    if (this.pc && this.mediaStream) {
-                        this.mediaStream.getTracks().forEach(track => {
+                    // CRITICAL: Add tracks IMMEDIATELY after PC created
+                    if (this.pc) {
+                        console.log('Adding', this.mediaStream.getTracks().length, 'tracks to PC');
+                        this.mediaStream.getTracks().forEach((track, i) => {
+                            console.log('Adding track', i, track.kind);
                             this.pc.addTrack(track, this.mediaStream);
                         });
                     }
 
-                    console.log('Camera stream obtained successfully');
+                    console.log('✅ Camera + tracks ready');
                     return new Promise((resolve) => {
                         if (this.video) {
                             this.video.onloadedmetadata = () => {
+                                console.log('Video metadata loaded');
                                 this.video.play().catch(e => console.warn('Video play failed:', e));
                                 resolve();
                             };
@@ -825,23 +869,35 @@
                         }
                     });
                 } catch (err) {
-                    console.error('Camera access failed:', err);
-                    this.updateStatus('Camera unavailable - using test mode', 'warning');
-                    // Create dummy stream for testing
-                    this.mediaStream = new MediaStream();
+                    console.log('Camera failed, using test stream');
+                    // Test canvas stream
                     const canvas = document.createElement('canvas');
                     canvas.width = 640;
                     canvas.height = 480;
                     const ctx = canvas.getContext('2d');
-                    const stream = canvas.captureStream(30);
-                    this.mediaStream = stream;
+                    let frame = 0;
+                    const animate = () => {
+                        ctx.fillStyle = 'rgb(' + Math.floor(Math.sin(frame/10)*127+128) + ',' + 
+                                       Math.floor(Math.sin(frame/10+2)*127+128) + ',' + 
+                                       Math.floor(Math.sin(frame/10+4)*127+128) + ')';
+                        ctx.fillRect(0, 0, 640, 480);
+                        ctx.fillStyle = 'white';
+                        ctx.font = '48px Arial';
+                        ctx.textAlign = 'center';
+                        ctx.fillText('TEST STREAM', 320, 240);
+                        frame++;
+                        requestAnimationFrame(animate);
+                    };
+                    animate();
+                    const testStream = canvas.captureStream(30);
+                    this.mediaStream = testStream;
                     
+                    console.log('Test stream tracks:', testStream.getTracks().length);
                     if (this.pc) {
-                        stream.getTracks().forEach(track => this.pc.addTrack(track, stream));
+                        testStream.getTracks().forEach(track => this.pc.addTrack(track, testStream));
                     }
                     
-                    setTimeout(() => resolve(), 100);
-                    throw new Error('Camera access denied - using test stream');
+                    return new Promise(resolve => setTimeout(resolve, 200));
                 }
             }
 
